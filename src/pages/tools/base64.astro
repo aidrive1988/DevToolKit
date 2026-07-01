@@ -1,0 +1,131 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="Base64 Encoder & Decoder — Free Online Tool | DevToolKit" description="Encode and decode Base64 strings instantly. Free online Base64 converter with UTF-8 support." toolName="Base64 Encoder & Decoder" category="Encoding">
+
+  <div class="tool-container">
+    <div class="tab-group">
+      <button class="tab-btn active" id="tab-encode">Encode</button>
+      <button class="tab-btn" id="tab-decode">Decode</button>
+    </div>
+
+    <div class="tool-input">
+      <textarea id="b64-input" placeholder="Enter text to encode to Base64..."></textarea>
+    </div>
+
+    <div class="tool-actions">
+      <button class="btn btn-primary" id="btn-convert">🔐 Encode</button>
+      <button class="btn btn-secondary" id="btn-swap">🔄 Swap</button>
+      <button class="btn btn-secondary" id="btn-copy">📋 Copy</button>
+      <button class="btn btn-danger" id="btn-clear">🗑 Clear</button>
+    </div>
+
+    <div class="tool-stats">
+      <span class="tool-stat"><strong id="stat-input-len">0</strong> Input chars</span>
+      <span class="tool-stat"><strong id="stat-output-len">0</strong> Output chars</span>
+    </div>
+
+    <div class="tool-output" id="b64-output">
+      <pre><span class="placeholder">Result will appear here...</span></pre>
+    </div>
+
+    <div class="tool-error" id="b64-error"></div>
+  </div>
+
+  <div class="info-section" slot="how-to-use">
+    <h2>How to Use the Base64 Encoder/Decoder</h2>
+    <ol class="steps-list">
+      <li>Select <strong>Encode</strong> or <strong>Decode</strong> mode using the tabs</li>
+      <li>Paste or type your text in the input field</li>
+      <li>Click the action button to convert, then <strong>Copy</strong> the result</li>
+    </ol>
+  </div>
+
+  <div class="info-section" slot="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <p class="faq-question">What is Base64 encoding?</p>
+      <p class="faq-answer">Base64 is a binary-to-text encoding scheme that converts binary data into ASCII characters. It's commonly used to embed images in HTML/CSS, encode email attachments, and transmit data in URLs and APIs.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Does this support Unicode/UTF-8?</p>
+      <p class="faq-answer">Yes! This tool handles UTF-8 text properly, including emojis and special characters from any language.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Is Base64 encryption?</p>
+      <p class="faq-answer">No. Base64 is encoding, not encryption. It does not provide any security — anyone can decode Base64 text. Use proper encryption for sensitive data.</p>
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  let mode = 'encode';
+  const input = document.getElementById('b64-input');
+  const output = document.getElementById('b64-output');
+  const errorEl = document.getElementById('b64-error');
+  const btnConvert = document.getElementById('btn-convert');
+  const tabEncode = document.getElementById('tab-encode');
+  const tabDecode = document.getElementById('tab-decode');
+
+  function setMode(m) {
+    mode = m;
+    tabEncode.classList.toggle('active', m === 'encode');
+    tabDecode.classList.toggle('active', m === 'decode');
+    btnConvert.textContent = m === 'encode' ? '🔐 Encode' : '🔓 Decode';
+    input.placeholder = m === 'encode' ? 'Enter text to encode to Base64...' : 'Enter Base64 string to decode...';
+  }
+
+  tabEncode.addEventListener('click', () => setMode('encode'));
+  tabDecode.addEventListener('click', () => setMode('decode'));
+
+  function showError(msg) { errorEl.textContent = '❌ ' + msg; errorEl.classList.add('visible'); }
+  function hideError() { errorEl.classList.remove('visible'); }
+
+  function setOutput(text) {
+    output.innerHTML = '<pre>' + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>';
+    document.getElementById('stat-input-len').textContent = input.value.length;
+    document.getElementById('stat-output-len').textContent = text.length;
+  }
+
+  btnConvert.addEventListener('click', () => {
+    hideError();
+    const val = input.value;
+    if (!val.trim()) { showError('Please enter some text.'); return; }
+    try {
+      if (mode === 'encode') {
+        setOutput(btoa(unescape(encodeURIComponent(val))));
+      } else {
+        setOutput(decodeURIComponent(escape(atob(val.trim()))));
+      }
+    } catch (e) {
+      showError(mode === 'decode' ? 'Invalid Base64 string.' : 'Encoding failed: ' + e.message);
+    }
+  });
+
+  document.getElementById('btn-swap').addEventListener('click', () => {
+    const outText = output.innerText;
+    if (outText && !outText.includes('Result will')) {
+      input.value = outText;
+      setMode(mode === 'encode' ? 'decode' : 'encode');
+      output.innerHTML = '<pre><span class="placeholder">Result will appear here...</span></pre>';
+    }
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', () => {
+    const text = output.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy');
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    });
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    input.value = '';
+    output.innerHTML = '<pre><span class="placeholder">Result will appear here...</span></pre>';
+    hideError();
+    document.getElementById('stat-input-len').textContent = '0';
+    document.getElementById('stat-output-len').textContent = '0';
+  });
+</script>

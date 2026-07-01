@@ -1,0 +1,192 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="JSON Formatter & Validator — Free Online Tool | DevToolKit" description="Format, validate, and beautify JSON data instantly. Free online JSON formatter with error detection and minification." toolName="JSON Formatter & Validator" category="Developer">
+
+  <div class="tool-container">
+    <div class="tool-input">
+      <textarea id="json-input" placeholder='Paste your JSON here... e.g. {"name": "John", "age": 30}'></textarea>
+    </div>
+
+    <div class="tool-actions">
+      <button class="btn btn-primary" id="btn-format">✨ Format</button>
+      <button class="btn btn-secondary" id="btn-minify">📦 Minify</button>
+      <button class="btn btn-secondary" id="btn-validate">✅ Validate</button>
+      <button class="btn btn-secondary" id="btn-sample">📄 Sample</button>
+      <button class="btn btn-secondary" id="btn-copy">📋 Copy</button>
+      <button class="btn btn-danger" id="btn-clear">🗑 Clear</button>
+    </div>
+
+    <div class="tool-stats" id="json-stats">
+      <span class="tool-stat"><strong id="stat-keys">0</strong> Keys</span>
+      <span class="tool-stat"><strong id="stat-depth">0</strong> Max Depth</span>
+      <span class="tool-stat"><strong id="stat-size">0</strong> Bytes</span>
+    </div>
+
+    <div class="tool-output" id="json-output">
+      <pre><span class="placeholder">Formatted JSON will appear here...</span></pre>
+    </div>
+
+    <div class="tool-error" id="json-error"></div>
+  </div>
+
+  <div class="info-section" slot="how-to-use">
+    <h2>How to Use the JSON Formatter</h2>
+    <ol class="steps-list">
+      <li>Paste your raw JSON data into the input field above</li>
+      <li>Click <strong>Format</strong> to beautify with proper indentation, or <strong>Minify</strong> to compress</li>
+      <li>Click <strong>Copy</strong> to copy the result to your clipboard</li>
+    </ol>
+  </div>
+
+  <div class="info-section" slot="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <p class="faq-question">Is my JSON data safe?</p>
+      <p class="faq-answer">Absolutely. All processing happens in your browser. Your data never leaves your device — we have no servers processing your input.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">What is JSON?</p>
+      <p class="faq-answer">JSON (JavaScript Object Notation) is a lightweight data format used to exchange data between a server and a client. It's easy for humans to read and write, and easy for machines to parse.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">What's the difference between Format and Minify?</p>
+      <p class="faq-answer">Format adds indentation and newlines for readability. Minify removes all whitespace to reduce file size — useful for production APIs and storage.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Can I format large JSON files?</p>
+      <p class="faq-answer">Yes! Since processing is done in your browser, it can handle files up to several megabytes. For very large files, formatting may take a moment.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Does this tool support JSON5 or JSONC?</p>
+      <p class="faq-answer">This tool validates strict JSON as per the RFC 8259 standard. JSON5 and JSONC (with comments) are not supported — comments and trailing commas will be flagged as errors.</p>
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  const input = document.getElementById('json-input');
+  const output = document.getElementById('json-output');
+  const errorEl = document.getElementById('json-error');
+  const statKeys = document.getElementById('stat-keys');
+  const statDepth = document.getElementById('stat-depth');
+  const statSize = document.getElementById('stat-size');
+
+  function countKeys(obj) {
+    let count = 0;
+    if (typeof obj === 'object' && obj !== null) {
+      if (Array.isArray(obj)) {
+        obj.forEach(item => { count += countKeys(item); });
+      } else {
+        for (const key in obj) {
+          count++;
+          count += countKeys(obj[key]);
+        }
+      }
+    }
+    return count;
+  }
+
+  function getDepth(obj) {
+    if (typeof obj !== 'object' || obj === null) return 0;
+    let max = 0;
+    for (const key in obj) {
+      const d = getDepth(obj[key]);
+      if (d > max) max = d;
+    }
+    return max + 1;
+  }
+
+  function updateStats(parsed, raw) {
+    statKeys.textContent = countKeys(parsed);
+    statDepth.textContent = getDepth(parsed);
+    statSize.textContent = new Blob([raw]).size;
+  }
+
+  function showError(msg) {
+    errorEl.textContent = '❌ ' + msg;
+    errorEl.classList.add('visible');
+  }
+
+  function hideError() {
+    errorEl.classList.remove('visible');
+  }
+
+  function setOutput(text) {
+    output.innerHTML = '<pre>' + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>';
+  }
+
+  document.getElementById('btn-format').addEventListener('click', () => {
+    hideError();
+    try {
+      const parsed = JSON.parse(input.value);
+      const formatted = JSON.stringify(parsed, null, 2);
+      setOutput(formatted);
+      updateStats(parsed, formatted);
+    } catch (e) {
+      showError('Invalid JSON: ' + e.message);
+    }
+  });
+
+  document.getElementById('btn-minify').addEventListener('click', () => {
+    hideError();
+    try {
+      const parsed = JSON.parse(input.value);
+      const minified = JSON.stringify(parsed);
+      setOutput(minified);
+      updateStats(parsed, minified);
+    } catch (e) {
+      showError('Invalid JSON: ' + e.message);
+    }
+  });
+
+  document.getElementById('btn-validate').addEventListener('click', () => {
+    hideError();
+    try {
+      const parsed = JSON.parse(input.value);
+      setOutput('✅ Valid JSON!');
+      updateStats(parsed, input.value);
+    } catch (e) {
+      showError('Invalid JSON: ' + e.message);
+    }
+  });
+
+  document.getElementById('btn-sample').addEventListener('click', () => {
+    hideError();
+    const sample = {
+      "name": "DevToolKit",
+      "version": "1.0.0",
+      "description": "Free online developer tools",
+      "tools": ["JSON Formatter", "Base64 Encoder", "Color Converter"],
+      "features": {
+        "free": true,
+        "privacy": "client-side only",
+        "frameworks": { "frontend": "AstroJS", "hosting": "Cloudflare Pages" }
+      },
+      "stats": { "tools": 6, "users": 10000, "uptime": 99.9 }
+    };
+    input.value = JSON.stringify(sample);
+    const formatted = JSON.stringify(sample, null, 2);
+    setOutput(formatted);
+    updateStats(sample, formatted);
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', () => {
+    const text = output.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy');
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    });
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    input.value = '';
+    output.innerHTML = '<pre><span class="placeholder">Formatted JSON will appear here...</span></pre>';
+    hideError();
+    statKeys.textContent = '0';
+    statDepth.textContent = '0';
+    statSize.textContent = '0';
+  });
+</script>

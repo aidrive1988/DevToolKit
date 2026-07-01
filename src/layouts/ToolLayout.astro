@@ -1,0 +1,53 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  toolName: string;
+  category: string;
+  canonicalURL?: string;
+}
+
+const { title, description, toolName, category, canonicalURL } = Astro.props;
+const siteURL = 'https://devtoolkit.pages.dev';
+
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": toolName,
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "url": canonicalURL || new URL(Astro.url.pathname, siteURL).href,
+  "description": description
+};
+---
+
+<BaseLayout title={title} description={description} canonicalURL={canonicalURL}>
+  <Header />
+  <main class="tool-page container">
+    <nav class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="sep">›</span>
+      <a href="/#tools">Tools</a>
+      <span class="sep">›</span>
+      <span>{toolName}</span>
+    </nav>
+
+    <div class="tool-header">
+      <h1>{toolName}</h1>
+      <p>{description}</p>
+    </div>
+
+    <slot />
+
+    <slot name="how-to-use" />
+    <slot name="faq" />
+  </main>
+  <Footer />
+
+  <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+</BaseLayout>

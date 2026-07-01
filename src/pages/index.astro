@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ToolCard from '../components/ToolCard.astro';
+
+const tools = [
+  { title: 'JSON Formatter & Validator', description: 'Format, validate, and beautify JSON data instantly with syntax highlighting.', href: '/tools/json-formatter', icon: '📋', category: 'Developer' },
+  { title: 'Base64 Encoder & Decoder', description: 'Encode and decode Base64 strings instantly. Supports UTF-8 text.', href: '/tools/base64', icon: '🔐', category: 'Encoding' },
+  { title: 'URL Encoder & Decoder', description: 'Encode and decode URLs with encodeURI and encodeURIComponent support.', href: '/tools/url-encoder', icon: '🔗', category: 'Encoding' },
+  { title: 'Color Converter', description: 'Convert colors between HEX, RGB, and HSL formats with live preview.', href: '/tools/color-converter', icon: '🎨', category: 'Design' },
+  { title: 'Lorem Ipsum Generator', description: 'Generate placeholder text in paragraphs, sentences, or words.', href: '/tools/lorem-ipsum', icon: '📝', category: 'Text' },
+  { title: 'Word & Character Counter', description: 'Count words, characters, sentences, and paragraphs with reading time.', href: '/tools/word-counter', icon: '🔢', category: 'Text' },
+];
+---
+
+<BaseLayout title="DevToolKit — Free Online Developer Tools" description="Lightning-fast, privacy-first developer tools that run in your browser. JSON Formatter, Base64 Encoder, Color Converter & more. No signup. 100% free.">
+  <Header />
+
+  <section class="hero">
+    <div class="container hero-content">
+      <h1>Free Online<br/>Developer Tools</h1>
+      <p class="hero-subtitle">Lightning-fast, privacy-first tools that run entirely in your browser. No signup. No data collection. Just pure utility.</p>
+      <div class="hero-stats">
+        <span class="hero-stat"><span class="dot"></span> 6 Free Tools</span>
+        <span class="hero-stat"><span class="dot"></span> Zero Tracking</span>
+        <span class="hero-stat"><span class="dot"></span> 100% Client-Side</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="tools-section container" id="tools">
+    <div class="section-header">
+      <h2>Our Tools</h2>
+      <p>Pick a tool and get started instantly — no setup required.</p>
+    </div>
+    <div class="tools-grid">
+      {tools.map((tool, i) => (
+        <div class={`animate-in animate-delay-${i % 3 + 1}`}>
+          <ToolCard {...tool} />
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="benefits-section container">
+    <div class="section-header">
+      <h2>Why DevToolKit?</h2>
+      <p>Built by developers, for developers.</p>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <span class="benefit-icon">⚡</span>
+        <h3>Lightning Fast</h3>
+        <p>Zero JavaScript by default. Tools load instantly on any device.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">🔒</span>
+        <h3>Privacy First</h3>
+        <p>Everything runs in your browser. We never see or store your data.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">💰</span>
+        <h3>100% Free</h3>
+        <p>No signup, no premium tiers, no hidden costs. Free forever.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">🌐</span>
+        <h3>Works Offline</h3>
+        <p>All tools work without an internet connection once loaded.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section container">
+    <div class="cta-box">
+      <h2>Bookmark DevToolKit</h2>
+      <p>Press <strong>Ctrl+D</strong> to bookmark this page and access all tools instantly whenever you need them.</p>
+      <a href="/#tools" class="btn btn-primary">Explore All Tools →</a>
+    </div>
+  </section>
+
+  <Footer />
+</BaseLayout>

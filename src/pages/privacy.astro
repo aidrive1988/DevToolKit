@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Privacy Policy — DevToolKit" description="DevToolKit privacy policy. Learn how we handle your data (spoiler: we don't collect any).">
+  <Header />
+  <div class="container page-content">
+    <h1>Privacy Policy</h1>
+    <p><strong>Last updated:</strong> January 1, 2025</p>
+    <h2>Information We Collect</h2>
+    <p>DevToolKit does <strong>not</strong> collect, store, or transmit any personal data. All tools run entirely in your browser using client-side JavaScript. Your input data never leaves your device.</p>
+    <h2>Cookies</h2>
+    <p>DevToolKit does not use cookies for tracking. Third-party services (such as Google AdSense, if enabled) may use cookies to serve relevant ads. You can manage cookie preferences through your browser settings.</p>
+    <h2>Third-Party Services</h2>
+    <p>We may use the following third-party services:</p>
+    <ul>
+      <li><strong>Google AdSense</strong> — For displaying advertisements. Google may use cookies to personalize ads. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.</li>
+      <li><strong>Cloudflare</strong> — For hosting and CDN services. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's Privacy Policy</a>.</li>
+    </ul>
+    <h2>Data Security</h2>
+    <p>Since we don't collect any data, there's nothing to secure. Your data stays on your device at all times.</p>
+    <h2>Changes to This Policy</h2>
+    <p>We may update this privacy policy from time to time. Any changes will be posted on this page.</p>
+    <h2>Contact</h2>
+    <p>Questions about this policy? Open an issue on our <a href="https://github.com/aidrive1988/DevToolKit" target="_blank" rel="noopener">GitHub repository</a>.</p>
+  </div>
+  <Footer />
+</BaseLayout>

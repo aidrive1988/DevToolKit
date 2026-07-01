@@ -1,0 +1,153 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="Word & Character Counter — Free Online Tool | DevToolKit" description="Count words, characters, sentences, and paragraphs instantly. Free online text analysis tool with reading time estimate." toolName="Word & Character Counter" category="Text">
+
+  <div class="tool-container">
+    <div class="tool-input">
+      <textarea id="text-input" placeholder="Start typing or paste your text here..." style="min-height:220px;font-family:var(--font-family);"></textarea>
+    </div>
+
+    <div class="stats-dashboard">
+      <div class="stat-card">
+        <div class="stat-value" id="word-count">0</div>
+        <div class="stat-label">Words</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="char-count">0</div>
+        <div class="stat-label">Characters</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="char-no-space">0</div>
+        <div class="stat-label">No Spaces</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="sentence-count">0</div>
+        <div class="stat-label">Sentences</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="paragraph-count">0</div>
+        <div class="stat-label">Paragraphs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="reading-time">0 min</div>
+        <div class="stat-label">Reading Time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="speaking-time">0 min</div>
+        <div class="stat-label">Speaking Time</div>
+      </div>
+    </div>
+
+    <div class="tool-actions">
+      <button class="btn btn-secondary" id="btn-select">🔘 Select All</button>
+      <button class="btn btn-secondary" id="btn-copy">📋 Copy</button>
+      <button class="btn btn-danger" id="btn-clear">🗑 Clear</button>
+    </div>
+
+    <div style="margin-top:2rem;">
+      <h3 style="font-size:1.6rem;margin-bottom:1rem;color:var(--text-primary);">Top Keywords</h3>
+      <div id="top-words" style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+        <span style="font-size:1.3rem;color:var(--text-muted);font-style:italic;">Start typing to see top keywords...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-section" slot="how-to-use">
+    <h2>How to Use the Word Counter</h2>
+    <ol class="steps-list">
+      <li>Type or paste your text into the input area above</li>
+      <li>All statistics update <strong>instantly in real-time</strong> as you type</li>
+      <li>View top keywords, reading time, and speaking time estimates</li>
+    </ol>
+  </div>
+
+  <div class="info-section" slot="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <p class="faq-question">How is reading time calculated?</p>
+      <p class="faq-answer">Reading time is based on an average reading speed of 200 words per minute (wpm), which is the standard for adult readers.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">How is speaking time calculated?</p>
+      <p class="faq-answer">Speaking time uses 130 words per minute, which is the average pace for public speaking and presentations.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Is my text stored anywhere?</p>
+      <p class="faq-answer">No. All processing happens locally in your browser. Your text never leaves your device.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">What counts as a sentence?</p>
+      <p class="faq-answer">Sentences are detected by periods (.), exclamation marks (!), and question marks (?). Multiple punctuation marks are counted as one sentence boundary.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">What counts as a paragraph?</p>
+      <p class="faq-answer">Paragraphs are separated by one or more blank lines. A single block of text with no blank lines counts as one paragraph.</p>
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  const input = document.getElementById('text-input');
+  const STOP_WORDS = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','is','it','that','this','was','are','be','has','had','have','with','as','by','from','not','no','so','if','its','do','did','will','can','just','than','then','them','they','my','your','we','he','she','all','been','would','could','should','their','there','here','about','out','up','what','when','who','how','which','each','other','into']);
+
+  function analyze() {
+    const text = input.value;
+
+    const words = text.trim() ? text.trim().split(/\s+/).filter(w => w.length > 0) : [];
+    const wordCount = words.length;
+    const charCount = text.length;
+    const charNoSpace = text.replace(/\s/g, '').length;
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const paragraphs = text.trim() ? text.split(/\n\s*\n/).filter(p => p.trim().length > 0) : [];
+    const readingMin = wordCount > 0 ? Math.max(1, Math.ceil(wordCount / 200)) : 0;
+    const speakingMin = wordCount > 0 ? Math.max(1, Math.ceil(wordCount / 130)) : 0;
+
+    document.getElementById('word-count').textContent = wordCount;
+    document.getElementById('char-count').textContent = charCount;
+    document.getElementById('char-no-space').textContent = charNoSpace;
+    document.getElementById('sentence-count').textContent = sentences.length;
+    document.getElementById('paragraph-count').textContent = text.trim() ? paragraphs.length : 0;
+    document.getElementById('reading-time').textContent = readingMin + ' min';
+    document.getElementById('speaking-time').textContent = speakingMin + ' min';
+
+    // Top keywords
+    const freq = {};
+    words.forEach(w => {
+      const clean = w.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (clean.length > 2 && !STOP_WORDS.has(clean)) {
+        freq[clean] = (freq[clean] || 0) + 1;
+      }
+    });
+    const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const topEl = document.getElementById('top-words');
+    if (sorted.length === 0) {
+      topEl.innerHTML = '<span style="font-size:1.3rem;color:var(--text-muted);font-style:italic;">Start typing to see top keywords...</span>';
+    } else {
+      topEl.innerHTML = sorted.map(([word, count]) =>
+        `<span style="padding:0.4rem 1rem;background:rgba(124,58,237,0.15);border-radius:20px;font-size:1.3rem;color:var(--accent-purple);font-weight:600;">${word} (${count})</span>`
+      ).join('');
+    }
+  }
+
+  input.addEventListener('input', analyze);
+
+  document.getElementById('btn-select').addEventListener('click', () => {
+    input.select();
+    input.focus();
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', () => {
+    navigator.clipboard.writeText(input.value).then(() => {
+      const btn = document.getElementById('btn-copy');
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    });
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    input.value = '';
+    analyze();
+  });
+</script>

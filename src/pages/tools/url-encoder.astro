@@ -1,0 +1,129 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="URL Encoder & Decoder — Free Online Tool | DevToolKit" description="Encode and decode URLs instantly. Free online URL encoding tool with encodeURI and encodeURIComponent support." toolName="URL Encoder & Decoder" category="Encoding">
+
+  <div class="tool-container">
+    <div class="tab-group">
+      <button class="tab-btn active" id="tab-encode">Encode</button>
+      <button class="tab-btn" id="tab-decode">Decode</button>
+    </div>
+
+    <div class="tool-input">
+      <textarea id="url-input" placeholder="Enter URL or text to encode..."></textarea>
+    </div>
+
+    <div class="tool-actions">
+      <button class="btn btn-primary" id="btn-component">🔗 encodeURIComponent</button>
+      <button class="btn btn-secondary" id="btn-uri">🌐 encodeURI</button>
+      <button class="btn btn-secondary" id="btn-copy">📋 Copy</button>
+      <button class="btn btn-danger" id="btn-clear">🗑 Clear</button>
+    </div>
+
+    <div class="tool-stats">
+      <span class="tool-stat"><strong id="stat-input-len">0</strong> Input chars</span>
+      <span class="tool-stat"><strong id="stat-output-len">0</strong> Output chars</span>
+    </div>
+
+    <div class="tool-output" id="url-output">
+      <pre><span class="placeholder">Encoded/Decoded URL will appear here...</span></pre>
+    </div>
+
+    <div class="tool-error" id="url-error"></div>
+  </div>
+
+  <div class="info-section" slot="how-to-use">
+    <h2>How to Use the URL Encoder/Decoder</h2>
+    <ol class="steps-list">
+      <li>Select <strong>Encode</strong> or <strong>Decode</strong> mode</li>
+      <li>Paste your URL or text into the input field</li>
+      <li>Choose <strong>encodeURIComponent</strong> (for query params) or <strong>encodeURI</strong> (for full URLs)</li>
+    </ol>
+    <h3>encodeURIComponent vs encodeURI</h3>
+    <p><strong>encodeURIComponent</strong> encodes everything except: <code>A-Z a-z 0-9 - _ . ! ~ * ' ( )</code>. Use this for query parameter values.</p>
+    <p><strong>encodeURI</strong> preserves URL-special characters like <code>: / ? # [ ] @ ! $ & ' ( ) * + , ; =</code>. Use this for encoding a full URL.</p>
+  </div>
+
+  <div class="info-section" slot="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <p class="faq-question">What is URL encoding?</p>
+      <p class="faq-answer">URL encoding (percent-encoding) replaces special characters with a % sign followed by their hexadecimal value. For example, a space becomes %20. This ensures URLs are transmitted correctly over the internet.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">When should I use encodeURIComponent?</p>
+      <p class="faq-answer">Use encodeURIComponent when encoding query parameter values, form data, or any text that will be part of a URL segment. It encodes characters like &, =, and ? that have special meaning in URLs.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">When should I use encodeURI?</p>
+      <p class="faq-answer">Use encodeURI when encoding a complete URL. It preserves the URL structure (protocol, slashes, colons) while encoding spaces and other non-URL characters.</p>
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  let mode = 'encode';
+  const input = document.getElementById('url-input');
+  const output = document.getElementById('url-output');
+  const errorEl = document.getElementById('url-error');
+  const btnComponent = document.getElementById('btn-component');
+  const btnUri = document.getElementById('btn-uri');
+  const tabEncode = document.getElementById('tab-encode');
+  const tabDecode = document.getElementById('tab-decode');
+
+  function setMode(m) {
+    mode = m;
+    tabEncode.classList.toggle('active', m === 'encode');
+    tabDecode.classList.toggle('active', m === 'decode');
+    btnComponent.textContent = m === 'encode' ? '🔗 encodeURIComponent' : '🔗 decodeURIComponent';
+    btnUri.textContent = m === 'encode' ? '🌐 encodeURI' : '🌐 decodeURI';
+    input.placeholder = m === 'encode' ? 'Enter URL or text to encode...' : 'Enter encoded URL to decode...';
+  }
+
+  tabEncode.addEventListener('click', () => setMode('encode'));
+  tabDecode.addEventListener('click', () => setMode('decode'));
+
+  function showError(msg) { errorEl.textContent = '❌ ' + msg; errorEl.classList.add('visible'); }
+  function hideError() { errorEl.classList.remove('visible'); }
+
+  function setOutput(text) {
+    output.innerHTML = '<pre>' + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>';
+    document.getElementById('stat-input-len').textContent = input.value.length;
+    document.getElementById('stat-output-len').textContent = text.length;
+  }
+
+  btnComponent.addEventListener('click', () => {
+    hideError();
+    const val = input.value;
+    if (!val.trim()) { showError('Please enter some text.'); return; }
+    try {
+      setOutput(mode === 'encode' ? encodeURIComponent(val) : decodeURIComponent(val));
+    } catch (e) { showError('Error: ' + e.message); }
+  });
+
+  btnUri.addEventListener('click', () => {
+    hideError();
+    const val = input.value;
+    if (!val.trim()) { showError('Please enter some text.'); return; }
+    try {
+      setOutput(mode === 'encode' ? encodeURI(val) : decodeURI(val));
+    } catch (e) { showError('Error: ' + e.message); }
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', () => {
+    navigator.clipboard.writeText(output.innerText).then(() => {
+      const btn = document.getElementById('btn-copy');
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    });
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    input.value = '';
+    output.innerHTML = '<pre><span class="placeholder">Encoded/Decoded URL will appear here...</span></pre>';
+    hideError();
+    document.getElementById('stat-input-len').textContent = '0';
+    document.getElementById('stat-output-len').textContent = '0';
+  });
+</script>

@@ -1,0 +1,30 @@
+---
+const currentPath = Astro.url.pathname;
+---
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="logo">
+      <span>⚡</span> DevToolKit
+    </a>
+    <button class="mobile-toggle" id="menu-toggle" aria-label="Toggle menu">☰</button>
+    <nav>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/" class={currentPath === '/' ? 'active' : ''}>Home</a></li>
+        <li><a href="/#tools" class={currentPath.startsWith('/tools') ? 'active' : ''}>Tools</a></li>
+        <li><a href="/about" class={currentPath === '/about/' || currentPath === '/about' ? 'active' : ''}>About</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('menu-toggle');
+  const nav = document.getElementById('nav-links');
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => {
+      nav.classList.toggle('open');
+      toggle.textContent = nav.classList.contains('open') ? '✕' : '☰';
+    });
+  }
+</script>

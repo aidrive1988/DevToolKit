@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="About DevToolKit — Free Developer Tools" description="DevToolKit is a collection of free, fast, privacy-first developer tools built with AstroJS.">
+  <Header />
+  <div class="container page-content">
+    <h1>About DevToolKit</h1>
+    <p>DevToolKit is a free, open-source collection of developer tools built by developers, for developers. Every tool runs entirely in your browser — your data never touches our servers.</p>
+    <h2>Our Mission</h2>
+    <p>We believe developer tools should be free, fast, and private. No accounts, no tracking, no data harvesting. Just useful utilities that help you get your work done.</p>
+    <h2>Tech Stack</h2>
+    <p>DevToolKit is built with modern, performance-first technologies:</p>
+    <ul>
+      <li><strong>AstroJS</strong> — Zero JavaScript by default for blazing-fast page loads</li>
+      <li><strong>Cloudflare Pages</strong> — Global CDN with edge caching for instant access worldwide</li>
+      <li><strong>Client-Side Processing</strong> — All tools run in your browser, keeping your data private</li>
+    </ul>
+    <h2>Open Source</h2>
+    <p>DevToolKit is open source and available on GitHub. Contributions, bug reports, and feature requests are welcome!</p>
+    <h2>Contact</h2>
+    <p>Have a suggestion or found a bug? Open an issue on our <a href="https://github.com/aidrive1988/DevToolKit" target="_blank" rel="noopener">GitHub repository</a>.</p>
+  </div>
+  <Footer />
+</BaseLayout>

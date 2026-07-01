@@ -1,0 +1,197 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="Color Converter — HEX RGB HSL | DevToolKit" description="Convert colors between HEX, RGB, and HSL formats instantly. Free online color converter with live preview." toolName="Color Converter" category="Design">
+
+  <div class="tool-container">
+    <div class="color-preview" id="color-preview" style="background-color: #7c3aed;"></div>
+
+    <div class="color-inputs-grid">
+      <div class="color-group">
+        <label>HEX</label>
+        <input type="text" id="hex-input" value="#7c3aed" placeholder="#000000" />
+      </div>
+      <div class="color-group">
+        <label>RGB</label>
+        <input type="text" id="rgb-input" value="rgb(124, 58, 237)" placeholder="rgb(0, 0, 0)" />
+      </div>
+      <div class="color-group">
+        <label>HSL</label>
+        <input type="text" id="hsl-input" value="hsl(262, 83%, 58%)" placeholder="hsl(0, 0%, 0%)" />
+      </div>
+    </div>
+
+    <div class="tool-actions" style="margin-top: 1.6rem;">
+      <label style="display:flex;align-items:center;gap:0.8rem;cursor:pointer;">
+        <input type="color" id="color-picker" value="#7c3aed" style="width:40px;height:36px;border:none;cursor:pointer;border-radius:6px;" />
+        <span style="font-size:1.4rem;color:var(--text-secondary);">Color Picker</span>
+      </label>
+      <button class="btn btn-secondary" id="btn-copy-hex">📋 Copy HEX</button>
+      <button class="btn btn-secondary" id="btn-copy-rgb">📋 Copy RGB</button>
+      <button class="btn btn-secondary" id="btn-copy-hsl">📋 Copy HSL</button>
+    </div>
+
+    <div style="margin-top: 2.4rem;">
+      <h3 style="font-size:1.6rem;margin-bottom:1rem;color:var(--text-primary);">Popular Palettes</h3>
+      <div class="palette-grid">
+        <div class="palette-swatch" style="background:#ef4444;" data-color="#ef4444" title="Red"></div>
+        <div class="palette-swatch" style="background:#f59e0b;" data-color="#f59e0b" title="Amber"></div>
+        <div class="palette-swatch" style="background:#10b981;" data-color="#10b981" title="Emerald"></div>
+        <div class="palette-swatch" style="background:#3b82f6;" data-color="#3b82f6" title="Blue"></div>
+        <div class="palette-swatch" style="background:#8b5cf6;" data-color="#8b5cf6" title="Violet"></div>
+        <div class="palette-swatch" style="background:#ec4899;" data-color="#ec4899" title="Pink"></div>
+        <div class="palette-swatch" style="background:#06b6d4;" data-color="#06b6d4" title="Cyan"></div>
+        <div class="palette-swatch" style="background:#f97316;" data-color="#f97316" title="Orange"></div>
+        <div class="palette-swatch" style="background:#14b8a6;" data-color="#14b8a6" title="Teal"></div>
+        <div class="palette-swatch" style="background:#6366f1;" data-color="#6366f1" title="Indigo"></div>
+        <div class="palette-swatch" style="background:#a855f7;" data-color="#a855f7" title="Purple"></div>
+        <div class="palette-swatch" style="background:#e11d48;" data-color="#e11d48" title="Rose"></div>
+      </div>
+    </div>
+
+    <div class="tool-error" id="color-error"></div>
+  </div>
+
+  <div class="info-section" slot="how-to-use">
+    <h2>How to Use the Color Converter</h2>
+    <ol class="steps-list">
+      <li>Enter a color value in any format — HEX (#ff5733), RGB (rgb(255, 87, 51)), or HSL (hsl(14, 100%, 60%))</li>
+      <li>All other formats update automatically with a live preview</li>
+      <li>Use the color picker or click a palette swatch for quick selection</li>
+    </ol>
+  </div>
+
+  <div class="info-section" slot="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <p class="faq-question">What's the difference between HEX, RGB, and HSL?</p>
+      <p class="faq-answer"><strong>HEX</strong> uses hexadecimal notation (#RRGGBB). <strong>RGB</strong> specifies red, green, blue values (0-255). <strong>HSL</strong> uses hue (0-360°), saturation (0-100%), and lightness (0-100%) — often the most intuitive for design work.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Which format should I use in CSS?</p>
+      <p class="faq-answer">All three are valid in CSS. HEX is the most common and compact. HSL is great for creating color variations (just adjust lightness). RGB is useful when you need alpha transparency (rgba).</p>
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  const hexInput = document.getElementById('hex-input');
+  const rgbInput = document.getElementById('rgb-input');
+  const hslInput = document.getElementById('hsl-input');
+  const preview = document.getElementById('color-preview');
+  const picker = document.getElementById('color-picker');
+  const errorEl = document.getElementById('color-error');
+
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return { r, g, b };
+  }
+
+  function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  }
+
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    if (max === min) { h = s = 0; }
+    else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+  }
+
+  function hslToRgb(h, s, l) {
+    h /= 360; s /= 100; l /= 100;
+    let r, g, b;
+    if (s === 0) { r = g = b = l; }
+    else {
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1; if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+  }
+
+  function updateAll(r, g, b, source) {
+    const hex = rgbToHex(r, g, b);
+    const hsl = rgbToHsl(r, g, b);
+    if (source !== 'hex') hexInput.value = hex;
+    if (source !== 'rgb') rgbInput.value = `rgb(${r}, ${g}, ${b})`;
+    if (source !== 'hsl') hslInput.value = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+    preview.style.backgroundColor = hex;
+    picker.value = hex;
+    errorEl.classList.remove('visible');
+  }
+
+  hexInput.addEventListener('input', () => {
+    const hex = hexInput.value.trim();
+    if (/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex)) {
+      const { r, g, b } = hexToRgb(hex);
+      updateAll(r, g, b, 'hex');
+    }
+  });
+
+  rgbInput.addEventListener('input', () => {
+    const match = rgbInput.value.match(/(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/);
+    if (match) {
+      updateAll(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), 'rgb');
+    }
+  });
+
+  hslInput.addEventListener('input', () => {
+    const match = hslInput.value.match(/(\d{1,3})\s*,\s*(\d{1,3})%?\s*,\s*(\d{1,3})%?/);
+    if (match) {
+      const { r, g, b } = hslToRgb(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
+      updateAll(r, g, b, 'hsl');
+    }
+  });
+
+  picker.addEventListener('input', () => {
+    const { r, g, b } = hexToRgb(picker.value);
+    updateAll(r, g, b, 'picker');
+  });
+
+  document.querySelectorAll('.palette-swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      const { r, g, b } = hexToRgb(swatch.dataset.color);
+      updateAll(r, g, b, 'picker');
+    });
+  });
+
+  function copyField(id, btnId) {
+    document.getElementById(btnId).addEventListener('click', () => {
+      const val = document.getElementById(id).value;
+      navigator.clipboard.writeText(val).then(() => {
+        const btn = document.getElementById(btnId);
+        const orig = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+      });
+    });
+  }
+  copyField('hex-input', 'btn-copy-hex');
+  copyField('rgb-input', 'btn-copy-rgb');
+  copyField('hsl-input', 'btn-copy-hsl');
+</script>

@@ -1,0 +1,188 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="Lorem Ipsum Generator — Free Online Tool | DevToolKit" description="Generate placeholder text instantly. Free online Lorem Ipsum generator with paragraphs, sentences, and words modes." toolName="Lorem Ipsum Generator" category="Text">
+
+  <div class="tool-container">
+    <div style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center;margin-bottom:1.6rem;">
+      <div>
+        <label style="font-size:1.3rem;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Quantity</label>
+        <input type="number" id="lorem-count" value="3" min="1" max="100" style="width:80px;padding:0.8rem;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.4rem;" />
+      </div>
+      <div>
+        <label style="font-size:1.3rem;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Type</label>
+        <select id="lorem-type" style="padding:0.8rem 1.2rem;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.4rem;">
+          <option value="paragraphs">Paragraphs</option>
+          <option value="sentences">Sentences</option>
+          <option value="words">Words</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-top:1.8rem;">
+        <input type="checkbox" id="lorem-classic" checked style="accent-color:var(--accent-purple);width:18px;height:18px;" />
+        <label for="lorem-classic" style="font-size:1.4rem;color:var(--text-secondary);cursor:pointer;">Start with "Lorem ipsum..."</label>
+      </div>
+    </div>
+
+    <div class="tool-actions">
+      <button class="btn btn-primary" id="btn-generate">✨ Generate</button>
+      <button class="btn btn-secondary" id="btn-copy">📋 Copy</button>
+      <button class="btn btn-danger" id="btn-clear">🗑 Clear</button>
+    </div>
+
+    <div class="tool-stats">
+      <span class="tool-stat"><strong id="stat-words">0</strong> Words</span>
+      <span class="tool-stat"><strong id="stat-chars">0</strong> Characters</span>
+      <span class="tool-stat"><strong id="stat-paras">0</strong> Paragraphs</span>
+    </div>
+
+    <div class="tool-output" id="lorem-output">
+      <pre><span class="placeholder">Generated lorem ipsum text will appear here...</span></pre>
+    </div>
+  </div>
+
+  <div class="info-section" slot="how-to-use">
+    <h2>How to Use the Lorem Ipsum Generator</h2>
+    <ol class="steps-list">
+      <li>Set the quantity and choose between paragraphs, sentences, or words</li>
+      <li>Toggle "Start with Lorem ipsum..." for the classic opening</li>
+      <li>Click <strong>Generate</strong> and then <strong>Copy</strong> the result</li>
+    </ol>
+  </div>
+
+  <div class="info-section" slot="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <p class="faq-question">What is Lorem Ipsum?</p>
+      <p class="faq-answer">Lorem Ipsum is dummy text used in the printing and typesetting industry since the 1500s. It's used as placeholder text in designs and layouts to simulate the appearance of real content.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Is Lorem Ipsum real Latin?</p>
+      <p class="faq-answer">It's derived from a work by Cicero written in 45 BC, but it's been altered and scrambled over the centuries, so it's not meaningful Latin anymore.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Why use Lorem Ipsum instead of real text?</p>
+      <p class="faq-answer">Using placeholder text helps designers and developers focus on visual layout and typography without being distracted by readable content. It provides a natural-looking text distribution.</p>
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  const SENTENCES = [
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+    "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.",
+    "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.",
+    "Nulla facilisi morbi tempus iaculis urna id volutpat lacus.",
+    "Amet consectetur adipiscing elit pellentesque habitant morbi tristique senectus.",
+    "Viverra accumsan in nisl nisi scelerisque eu ultrices vitae.",
+    "Eget nulla facilisi etiam dignissim diam quis enim lobortis.",
+    "Faucibus interdum posuere lorem ipsum dolor sit amet consectetur.",
+    "Pellentesque eu tincidunt tortor aliquam nulla facilisi cras fermentum.",
+    "Mauris augue neque gravida in fermentum et sollicitudin ac.",
+    "Egestas integer eget aliquet nibh praesent tristique magna sit.",
+    "Volutpat consequat mauris nunc congue nisi vitae suscipit tellus.",
+    "Feugiat in ante metus dictum at tempor commodo ullamcorper.",
+    "Adipiscing commodo elit at imperdiet dui accumsan sit amet.",
+    "Erat pellentesque adipiscing commodo elit at imperdiet dui accumsan.",
+    "Cursus euismod quis viverra nibh cras pulvinar mattis nunc.",
+    "Amet venenatis urna cursus eget nunc scelerisque viverra mauris.",
+    "Ornare suspendisse sed nisi lacus sed viverra tellus in.",
+    "Sit amet facilisis magna etiam tempor orci eu lobortis.",
+    "Nisl pretium fusce id velit ut tortor pretium viverra.",
+    "Sem fringilla ut morbi tincidunt augue interdum velit euismod.",
+    "Tristique nulla aliquet enim tortor at auctor urna nunc.",
+    "Vel facilisis volutpat est velit egestas dui id ornare.",
+    "Pretium quam vulputate dignissim suspendisse in est ante in.",
+    "Ultrices in iaculis nunc sed augue lacus viverra vitae.",
+    "Congue eu consequat ac felis donec et odio pellentesque.",
+    "Mattis rhoncus urna neque viverra justo nec ultrices dui.",
+    "Imperdiet massa tincidunt nunc pulvinar sapien et ligula ullamcorper.",
+    "Habitant morbi tristique senectus et netus et malesuada fames.",
+    "Turpis egestas maecenas pharetra convallis posuere morbi leo urna.",
+    "Tincidunt lobortis feugiat vivamus at augue eget arcu dictum.",
+    "Id porta nibh venenatis cras sed felis eget velit.",
+    "Sed risus pretium quam vulputate dignissim suspendisse in est.",
+    "Bibendum at varius vel pharetra vel turpis nunc eget.",
+    "Amet tellus cras adipiscing enim eu turpis egestas pretium.",
+    "Facilisi nullam vehicula ipsum a arcu cursus vitae congue.",
+    "Non odio euismod lacinia at quis risus sed vulputate.",
+    "Ultrices gravida dictum fusce ut placerat orci nulla pellentesque.",
+    "Viverra vitae congue eu consequat ac felis donec et.",
+    "Pharetra magna ac placerat vestibulum lectus mauris ultrices eros.",
+    "Nisi est sit amet facilisis magna etiam tempor orci.",
+    "Massa id neque aliquam vestibulum morbi blandit cursus risus.",
+    "Elementum tempus egestas sed sed risus pretium quam vulputate.",
+    "Vitae turpis massa sed elementum tempus egestas sed sed.",
+    "Eget arcu dictum varius duis at consectetur lorem donec.",
+    "Sagittis scelerisque purus semper eget duis at tellus at.",
+    "Tortor posuere ac ut consequat semper viverra nam libero.",
+    "Augue ut lectus arcu bibendum at varius vel pharetra."
+  ];
+
+  const WORDS = SENTENCES.join(' ').replace(/[.,]/g, '').toLowerCase().split(/\s+/);
+
+  function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function generateParagraph() {
+    const count = 4 + Math.floor(Math.random() * 5);
+    return shuffle(SENTENCES).slice(0, count).join(' ');
+  }
+
+  document.getElementById('btn-generate').addEventListener('click', () => {
+    const count = parseInt(document.getElementById('lorem-count').value) || 1;
+    const type = document.getElementById('lorem-type').value;
+    const classic = document.getElementById('lorem-classic').checked;
+    let result = '';
+
+    if (type === 'paragraphs') {
+      const paras = [];
+      for (let i = 0; i < count; i++) paras.push(generateParagraph());
+      if (classic && paras.length > 0) {
+        paras[0] = SENTENCES[0] + ' ' + paras[0];
+      }
+      result = paras.join('\n\n');
+    } else if (type === 'sentences') {
+      const sents = shuffle(SENTENCES).slice(0, Math.min(count, SENTENCES.length));
+      while (sents.length < count) sents.push(getRandom(SENTENCES));
+      if (classic) sents[0] = SENTENCES[0];
+      result = sents.join(' ');
+    } else {
+      const words = [];
+      for (let i = 0; i < count; i++) words.push(getRandom(WORDS));
+      if (classic && words.length >= 2) { words[0] = 'lorem'; words[1] = 'ipsum'; }
+      result = words.join(' ');
+    }
+
+    document.getElementById('lorem-output').innerHTML = '<pre>' + result + '</pre>';
+    document.getElementById('stat-words').textContent = result.split(/\s+/).filter(w => w).length;
+    document.getElementById('stat-chars').textContent = result.length;
+    document.getElementById('stat-paras').textContent = result.split(/\n\n/).length;
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', () => {
+    const text = document.getElementById('lorem-output').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy');
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    });
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    document.getElementById('lorem-output').innerHTML = '<pre><span class="placeholder">Generated lorem ipsum text will appear here...</span></pre>';
+    document.getElementById('stat-words').textContent = '0';
+    document.getElementById('stat-chars').textContent = '0';
+    document.getElementById('stat-paras').textContent = '0';
+  });
+</script>

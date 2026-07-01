@@ -1,0 +1,64 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  canonicalURL?: string;
+  ogImage?: string;
+}
+
+const { title, description, canonicalURL, ogImage } = Astro.props;
+const siteURL = 'https://devtoolkit.pages.dev';
+const canonical = canonicalURL || new URL(Astro.url.pathname, siteURL).href;
+const image = ogImage || `${siteURL}/og-default.png`;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={image} />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={image} />
+
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#7c3aed" />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "DevToolKit",
+    "url": siteURL,
+    "description": "Free online developer tools — JSON Formatter, Base64 Encoder, Color Converter & more.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": `${siteURL}/tools/{search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
+  })} />
+
+  <style>
+    @import '../styles/global.css';
+  </style>
+</head>
+<body>
+  <slot />
+</body>
+</html>
