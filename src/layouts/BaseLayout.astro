@@ -148,6 +148,11 @@ import '../styles/global.css';
       { name: 'Color Converter & Preview', desc: 'Convert colors between HEX, RGB, HSL, and OKLCH', url: '/tools/color-converter', keywords: 'color converter hex rgb hsl oklch palette wcag contrast' },
       { name: 'Lorem Ipsum Generator', desc: 'Generate placeholder text using range sliders', url: '/tools/lorem-ipsum', keywords: 'lorem ipsum text generator dummy sentences words paragraphs' },
       { name: 'Word & Character Counter', desc: 'Count text length, word statistics, and speaking times', url: '/tools/word-counter', keywords: 'word counter characters paragraphs speaking density stats' },
+      { name: 'PDF Scanner', desc: 'Scan documents with camera or generate from images', url: '/tools/pdf-scanner', keywords: 'pdf scanner camera picture image convert multiple pages scan' },
+      { name: 'PDF Merge', desc: 'Combine multiple PDF files into a single document instantly', url: '/tools/pdf-merge', keywords: 'pdf merge combine join multiple files documents' },
+      { name: 'PDF Split', desc: 'Extract specific pages or split PDF into smaller files', url: '/tools/pdf-split', keywords: 'pdf split extract separate pages split divide' },
+      { name: 'PDF Protect', desc: 'Secure your PDF files with passwords and encryption', url: '/tools/pdf-protect', keywords: 'pdf protect secure password encrypt lock security' },
+      { name: 'PDF Unlock', desc: 'Remove password protection and encryption from PDF files', url: '/tools/pdf-unlock', keywords: 'pdf unlock decrypt remove password security open unprotect' },
       { name: 'Homepage', desc: 'Go back to landing dashboard', url: '/', keywords: 'home dashboard tools suite utility list' },
       { name: 'About Platform', desc: 'Details on platform security, speed, and privacy features', url: '/about', keywords: 'about security client side privacy tracking details open source' }
     ];
@@ -206,6 +211,8 @@ import '../styles/global.css';
           iconHtml = '<svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
         } else if (tool.url.includes('word')) {
           iconHtml = '<svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h10M7 16h10"></path></svg>';
+        } else if (tool.url.includes('pdf')) {
+          iconHtml = '<svg viewBox="0 0 24 24"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>';
         } else {
           iconHtml = '<svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>';
         }
