@@ -1,0 +1,274 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="PDF Split — Extract Pages from PDF | DevToolKit" description="Extract specific pages from a PDF document or split it into smaller files. Fast, secure, and 100% client-side processing." toolName="PDF Split" category="Productivity">
+
+  <div class="tool-container">
+    <!-- Upload Zone -->
+    <div class="drop-zone" id="drop-zone">
+      <div class="drop-zone-content">
+        <span style="font-size:4.8rem;display:block;margin-bottom:1rem;">✂️</span>
+        <p style="font-size:1.8rem;font-weight:600;color:var(--text-primary);margin-bottom:0.6rem;">Drop a PDF file here or click to upload</p>
+        <p style="font-size:1.4rem;color:var(--text-muted);">Select a single PDF file to extract pages from</p>
+      </div>
+      <input type="file" id="file-input" accept=".pdf,application/pdf" style="display:none;" />
+    </div>
+
+    <!-- Active File Info -->
+    <div id="file-info" style="display:none;margin-top:2rem;padding:1.6rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:1.2rem;">
+          <span style="font-size:2.4rem;">📄</span>
+          <div>
+            <div id="active-filename" style="font-size:1.5rem;font-weight:600;color:var(--text-primary);">filename.pdf</div>
+            <div id="active-filemeta" style="font-size:1.3rem;color:var(--text-muted);">0 pages • 0 KB</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btn-change-file">🔄 Change File</button>
+      </div>
+    </div>
+
+    <!-- Split Settings -->
+    <div id="split-settings" style="display:none;margin:2rem 0;padding:1.6rem;background:var(--bg-input);border-radius:var(--radius-md);border:1px solid var(--border-color);">
+      <h3 style="font-size:1.5rem;margin-bottom:1.6rem;color:var(--text-primary);">Extraction Settings</h3>
+      
+      <div style="margin-bottom:1.6rem;">
+        <label style="font-size:1.4rem;font-weight:600;color:var(--text-primary);display:block;margin-bottom:0.6rem;">Pages to Extract</label>
+        <input type="text" id="page-ranges" placeholder="e.g., 1, 3-5, 8" style="width:100%;padding:1rem 1.2rem;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.5rem;" />
+        <p style="font-size:1.2rem;color:var(--text-muted);margin-top:0.6rem;">Enter comma-separated page numbers or ranges (e.g., "1, 3-5"). A new PDF will be created containing only these pages.</p>
+      </div>
+
+      <div>
+        <label style="font-size:1.3rem;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Output Filename</label>
+        <input type="text" id="output-filename" value="extracted-pages" placeholder="extracted-pages" style="padding:0.8rem 1.2rem;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.4rem;width:100%;max-width:300px;" />
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="tool-actions" style="margin-top:2rem;">
+      <button class="btn btn-primary" id="btn-split" disabled>✂️ Extract Pages</button>
+    </div>
+
+    <div class="tool-error" id="split-error"></div>
+
+    <!-- Progress Bar -->
+    <div id="progress-container" style="display:none;margin-top:1.6rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;">
+        <span style="font-size:1.3rem;color:var(--text-secondary);" id="progress-label">Processing...</span>
+      </div>
+      <div style="height:6px;background:var(--bg-input);border-radius:3px;overflow:hidden;">
+        <div id="progress-bar" style="height:100%;width:100%;background:var(--gradient-primary);border-radius:3px;animation:pulse 1.5s infinite;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-section" slot="how-to-use">
+    <h2>How to Use PDF Split</h2>
+    <ol class="steps-list">
+      <li><strong>Upload a PDF</strong> by dragging and dropping it, or clicking the upload area.</li>
+      <li><strong>Enter page ranges</strong> you want to extract. For example, entering `1, 4-6` will create a new PDF containing pages 1, 4, 5, and 6.</li>
+      <li><strong>Set the filename</strong> for your new document.</li>
+      <li>Click <strong>Extract Pages</strong> to generate and download your new PDF.</li>
+    </ol>
+  </div>
+
+  <div class="info-section" slot="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <p class="faq-question">Are my documents private?</p>
+      <p class="faq-answer">Yes, 100%. The PDF splitting process happens entirely in your web browser. Your files never leave your device and are not uploaded to any server.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">How do I specify which pages to extract?</p>
+      <p class="faq-answer">Use commas to separate individual pages, and hyphens for ranges. For example, `1, 3, 5-10, 15` will extract page 1, page 3, pages 5 through 10, and page 15.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">What happens to the original PDF?</p>
+      <p class="faq-answer">Your original PDF remains completely untouched on your device. The tool creates a brand new PDF file containing only the extracted pages.</p>
+    </div>
+  </div>
+</ToolLayout>
+
+<style>
+  .drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 4rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    background: var(--bg-input);
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent-purple);
+    background: rgba(139, 92, 246, 0.05);
+  }
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+  .btn-sm { padding: 0.6rem 1.2rem; font-size: 1.3rem; }
+</style>
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<script>
+  let activePdf = null; // { file, name, size, pageCount, arrayBuffer }
+  
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+  const fileInfoEl = document.getElementById('file-info');
+  const settingsEl = document.getElementById('split-settings');
+  const btnSplit = document.getElementById('btn-split');
+  const errorEl = document.getElementById('split-error');
+  const progressContainer = document.getElementById('progress-container');
+  const pageRangesInput = document.getElementById('page-ranges');
+
+  // Drop zone events
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length > 0) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  });
+  
+  fileInput.addEventListener('change', () => { 
+    if (fileInput.files.length > 0) {
+      handleFile(fileInput.files[0]); 
+    }
+    fileInput.value = ''; 
+  });
+  
+  document.getElementById('btn-change-file').addEventListener('click', () => fileInput.click());
+
+  async function handleFile(file) {
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      try {
+        hideError();
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        const pageCount = pdfDoc.getPageCount();
+        
+        activePdf = { file, name: file.name, size: file.size, pageCount, arrayBuffer };
+        
+        // Update UI
+        dropZone.style.display = 'none';
+        fileInfoEl.style.display = 'block';
+        settingsEl.style.display = 'block';
+        btnSplit.disabled = false;
+        
+        document.getElementById('active-filename').textContent = file.name;
+        document.getElementById('active-filemeta').textContent = `${pageCount} page${pageCount !== 1 ? 's' : ''} • ${formatSize(file.size)}`;
+        
+        // Suggest a default range (e.g. first half, or just 1)
+        pageRangesInput.value = pageCount > 1 ? `1-${Math.min(pageCount, 5)}` : '1';
+        
+      } catch (err) {
+        showError(`Could not read "${file.name}": ${err.message}`);
+      }
+    } else {
+      showError('Please select a valid PDF file.');
+    }
+  }
+
+  function formatSize(bytes) {
+    if (bytes > 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+    return Math.round(bytes / 1024) + ' KB';
+  }
+
+  // Parse page range string (e.g., "1, 3-5, 8" -> [1, 3, 4, 5, 8])
+  function parsePageRanges(input, maxPage) {
+    const pages = new Set();
+    const parts = input.split(',').map(p => p.trim()).filter(p => p);
+    
+    for (const part of parts) {
+      if (part.includes('-')) {
+        const [startStr, endStr] = part.split('-');
+        const start = parseInt(startStr, 10);
+        const end = parseInt(endStr, 10);
+        
+        if (isNaN(start) || isNaN(end) || start > end || start < 1) {
+          throw new Error(`Invalid range: ${part}`);
+        }
+        
+        for (let i = start; i <= Math.min(end, maxPage); i++) {
+          pages.add(i);
+        }
+      } else {
+        const page = parseInt(part, 10);
+        if (isNaN(page) || page < 1) {
+          throw new Error(`Invalid page number: ${part}`);
+        }
+        if (page <= maxPage) {
+          pages.add(page);
+        }
+      }
+    }
+    
+    return Array.from(pages).sort((a, b) => a - b);
+  }
+
+  // Split / Extract
+  btnSplit.addEventListener('click', async () => {
+    if (!activePdf) return;
+    hideError();
+    
+    let pagesToExtract;
+    try {
+      pagesToExtract = parsePageRanges(pageRangesInput.value, activePdf.pageCount);
+      if (pagesToExtract.length === 0) {
+        throw new Error('No valid pages selected for extraction.');
+      }
+    } catch (err) {
+      showError(err.message);
+      return;
+    }
+
+    btnSplit.disabled = true;
+    btnSplit.textContent = '⏳ Extracting...';
+    progressContainer.style.display = '';
+
+    try {
+      const srcDoc = await PDFLib.PDFDocument.load(activePdf.arrayBuffer, { ignoreEncryption: true });
+      const newPdf = await PDFLib.PDFDocument.create();
+      
+      // pdf-lib uses 0-indexed page numbers
+      const indicesToCopy = pagesToExtract.map(p => p - 1);
+      const copiedPages = await newPdf.copyPages(srcDoc, indicesToCopy);
+      
+      copiedPages.forEach(page => newPdf.addPage(page));
+
+      const mergedBytes = await newPdf.save();
+      const blob = new Blob([mergedBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      const filenameInput = document.getElementById('output-filename');
+      let filename = (filenameInput.value || 'extracted-pages').trim();
+      if (!filename.toLowerCase().endsWith('.pdf')) filename += '.pdf';
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      if (window.showToast) window.showToast(`Extracted ${pagesToExtract.length} pages successfully!`, 'success');
+    } catch (err) {
+      showError('Failed to extract pages: ' + err.message);
+      console.error(err);
+    }
+
+    btnSplit.disabled = false;
+    btnSplit.textContent = '✂️ Extract Pages';
+    setTimeout(() => { progressContainer.style.display = 'none'; }, 1000);
+  });
+
+  function showError(msg) { errorEl.textContent = '❌ ' + msg; errorEl.classList.add('visible'); }
+  function hideError() { errorEl.classList.remove('visible'); }
+</script>
