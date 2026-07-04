@@ -2,54 +2,138 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 ---
 
-<ToolLayout title="Word & Character Counter — Free Online Tool | DevToolKit" description="Count words, characters, sentences, and paragraphs instantly. Free online text analysis tool with reading time estimate." toolName="Word & Character Counter" category="Text">
-
-  <div class="tool-container">
-    <div class="tool-input">
-      <textarea id="text-input" placeholder="Start typing or paste your text here..." style="min-height:220px;font-family:var(--font-family);"></textarea>
+<ToolLayout title="Word & Character Counter — Text Analysis Suite" description="Count words, characters, reading times, speaking times, and keyword density. Complete browser-based text analysis." toolName="Word & Character Counter" category="Text">
+  
+  <div class="workspace-toolbar">
+    <!-- Toolbar Actions -->
+    <div class="toolbar-actions">
+      <button class="btn btn-primary" id="btn-copy" title="Copy text to clipboard">
+        <span>📋 Copy Text</span>
+      </button>
+      <button class="btn btn-secondary" id="btn-select" title="Select all text">
+        <span>🔘 Select All</span>
+      </button>
     </div>
 
-    <div class="stats-dashboard">
-      <div class="stat-card">
-        <div class="stat-value" id="word-count">0</div>
-        <div class="stat-label">Words</div>
+    <div class="toolbar-actions">
+      <label class="btn btn-secondary" style="cursor: pointer; margin: 0;" title="Upload File to Count">
+        <span>📤 Upload</span>
+        <input type="file" id="file-upload" accept=".txt,.md,.csv,.json" style="display: none;" />
+      </label>
+      <button class="btn btn-secondary" id="btn-download" title="Export stats analysis report">
+        <span>📥 Export Report</span>
+      </button>
+      <button class="btn btn-danger" id="btn-clear" title="Clear input text">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Grid Workspace -->
+  <div class="workspace-grid">
+    <!-- Input Workspace -->
+    <div class="editor-container" id="input-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Input Text</span>
+        <button class="toolbar-btn" id="btn-paste" title="Paste from clipboard">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        </button>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" id="char-count">0</div>
-        <div class="stat-label">Characters</div>
+      <div class="editor-row">
+        <!-- Visual Line Numbers -->
+        <div class="editor-line-numbers" id="input-lines">1</div>
+        <div class="editor-main-area">
+          <textarea id="text-input" class="editor-textarea" placeholder="Start typing or paste your text here..." autocomplete="off" style="font-family:var(--font-body); font-size:1.5rem; line-height:1.6; resize:vertical; min-height:360px;"></textarea>
+          <!-- Drag & Drop Overlay -->
+          <div class="dropzone-overlay" id="drop-overlay">
+            <svg viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <p>Drop file to read text</p>
+          </div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" id="char-no-space">0</div>
-        <div class="stat-label">No Spaces</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="sentence-count">0</div>
-        <div class="stat-label">Sentences</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="paragraph-count">0</div>
-        <div class="stat-label">Paragraphs</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="reading-time">0 min</div>
-        <div class="stat-label">Reading Time</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="speaking-time">0 min</div>
-        <div class="stat-label">Speaking Time</div>
+      <div class="editor-footer-status">
+        <span id="char-count">0 chars</span>
+        <span id="line-count">1 lines</span>
       </div>
     </div>
 
-    <div class="tool-actions">
-      <button class="btn btn-secondary" id="btn-select">🔘 Select All</button>
-      <button class="btn btn-secondary" id="btn-copy">📋 Copy</button>
-      <button class="btn btn-danger" id="btn-clear">🗑 Clear</button>
-    </div>
+    <!-- Right Workspace: Statistics Dashboard -->
+    <div class="editor-container" style="padding:2.4rem; gap:2.4rem; border-color:var(--border-color); overflow-y:auto; max-height:480px;">
+      <!-- Stats Grid -->
+      <div>
+        <h3 style="font-size:1.8rem; border-bottom:1px solid var(--border-color); padding-bottom:1rem; margin-bottom:1.6rem;">Text Metrics</h3>
+        <div class="stats-dashboard" style="margin:0; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));">
+          <div class="stat-card" style="padding:1.2rem;">
+            <div class="stat-value" id="word-count" style="font-size:2.8rem;">0</div>
+            <div class="stat-label">Words</div>
+          </div>
+          <div class="stat-card" style="padding:1.2rem;">
+            <div class="stat-value" id="char-count-val" style="font-size:2.8rem;">0</div>
+            <div class="stat-label">Characters</div>
+          </div>
+          <div class="stat-card" style="padding:1.2rem;">
+            <div class="stat-value" id="char-no-space" style="font-size:2.8rem;">0</div>
+            <div class="stat-label">No Spaces</div>
+          </div>
+          <div class="stat-card" style="padding:1.2rem;">
+            <div class="stat-value" id="sentence-count" style="font-size:2.8rem;">0</div>
+            <div class="stat-label">Sentences</div>
+          </div>
+          <div class="stat-card" style="padding:1.2rem;">
+            <div class="stat-value" id="paragraph-count" style="font-size:2.8rem;">0</div>
+            <div class="stat-label">Paragraphs</div>
+          </div>
+          <div class="stat-card" style="padding:1.2rem;">
+            <div class="stat-value" id="reading-time" style="font-size:2.8rem; color:var(--accent-cyan); background:none; -webkit-text-fill-color:initial;">0m</div>
+            <div class="stat-label">Read Time</div>
+          </div>
+          <div class="stat-card" style="padding:1.2rem;">
+            <div class="stat-value" id="speaking-time" style="font-size:2.8rem; color:var(--accent-indigo); background:none; -webkit-text-fill-color:initial;">0m</div>
+            <div class="stat-label">Speak Time</div>
+          </div>
+        </div>
+      </div>
 
-    <div style="margin-top:2rem;">
-      <h3 style="font-size:1.6rem;margin-bottom:1rem;color:var(--text-primary);">Top Keywords</h3>
-      <div id="top-words" style="display:flex;flex-wrap:wrap;gap:0.6rem;">
-        <span style="font-size:1.3rem;color:var(--text-muted);font-style:italic;">Start typing to see top keywords...</span>
+      <!-- Keyword Density visualizer -->
+      <div>
+        <h3 style="font-size:1.6rem; margin-bottom:1.2rem; color:var(--text-primary);">Top Keyword Density</h3>
+        <div id="top-words-container" style="display:flex; flex-direction:column; gap:0.8rem;">
+          <span style="font-size:1.3rem; color:var(--text-muted); font-style:italic;">Start typing to map keyword distributions...</span>
+        </div>
+      </div>
+
+      <!-- Character distributions visual progress bar -->
+      <div>
+        <h3 style="font-size:1.6rem; margin-bottom:1.2rem; color:var(--text-primary);">Character Frequency</h3>
+        <div style="display:flex; flex-direction:column; gap:0.8rem;">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:1.2rem; margin-bottom:0.2rem;">
+              <span>Vowels (A, E, I, O, U)</span>
+              <span id="lbl-freq-vowels">0% (0)</span>
+            </div>
+            <div style="width:100%; height:6px; background:var(--bg-input); border-radius:3px; overflow:hidden;">
+              <div id="bar-freq-vowels" style="width:0%; height:100%; background:var(--accent-purple); transition:width var(--transition-normal);"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:1.2rem; margin-bottom:0.2rem;">
+              <span>Consonants</span>
+              <span id="lbl-freq-consonants">0% (0)</span>
+            </div>
+            <div style="width:100%; height:6px; background:var(--bg-input); border-radius:3px; overflow:hidden;">
+              <div id="bar-freq-consonants" style="width:0%; height:100%; background:var(--accent-indigo); transition:width var(--transition-normal);"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:1.2rem; margin-bottom:0.2rem;">
+              <span>Numbers & Digits</span>
+              <span id="lbl-freq-digits">0% (0)</span>
+            </div>
+            <div style="width:100%; height:6px; background:var(--bg-input); border-radius:3px; overflow:hidden;">
+              <div id="bar-freq-digits" style="width:0%; height:100%; background:var(--accent-cyan); transition:width var(--transition-normal);"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -57,43 +141,87 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   <div class="info-section" slot="how-to-use">
     <h2>How to Use the Word Counter</h2>
     <ol class="steps-list">
-      <li>Type or paste your text into the input area above</li>
-      <li>All statistics update <strong>instantly in real-time</strong> as you type</li>
-      <li>View top keywords, reading time, and speaking time estimates</li>
+      <li>Type or paste your content directly into the Input editor. Drag-and-drop support is active for text files.</li>
+      <li>Examine the right-side dashboard to trace characters, reading times, speaking times, and keyword ratios.</li>
+      <li>Click **Export Report** to download a formatted summary report.</li>
     </ol>
   </div>
 
   <div class="info-section" slot="faq">
     <h2>Frequently Asked Questions</h2>
     <div class="faq-item">
-      <p class="faq-question">How is reading time calculated?</p>
-      <p class="faq-answer">Reading time is based on an average reading speed of 200 words per minute (wpm), which is the standard for adult readers.</p>
+      <p class="faq-question">How are reading and speaking times estimated?</p>
+      <p class="faq-answer">Estimates use standard benchmarks. **Reading time** is calculated at 200 words per minute (adult average). **Speaking time** is calculated at 130 words per minute (standard presentation speed).</p>
     </div>
     <div class="faq-item">
-      <p class="faq-question">How is speaking time calculated?</p>
-      <p class="faq-answer">Speaking time uses 130 words per minute, which is the average pace for public speaking and presentations.</p>
-    </div>
-    <div class="faq-item">
-      <p class="faq-question">Is my text stored anywhere?</p>
-      <p class="faq-answer">No. All processing happens locally in your browser. Your text never leaves your device.</p>
-    </div>
-    <div class="faq-item">
-      <p class="faq-question">What counts as a sentence?</p>
-      <p class="faq-answer">Sentences are detected by periods (.), exclamation marks (!), and question marks (?). Multiple punctuation marks are counted as one sentence boundary.</p>
-    </div>
-    <div class="faq-item">
-      <p class="faq-question">What counts as a paragraph?</p>
-      <p class="faq-answer">Paragraphs are separated by one or more blank lines. A single block of text with no blank lines counts as one paragraph.</p>
+      <p class="faq-question">What counts as keyword density?</p>
+      <p class="faq-answer">Keyword density maps how frequently specific words recur in your content. The tool automatically filters out common stop-words (like "the", "a", "or", "to") to highlight meaningful vocabulary terms.</p>
     </div>
   </div>
 </ToolLayout>
 
 <script>
-  const input = document.getElementById('text-input');
-  const STOP_WORDS = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','is','it','that','this','was','are','be','has','had','have','with','as','by','from','not','no','so','if','its','do','did','will','can','just','than','then','them','they','my','your','we','he','she','all','been','would','could','should','their','there','here','about','out','up','what','when','who','how','which','each','other','into']);
+  const inputEl = document.getElementById('text-input') as HTMLTextAreaElement;
+  const inputLines = document.getElementById('input-lines');
+  const charCount = document.getElementById('char-count');
+  const lineCount = document.getElementById('line-count');
 
-  function analyze() {
-    const text = input.value;
+  const metricWords = document.getElementById('word-count');
+  const metricChars = document.getElementById('char-count-val');
+  const metricNoSpace = document.getElementById('char-no-space');
+  const metricSentences = document.getElementById('sentence-count');
+  const metricParas = document.getElementById('paragraph-count');
+  const metricRead = document.getElementById('reading-time');
+  const metricSpeak = document.getElementById('speaking-time');
+
+  const keywordsContainer = document.getElementById('top-words-container');
+  const containerInput = document.getElementById('input-container');
+
+  // Freq Labels & Bars
+  const lblVowels = document.getElementById('lbl-freq-vowels');
+  const barVowels = document.getElementById('bar-freq-vowels');
+  const lblCons = document.getElementById('lbl-freq-consonants');
+  const barCons = document.getElementById('bar-freq-consonants');
+  const lblDigits = document.getElementById('lbl-freq-digits');
+  const barDigits = document.getElementById('bar-freq-digits');
+
+  const STOP_WORDS = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','is','it','that','this','was','are','be','has','had','have','with','as','by','from','not','no','so','if','its','do','did','will','can','just','than','then','them','they','my','your','we','he','she','all','been','would','could','should','their','there','here','about','out','up','what','when','who','how','which','each','other','into','about','under','above']);
+
+  // Load last session content
+  document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('counter_session');
+    if (saved && inputEl) {
+      inputEl.value = saved;
+      updateInputLines();
+      analyzeText();
+    }
+  });
+
+  inputEl?.addEventListener('input', () => {
+    updateInputLines();
+    analyzeText();
+    localStorage.setItem('counter_session', inputEl.value);
+  });
+
+  function updateInputLines() {
+    if (!inputEl || !inputLines || !charCount || !lineCount) return;
+    const text = inputEl.value;
+    const lines = text.split('\n');
+    const totalLines = Math.max(lines.length, 1);
+
+    let lineNumsStr = '';
+    for (let i = 1; i <= totalLines; i++) {
+      lineNumsStr += i + '<br/>';
+    }
+    inputLines.innerHTML = lineNumsStr;
+
+    charCount.textContent = `${text.length} chars`;
+    lineCount.textContent = `${totalLines} lines`;
+  }
+
+  function analyzeText() {
+    if (!inputEl) return;
+    const text = inputEl.value;
 
     const words = text.trim() ? text.trim().split(/\s+/).filter(w => w.length > 0) : [];
     const wordCount = words.length;
@@ -101,53 +229,208 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     const charNoSpace = text.replace(/\s/g, '').length;
     const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
     const paragraphs = text.trim() ? text.split(/\n\s*\n/).filter(p => p.trim().length > 0) : [];
-    const readingMin = wordCount > 0 ? Math.max(1, Math.ceil(wordCount / 200)) : 0;
-    const speakingMin = wordCount > 0 ? Math.max(1, Math.ceil(wordCount / 130)) : 0;
+    
+    // Estimates
+    const readingMin = wordCount > 0 ? Math.ceil(wordCount / 200) : 0;
+    const speakingMin = wordCount > 0 ? Math.ceil(wordCount / 130) : 0;
 
-    document.getElementById('word-count').textContent = wordCount;
-    document.getElementById('char-count').textContent = charCount;
-    document.getElementById('char-no-space').textContent = charNoSpace;
-    document.getElementById('sentence-count').textContent = sentences.length;
-    document.getElementById('paragraph-count').textContent = text.trim() ? paragraphs.length : 0;
-    document.getElementById('reading-time').textContent = readingMin + ' min';
-    document.getElementById('speaking-time').textContent = speakingMin + ' min';
+    if (metricWords) metricWords.textContent = String(wordCount);
+    if (metricChars) metricChars.textContent = String(charCount);
+    if (metricNoSpace) metricNoSpace.textContent = String(charNoSpace);
+    if (metricSentences) metricSentences.textContent = String(sentences.length);
+    if (metricParas) metricParas.textContent = text.trim() ? String(paragraphs.length) : '0';
+    if (metricRead) metricRead.textContent = `${readingMin}m`;
+    if (metricSpeak) metricSpeak.textContent = `${speakingMin}m`;
 
-    // Top keywords
-    const freq = {};
+    // Calculate Keyword Density
+    const freq: any = {};
     words.forEach(w => {
       const clean = w.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (clean.length > 2 && !STOP_WORDS.has(clean)) {
         freq[clean] = (freq[clean] || 0) + 1;
       }
     });
-    const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 8);
-    const topEl = document.getElementById('top-words');
-    if (sorted.length === 0) {
-      topEl.innerHTML = '<span style="font-size:1.3rem;color:var(--text-muted);font-style:italic;">Start typing to see top keywords...</span>';
+
+    const sorted = Object.entries(freq).sort((a: any, b: any) => b[1] - a[1]).slice(0, 5);
+    if (keywordsContainer) {
+      if (sorted.length === 0) {
+        keywordsContainer.innerHTML = '<span style="font-size:1.3rem;color:var(--text-muted);font-style:italic;">Start typing to map keyword distributions...</span>';
+      } else {
+        const maxVal = sorted[0][1] as number;
+        keywordsContainer.innerHTML = sorted.map(([word, val]: any) => {
+          const percent = maxVal > 0 ? Math.round((val / maxVal) * 100) : 0;
+          return `
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:1.2rem; margin-bottom:0.2rem;">
+                <span>"${word}"</span>
+                <span>${val} occurrences</span>
+              </div>
+              <div style="width:100%; height:6px; background:var(--bg-input); border-radius:3px; overflow:hidden;">
+                <div style="width:${percent}%; height:100%; background:var(--accent-purple); border-radius:3px;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Character Frequencies (Vowels, Consonants, Digits)
+    if (charCount > 0) {
+      const cleanText = text.toLowerCase();
+      const vowelsMatch = cleanText.match(/[aeiou]/g) || [];
+      const consMatch = cleanText.match(/[bcdfghjklmnpqrstvwxyz]/g) || [];
+      const digitsMatch = cleanText.match(/[0-9]/g) || [];
+
+      const vCount = vowelsMatch.length;
+      const cCount = consMatch.length;
+      const dCount = digitsMatch.length;
+
+      const vPercent = Math.round((vCount / charCount) * 100);
+      const cPercent = Math.round((cCount / charCount) * 100);
+      const dPercent = Math.round((dCount / charCount) * 100);
+
+      if (lblVowels) lblVowels.textContent = `${vPercent}% (${vCount})`;
+      if (barVowels) barVowels.style.width = `${vPercent}%`;
+
+      if (lblCons) lblCons.textContent = `${cPercent}% (${cCount})`;
+      if (barCons) barCons.style.width = `${cPercent}%`;
+
+      if (lblDigits) lblDigits.textContent = `${dPercent}% (${dCount})`;
+      if (barDigits) barDigits.style.width = `${dPercent}%`;
     } else {
-      topEl.innerHTML = sorted.map(([word, count]) =>
-        `<span style="padding:0.4rem 1rem;background:rgba(124,58,237,0.15);border-radius:20px;font-size:1.3rem;color:var(--accent-purple);font-weight:600;">${word} (${count})</span>`
-      ).join('');
+      if (lblVowels) lblVowels.textContent = '0% (0)';
+      if (barVowels) barVowels.style.width = '0%';
+      if (lblCons) lblCons.textContent = '0% (0)';
+      if (barCons) barCons.style.width = '0%';
+      if (lblDigits) lblDigits.textContent = '0% (0)';
+      if (barDigits) barDigits.style.width = '0%';
     }
   }
 
-  input.addEventListener('input', analyze);
-
-  document.getElementById('btn-select').addEventListener('click', () => {
-    input.select();
-    input.focus();
+  // Select all text button
+  document.getElementById('btn-select')?.addEventListener('click', () => {
+    if (inputEl) {
+      inputEl.select();
+      inputEl.focus();
+    }
   });
 
-  document.getElementById('btn-copy').addEventListener('click', () => {
-    navigator.clipboard.writeText(input.value).then(() => {
-      const btn = document.getElementById('btn-copy');
-      btn.textContent = '✅ Copied!';
-      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+  // Copy text
+  document.getElementById('btn-copy')?.addEventListener('click', () => {
+    if (!inputEl?.value) {
+      window.showToast('Nothing to copy!', 'error');
+      return;
+    }
+    navigator.clipboard.writeText(inputEl.value).then(() => {
+      window.showToast('Input text copied!', 'success');
     });
   });
 
-  document.getElementById('btn-clear').addEventListener('click', () => {
-    input.value = '';
-    analyze();
+  // Paste text
+  document.getElementById('btn-paste')?.addEventListener('click', () => {
+    navigator.clipboard.readText().then(text => {
+      if (inputEl) {
+        inputEl.value = text;
+        updateInputLines();
+        analyzeText();
+        localStorage.setItem('counter_session', text);
+        window.showToast('Pasted clipboard text!', 'success');
+      }
+    }).catch(() => {
+      window.showToast('Failed to read clipboard!', 'error');
+    });
+  });
+
+  // Clear inputs
+  document.getElementById('btn-clear')?.addEventListener('click', () => {
+    if (inputEl) inputEl.value = '';
+    updateInputLines();
+    analyzeText();
+    localStorage.setItem('counter_session', '');
+    window.showToast('Cleared input', 'info');
+  });
+
+  // File uploads
+  const fileUpload = document.getElementById('file-upload') as HTMLInputElement;
+  fileUpload?.addEventListener('change', (e: any) => {
+    const file = e.target.files[0];
+    if (file) readFile(file);
+  });
+
+  // Drag and Drop
+  containerInput?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    containerInput.classList.add('drag-over');
+  });
+  containerInput?.addEventListener('dragleave', () => {
+    containerInput.classList.remove('drag-over');
+  });
+  containerInput?.addEventListener('drop', (e: any) => {
+    e.preventDefault();
+    containerInput.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) readFile(file);
+  });
+
+  function readFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = (evt: any) => {
+      if (inputEl) {
+        inputEl.value = evt.target.result;
+        updateInputLines();
+        analyzeText();
+        localStorage.setItem('counter_session', inputEl.value);
+        window.showToast('File text loaded!', 'success');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Export Stats Report file download
+  document.getElementById('btn-download')?.addEventListener('click', () => {
+    if (!inputEl?.value) {
+      window.showToast('Nothing to analyze!', 'error');
+      return;
+    }
+
+    const text = inputEl.value;
+    const words = text.trim() ? text.trim().split(/\s+/).filter(w => w.length > 0) : [];
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const paragraphs = text.trim() ? text.split(/\n\s*\n/).filter(p => p.trim().length > 0) : [];
+    
+    // Density calculation
+    const freq: any = {};
+    words.forEach(w => {
+      const clean = w.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (clean.length > 2 && !STOP_WORDS.has(clean)) {
+        freq[clean] = (freq[clean] || 0) + 1;
+      }
+    });
+    const sorted = Object.entries(freq).sort((a: any, b: any) => b[1] - a[1]).slice(0, 8);
+    const densityStr = sorted.map(([w, c]) => `- "${w}": ${c} occurrences`).join('\n');
+
+    const report = `===========================================
+DEVTOOLKIT 2.0 — TEXT ANALYSIS REPORT
+===========================================
+Words:                 ${words.length}
+Characters:            ${text.length}
+Chars (No Space):      ${text.replace(/\s/g, '').length}
+Sentences:             ${sentences.length}
+Paragraphs:            ${paragraphs.length}
+Estimated Read Time:   ${Math.ceil(words.length / 200)} minutes
+Estimated Speak Time:  ${Math.ceil(words.length / 130)} minutes
+
+-------------------------------------------
+Top Keywords Density:
+-------------------------------------------
+${densityStr || 'None (no repeating words detected)'}
+===========================================`;
+
+    const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'devtoolkit-analysis-report.txt';
+    link.click();
+    window.showToast('Exported analysis report!', 'success');
   });
 </script>

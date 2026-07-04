@@ -13,6 +13,7 @@ interface Props {
 
 const { title, description, toolName, category, canonicalURL } = Astro.props;
 const siteURL = 'https://devtoolkit.pages.dev';
+const toolUrl = Astro.url.pathname;
 
 const schemaData = {
   "@context": "https://schema.org",
@@ -28,8 +29,10 @@ const schemaData = {
 
 <BaseLayout title={title} description={description} canonicalURL={canonicalURL}>
   <Header />
-  <main class="tool-page container">
-    <nav class="breadcrumb">
+  
+  <main class="container workspace-container">
+    <!-- Breadcrumbs -->
+    <nav class="workspace-breadcrumb" aria-label="Breadcrumb">
       <a href="/">Home</a>
       <span class="sep">›</span>
       <a href="/#tools">Tools</a>
@@ -37,17 +40,133 @@ const schemaData = {
       <span>{toolName}</span>
     </nav>
 
-    <div class="tool-header">
-      <h1>{toolName}</h1>
+    <!-- Tool header with Pinned/Favorite controls -->
+    <div class="workspace-title-section">
+      <div style="display: flex; align-items: center; gap: 1.6rem; flex-wrap: wrap;">
+        <h1>{toolName}</h1>
+        <button class="pin-toggle-btn" id="tool-favorite-btn" aria-label="Pin this tool" title="Pin tool to homepage">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+          </svg>
+        </button>
+      </div>
       <p>{description}</p>
     </div>
 
+    <!-- Active Tool Content Slot -->
     <slot />
 
+    <!-- Instructions Slot -->
     <slot name="how-to-use" />
+
+    <!-- FAQ Slot with Accordions -->
     <slot name="faq" />
   </main>
+
   <Footer />
 
   <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+
+  <script is:inline define:vars={{ toolName, description, toolUrl, category }}>
+    // Add this tool to recent tools list on load
+    (function recordRecent() {
+      try {
+        const recent = JSON.parse(localStorage.getItem('recentTools') || '[]');
+        // Remove duplicate if it already exists
+        const filtered = recent.filter(item => item.url !== toolUrl);
+        // Add to front of queue
+        filtered.unshift({ name: toolName, desc: description, url: toolUrl, category });
+        // Cap at 4 items
+        if (filtered.length > 4) filtered.pop();
+        localStorage.setItem('recentTools', JSON.stringify(filtered));
+      } catch (e) {
+        console.error('Error saving recent tool', e);
+      }
+    })();
+
+    // Favorite/Pin functionality on tool pages
+    const favBtn = document.getElementById('tool-favorite-btn');
+    if (favBtn) {
+      function checkFavState() {
+        try {
+          const favorites = JSON.parse(localStorage.getItem('favoriteTools') || '[]');
+          const isFav = favorites.some(item => item.url === toolUrl);
+          if (isFav) {
+            favBtn.classList.add('pinned');
+            const svgPath = favBtn.querySelector('svg');
+            if (svgPath) {
+              svgPath.setAttribute('fill', 'currentColor');
+            }
+          } else {
+            favBtn.classList.remove('pinned');
+            const svgPath = favBtn.querySelector('svg');
+            if (svgPath) {
+              svgPath.setAttribute('fill', 'none');
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      checkFavState();
+
+      favBtn.addEventListener('click', () => {
+        try {
+          const favorites = JSON.parse(localStorage.getItem('favoriteTools') || '[]');
+          const isFav = favorites.some(item => item.url === toolUrl);
+          let updated = [];
+          if (isFav) {
+            updated = favorites.filter(item => item.url !== toolUrl);
+            window.showToast('Unpinned from favorites', 'info');
+          } else {
+            favorites.push({ name: toolName, desc: description, url: toolUrl, category });
+            updated = favorites;
+            window.showToast('Pinned to favorites!', 'success');
+          }
+          localStorage.setItem('favoriteTools', JSON.stringify(updated));
+          checkFavState();
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    }
+
+    // Accordion expand/collapse controller for FAQs
+    document.addEventListener('DOMContentLoaded', () => {
+      const faqItems = document.querySelectorAll('.faq-item');
+      faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        
+        // Add rotate arrow icon if not present
+        if (question && !question.querySelector('svg')) {
+          question.innerHTML += `
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          `;
+        }
+
+        question?.addEventListener('click', () => {
+          const isOpen = item.classList.contains('open');
+          
+          // Close all FAQ items
+          faqItems.forEach(i => {
+            i.classList.remove('open');
+            const a = i.querySelector('.faq-answer');
+            if (a) a.style.maxHeight = null;
+          });
+
+          // Toggle current item
+          if (!isOpen) {
+            item.classList.add('open');
+            if (answer) {
+              answer.style.maxHeight = answer.scrollHeight + 'px';
+            }
+          }
+        });
+      });
+    });
+  </script>
 </BaseLayout>

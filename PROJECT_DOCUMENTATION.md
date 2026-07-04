@@ -1,0 +1,127 @@
+# DevToolKit Project Documentation
+
+This document serves as the single source of truth for the **DevToolKit** codebase, outline of files, components, routing, configuration, layouts, and styles. Refer to this document to understand how the project is organized rather than inspecting individual scripts.
+
+---
+
+## 🚀 Repository & Project Overview
+
+DevToolKit is a fast, free, privacy-first collection of developer utilities. All operations are performed 100% client-side inside the user's browser (no server-side data leakage).
+
+- **Tech Stack**: [Astro](https://astro.build) (Static HTML generation, minimal standard client JS)
+- **Deployment**: Configured for static hosting (Cloudflare Pages, Vercel, Netlify)
+- **Styling**: Vanilla CSS utilizing custom design system tokens, themes, and layouts in a single `global.css` sheet.
+
+---
+
+## 📁 Workspace Directory Structure
+
+```
+├── .astro/                  # Astro cached build files
+├── .vscode/                 # Editor configurations
+├── src/
+│   ├── components/          # Reusable UI widgets/partials
+│   │   ├── Header.astro     # Main application sticky header (responsive navigation)
+│   │   ├── Footer.astro     # Link-rich footer with quick navigation links
+│   │   └── ToolCard.astro   # Card component representing a single tool on the home grid
+│   │
+│   ├── layouts/             # Shared document structural wrappers
+│   │   ├── BaseLayout.astro # Full HTML frame with metadata, fonts, and SEO features
+│   │   └── ToolLayout.astro # Layout template for tool pages (breadcrumbs, structure)
+│   │
+│   ├── pages/               # Routing files (mapped to URLs)
+│   │   ├── about.astro      # "About Us" page detailing features and privacy
+│   │   ├── index.astro      # Main landing page featuring the grid of tool cards
+│   │   ├── privacy.astro    # Privacy Policy page
+│   │   ├── terms.astro      # Terms of Service page
+│   │   └── tools/           # Individual developer tool pages
+│   │       ├── base64.astro           # Base64 Encoder & Decoder
+│   │       ├── color-converter.astro  # RGB/HEX/HSL Color Converter
+│   │       ├── json-formatter.astro   # JSON Formatter, Minifier & Validator
+│   │       ├── lorem-ipsum.astro      # Placeholder Lorem Ipsum Text Generator
+│   │       ├── url-encoder.astro      # URL Percent-Encoder/Decoder
+│   │       └── word-counter.astro     # Word, Character & Read Time Counter
+│   │
+│   └── styles/              # Global custom CSS styles
+│       └── global.css       # Core styles, variables, typography, layouts, animations
+│
+├── astro.config.mjs         # Configuration file for Astro
+├── package.json             # NPM package scripts and dependencies
+├── README.md                # General readme overview
+└── AGENTS.md / CLAUDE.md    # Developer workflow and dev-server guidelines
+```
+
+---
+
+## 🧩 Shared Components & Layouts
+
+### 1. `BaseLayout.astro`
+- **Path**: `src/layouts/BaseLayout.astro`
+- **Responsibilities**:
+  - Handles HTML wrapper structure (`<html>`, `<head>`, `<body>`).
+  - Sets up title, meta descriptions, canonical URLs, and OpenGraph tags for SEO.
+  - Injects schema metadata (JSON-LD) for Search Console optimization.
+  - Injects global stylesheet imports (`src/styles/global.css`) and loads fonts (Inter from Google Fonts).
+
+### 2. `ToolLayout.astro`
+- **Path**: `src/layouts/ToolLayout.astro`
+- **Responsibilities**:
+  - Injects `BaseLayout.astro`, `Header.astro`, and `Footer.astro`.
+  - Creates the common navigation breadcrumb trail (`Home › Tools › [Tool Name]`).
+  - Injects structured JSON-LD `SoftwareApplication` data for search engine rich results.
+  - Provides standard content slots for the tool content, the *How to Use* instructions, and *FAQs*.
+
+### 3. `Header.astro`
+- **Path**: `src/components/Header.astro`
+- **Responsibilities**:
+  - Contains navigation links and logo logo.
+  - Highlights active states using `Astro.url.pathname`.
+  - Integrates a mobile collapsible navigation menu controlled via a lightweight inline `<script>`.
+
+### 4. `Footer.astro`
+- **Path**: `src/components/Footer.astro`
+- **Responsibilities**:
+  - Standard footer containing trademark, copyright, quick site links, and link lists grouping the popular utility tools.
+
+### 5. `ToolCard.astro`
+- **Path**: `src/components/ToolCard.astro`
+- **Props**: `title`, `description`, `href`, `icon`, `category`
+- **Responsibilities**:
+  - Renders a clean card linking to a specific utility. Supports micro-animations on hover.
+
+---
+
+## ⚙️ Developer Tools Index
+
+Below is the implementation logic summary for each tool under `src/pages/tools/`:
+
+| Path | Tool Name | Key Technical Logic |
+|---|---|---|
+| `json-formatter.astro` | **JSON Formatter & Validator** | Parses text input with `JSON.parse`. Formats output with indentation using `JSON.stringify(..., null, 2)` or minifies it. Calculates object properties like total keys, nesting depth, and size in bytes. |
+| `base64.astro` | **Base64 Encoder/Decoder** | Encodes text using `btoa(unescape(encodeURIComponent(str)))` and decodes using `decodeURIComponent(escape(atob(str)))` to safely preserve UTF-8 strings. Includes copy-to-clipboard functionality. |
+| `url-encoder.astro` | **URL Encoder/Decoder** | Uses standard browser APIs `encodeURIComponent` / `decodeURIComponent` for strict component encoding, and `encodeURI` / `decodeURI` for full url paths. |
+| `color-converter.astro` | **Color Converter** | Bidirectionally translates colors between hexadecimal (`#RRGGBB`), RGB (`rgb(r,g,b)`), and HSL (`hsl(h,s,l)`). Injects a visual color picker input and preset color swatches. |
+| `lorem-ipsum.astro` | **Lorem Ipsum Generator** | Uses a local array of classic Latin vocabulary words. Dynamically generates paragraphs, sentences, or individual words based on client inputs. |
+| `word-counter.astro` | **Word & Character Counter** | Tracks textual properties: word count, character count (with/without spaces), paragraphs, sentences, estimated reading time (~200 words/min), and density of top repeating terms. |
+
+---
+
+## 🎨 Global Styling System
+
+The application styling is concentrated inside `src/styles/global.css`.
+
+- **Colors & Themes (CSS Variables)**:
+  - Backgrounds: Dark mode default (`#0a0a0f`, `#12121a`).
+  - Cards & Inputs: `#1a1a2e` / `#16162a`.
+  - Accents: Neon Purple (`#7c3aed`), Blue (`#2563eb`), Cyan (`#06b6d4`), Green (`#10b981`), Red (`#ef4444`).
+  - Gradients: Sleek linear gradients for buttons, heroes, logos, and hover underlines.
+- **Base Typography**:
+  - Fonts loaded: `Inter`, system defaults.
+  - Scale: Root size set to `62.5%` (`1rem` = `10px`). Normal text `1.6rem` (`16px`).
+- **Layout Grids**:
+  - Flexbox and CSS Grids are used for cards, sections, layouts, and forms.
+- **Micro-Animations**:
+  - CSS keyframes for `@keyframes fadeInUp` / `heroGlow`.
+  - Global standard transition delay rules.
+- **Responsive Media Queries**:
+  - Custom breakpoints set at `1024px` and `768px` to collapse grids and toggle headers on smaller screen resolutions.

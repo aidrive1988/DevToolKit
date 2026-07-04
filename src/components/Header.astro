@@ -2,29 +2,118 @@
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="header">
+<header class="header" id="main-header">
   <div class="container header-inner">
-    <a href="/" class="logo">
-      <span>⚡</span> DevToolKit
+    <a href="/" class="logo-link" aria-label="DevToolKit Home">
+      <svg viewBox="0 0 24 24" width="24" height="24" style="flex-shrink: 0; fill: url(#logo-grad);">
+        <defs>
+          <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#8b5cf6" />
+            <stop offset="100%" stop-color="#06b6d4" />
+          </linearGradient>
+        </defs>
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+      </svg>
+      DevToolKit
     </a>
-    <button class="mobile-toggle" id="menu-toggle" aria-label="Toggle menu">☰</button>
-    <nav>
+
+    <button class="mobile-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    
+    <nav style="display: flex; align-items: center; gap: 1.6rem;">
       <ul class="nav-links" id="nav-links">
         <li><a href="/" class={currentPath === '/' ? 'active' : ''}>Home</a></li>
-        <li><a href="/#tools" class={currentPath.startsWith('/tools') ? 'active' : ''}>Tools</a></li>
+        <li><a href="/#tools" class={currentPath.includes('/tools') ? 'active' : ''}>Tools</a></li>
         <li><a href="/about" class={currentPath === '/about/' || currentPath === '/about' ? 'active' : ''}>About</a></li>
+        <li>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 0.6rem;">
+            GitHub
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-top: 2px;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"></path></svg>
+          </a>
+        </li>
       </ul>
+
+      <!-- Universal Search Button -->
+      <button class="nav-search-trigger" aria-label="Search tools" id="nav-search-trigger">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-top: 1px;"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <span>Search...</span>
+        <kbd class="nav-search-key">/</kbd>
+      </button>
+
+      <!-- Theme Switch Button -->
+      <button class="theme-switch" id="theme-toggle" aria-label="Toggle color theme">
+        <!-- Moon Icon (Dark Mode active, click to light) -->
+        <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+        </svg>
+        <!-- Sun Icon (Light Mode active, click to dark) -->
+        <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+          <circle cx="12" cy="12" r="5"></circle>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+        </svg>
+      </button>
     </nav>
   </div>
 </header>
 
 <script>
+  // Mobile menu toggle
   const toggle = document.getElementById('menu-toggle');
   const nav = document.getElementById('nav-links');
   if (toggle && nav) {
     toggle.addEventListener('click', () => {
-      nav.classList.toggle('open');
-      toggle.textContent = nav.classList.contains('open') ? '✕' : '☰';
+      const isOpen = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      toggle.textContent = isOpen ? '✕' : '☰';
     });
   }
+
+  // Header scroll visual state
+  const header = document.getElementById('main-header');
+  if (header) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 40) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  }
+
+  // Theme Toggler
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const darkIcon = themeToggleBtn?.querySelector('.theme-icon-dark') as HTMLElement;
+  const lightIcon = themeToggleBtn?.querySelector('.theme-icon-light') as HTMLElement;
+
+  function updateThemeIcons() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (darkIcon && lightIcon) {
+      if (isLight) {
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = 'block';
+      } else {
+        darkIcon.style.display = 'block';
+        lightIcon.style.display = 'none';
+      }
+    }
+  }
+
+  // Initial Sync
+  updateThemeIcons();
+
+  themeToggleBtn?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    let nextTheme = 'dark';
+    if (currentTheme !== 'light') {
+      nextTheme = 'light';
+    }
+
+    if (nextTheme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'dark');
+    }
+    updateThemeIcons();
+  });
 </script>

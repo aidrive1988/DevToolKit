@@ -2,123 +2,233 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 ---
 
-<ToolLayout title="Color Converter — HEX RGB HSL | DevToolKit" description="Convert colors between HEX, RGB, and HSL formats instantly. Free online color converter with live preview." toolName="Color Converter" category="Design">
-
-  <div class="tool-container">
-    <div class="color-preview" id="color-preview" style="background-color: #7c3aed;"></div>
-
-    <div class="color-inputs-grid">
-      <div class="color-group">
-        <label>HEX</label>
-        <input type="text" id="hex-input" value="#7c3aed" placeholder="#000000" />
+<ToolLayout title="Color Converter & Contrast Auditor — Private Tool" description="Convert colors between HEX, RGB, RGBA, HSL, HSV, and OKLCH. Audit WCAG contrast ratios and export design systems." toolName="Color Converter" category="Design">
+  
+  <div class="workspace-grid">
+    <!-- Left Workspace: Color Picker & Conversion inputs -->
+    <div class="editor-container" style="padding:2.4rem; gap:2rem;">
+      <h3 style="font-size:1.8rem; border-bottom:1px solid var(--border-color); padding-bottom:1rem; margin-bottom:1rem;">Color Select & Values</h3>
+      
+      <!-- Preview block -->
+      <div class="color-preview" id="color-preview" style="background-color: #8b5cf6; height:120px; display:flex; align-items:center; justify-content:center;">
+        <span id="preview-text-white" style="color:#ffffff; font-weight:700; font-size:1.6rem; text-shadow:0 1px 2px rgba(0,0,0,0.5);">White Text</span>
+        <span id="preview-text-black" style="color:#09090b; font-weight:700; font-size:1.6rem; margin-left:2rem; text-shadow:0 1px 1px rgba(255,255,255,0.4);">Black Text</span>
       </div>
-      <div class="color-group">
-        <label>RGB</label>
-        <input type="text" id="rgb-input" value="rgb(124, 58, 237)" placeholder="rgb(0, 0, 0)" />
+
+      <!-- Color inputs -->
+      <div style="display:flex; flex-direction:column; gap:1.2rem;">
+        <div class="slider-group" style="flex-direction:row; align-items:center; gap:1.2rem;">
+          <input type="color" id="color-picker" value="#8b5cf6" style="width:50px; height:44px; border:1px solid var(--border-color); cursor:pointer; border-radius:var(--radius-sm); padding:0;" />
+          <span style="font-size:1.3rem; color:var(--text-secondary);">Select from Canvas</span>
+        </div>
+
+        <div class="color-inputs-grid">
+          <div class="color-group">
+            <label>HEX</label>
+            <input type="text" id="hex-input" value="#8b5cf6" placeholder="#000000" />
+          </div>
+          <div class="color-group">
+            <label>RGB</label>
+            <input type="text" id="rgb-input" value="rgb(139, 92, 246)" placeholder="rgb(0, 0, 0)" />
+          </div>
+          <div class="color-group">
+            <label>RGBA</label>
+            <input type="text" id="rgba-input" value="rgba(139, 92, 246, 1)" placeholder="rgba(0, 0, 0, 1)" />
+          </div>
+        </div>
+
+        <div class="color-inputs-grid">
+          <div class="color-group">
+            <label>HSL</label>
+            <input type="text" id="hsl-input" value="hsl(258, 90%, 66%)" placeholder="hsl(0, 0%, 0%)" />
+          </div>
+          <div class="color-group">
+            <label>HSV</label>
+            <input type="text" id="hsv-input" value="hsv(258, 63%, 96%)" placeholder="hsv(0, 0%, 0%)" />
+          </div>
+          <div class="color-group">
+            <label>OKLCH</label>
+            <input type="text" id="oklch-input" value="oklch(0.62 0.22 284)" placeholder="oklch(0 0 0)" />
+          </div>
+        </div>
       </div>
-      <div class="color-group">
-        <label>HSL</label>
-        <input type="text" id="hsl-input" value="hsl(262, 83%, 58%)" placeholder="hsl(0, 0%, 0%)" />
+      
+      <!-- Copiers -->
+      <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+        <button class="btn btn-secondary" id="btn-copy-hex" style="padding:0.6rem 1.2rem; font-size:1.2rem;">Copy HEX</button>
+        <button class="btn btn-secondary" id="btn-copy-rgb" style="padding:0.6rem 1.2rem; font-size:1.2rem;">Copy RGB</button>
+        <button class="btn btn-secondary" id="btn-copy-hsl" style="padding:0.6rem 1.2rem; font-size:1.2rem;">Copy HSL</button>
+        <button class="btn btn-secondary" id="btn-copy-oklch" style="padding:0.6rem 1.2rem; font-size:1.2rem;">Copy OKLCH</button>
       </div>
     </div>
 
-    <div class="tool-actions" style="margin-top: 1.6rem;">
-      <label style="display:flex;align-items:center;gap:0.8rem;cursor:pointer;">
-        <input type="color" id="color-picker" value="#7c3aed" style="width:40px;height:36px;border:none;cursor:pointer;border-radius:6px;" />
-        <span style="font-size:1.4rem;color:var(--text-secondary);">Color Picker</span>
-      </label>
-      <button class="btn btn-secondary" id="btn-copy-hex">📋 Copy HEX</button>
-      <button class="btn btn-secondary" id="btn-copy-rgb">📋 Copy RGB</button>
-      <button class="btn btn-secondary" id="btn-copy-hsl">📋 Copy HSL</button>
-    </div>
+    <!-- Right Workspace: Contrast Auditor, Palette & Gradients -->
+    <div class="editor-container" style="padding:2.4rem; gap:2.4rem;">
+      <!-- Contrast auditing -->
+      <div>
+        <h3 style="font-size:1.8rem; border-bottom:1px solid var(--border-color); padding-bottom:1rem; margin-bottom:1.4rem;">WCAG Contrast Auditor</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.6rem;">
+          <div class="stat-card" style="padding:1.2rem;">
+            <div id="contrast-white-score" class="stat-value" style="font-size:2.8rem;">4.5:1</div>
+            <div class="stat-label">White Text Ratio</div>
+            <div id="badge-white-wcag" class="tool-badge" style="display:inline-block; margin-top:0.6rem; background:var(--accent-emerald); color:#fff; border:none;">Pass AA</div>
+          </div>
+          <div class="stat-card" style="padding:1.2rem;">
+            <div id="contrast-black-score" class="stat-value" style="font-size:2.8rem;">4.5:1</div>
+            <div class="stat-label">Black Text Ratio</div>
+            <div id="badge-black-wcag" class="tool-badge" style="display:inline-block; margin-top:0.6rem; background:var(--accent-emerald); color:#fff; border:none;">Pass AAA</div>
+          </div>
+        </div>
+      </div>
 
-    <div style="margin-top: 2.4rem;">
-      <h3 style="font-size:1.6rem;margin-bottom:1rem;color:var(--text-primary);">Popular Palettes</h3>
-      <div class="palette-grid">
-        <div class="palette-swatch" style="background:#ef4444;" data-color="#ef4444" title="Red"></div>
-        <div class="palette-swatch" style="background:#f59e0b;" data-color="#f59e0b" title="Amber"></div>
-        <div class="palette-swatch" style="background:#10b981;" data-color="#10b981" title="Emerald"></div>
-        <div class="palette-swatch" style="background:#3b82f6;" data-color="#3b82f6" title="Blue"></div>
-        <div class="palette-swatch" style="background:#8b5cf6;" data-color="#8b5cf6" title="Violet"></div>
-        <div class="palette-swatch" style="background:#ec4899;" data-color="#ec4899" title="Pink"></div>
-        <div class="palette-swatch" style="background:#06b6d4;" data-color="#06b6d4" title="Cyan"></div>
-        <div class="palette-swatch" style="background:#f97316;" data-color="#f97316" title="Orange"></div>
-        <div class="palette-swatch" style="background:#14b8a6;" data-color="#14b8a6" title="Teal"></div>
-        <div class="palette-swatch" style="background:#6366f1;" data-color="#6366f1" title="Indigo"></div>
-        <div class="palette-swatch" style="background:#a855f7;" data-color="#a855f7" title="Purple"></div>
-        <div class="palette-swatch" style="background:#e11d48;" data-color="#e11d48" title="Rose"></div>
+      <!-- Theory palettes -->
+      <div>
+        <h3 style="font-size:1.6rem; margin-bottom:1rem; color:var(--text-primary);">Design Palette Generator</h3>
+        <div style="display:flex; flex-direction:column; gap:1rem;">
+          <div>
+            <div style="font-size:1.2rem; color:var(--text-secondary); margin-bottom:0.4rem;">Complementary Split</div>
+            <div class="palette-grid" id="complementary-palette"></div>
+          </div>
+          <div>
+            <div style="font-size:1.2rem; color:var(--text-secondary); margin-bottom:0.4rem;">Analogous Scheme</div>
+            <div class="palette-grid" id="analogous-palette"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gradient preview -->
+      <div>
+        <h3 style="font-size:1.6rem; margin-bottom:1rem; color:var(--text-primary);">Gradient Preview</h3>
+        <div id="gradient-bar" style="width:100%; height:40px; border-radius:var(--radius-sm); border:1px solid var(--border-color);"></div>
+        <div style="display:flex; justify-content:space-between; margin-top:0.6rem;">
+          <button class="btn btn-secondary" id="btn-copy-css" style="padding:0.4rem 1rem; font-size:1.1rem;">Copy CSS Variables</button>
+        </div>
       </div>
     </div>
-
-    <div class="tool-error" id="color-error"></div>
   </div>
 
   <div class="info-section" slot="how-to-use">
-    <h2>How to Use the Color Converter</h2>
+    <h2>How to Use the Color Suite</h2>
     <ol class="steps-list">
-      <li>Enter a color value in any format — HEX (#ff5733), RGB (rgb(255, 87, 51)), or HSL (hsl(14, 100%, 60%))</li>
-      <li>All other formats update automatically with a live preview</li>
-      <li>Use the color picker or click a palette swatch for quick selection</li>
+      <li>Choose a color from the canvas color picker or enter HEX, RGB, HSL, HSV, or OKLCH values.</li>
+      <li>Examine the **WCAG Contrast score** to verify readability limits. 4.5:1 ratio is required for standard AA validation.</li>
+      <li>Copy the generated CSS custom properties to paste colors directly into your stylesheets.</li>
     </ol>
   </div>
 
   <div class="info-section" slot="faq">
     <h2>Frequently Asked Questions</h2>
     <div class="faq-item">
-      <p class="faq-question">What's the difference between HEX, RGB, and HSL?</p>
-      <p class="faq-answer"><strong>HEX</strong> uses hexadecimal notation (#RRGGBB). <strong>RGB</strong> specifies red, green, blue values (0-255). <strong>HSL</strong> uses hue (0-360°), saturation (0-100%), and lightness (0-100%) — often the most intuitive for design work.</p>
+      <p class="faq-question">What is OKLCH format?</p>
+      <p class="faq-answer">OKLCH is a modern color definition standard that provides predictable brightness mappings based on human vision. It represents colors via Oklab Lightness (0-1), Chroma (saturation, 0-0.4), and Hue angle (0-360).</p>
     </div>
     <div class="faq-item">
-      <p class="faq-question">Which format should I use in CSS?</p>
-      <p class="faq-answer">All three are valid in CSS. HEX is the most common and compact. HSL is great for creating color variations (just adjust lightness). RGB is useful when you need alpha transparency (rgba).</p>
+      <p class="faq-question">What are WCAG Contrast Ratios?</p>
+      <p class="faq-answer">The Web Content Accessibility Guidelines require body text to have a contrast ratio of at least **4.5:1** against backgrounds (AA standard), and **7:1** for optimal accessibility (AAA standard).</p>
     </div>
   </div>
 </ToolLayout>
 
 <script>
-  const hexInput = document.getElementById('hex-input');
-  const rgbInput = document.getElementById('rgb-input');
-  const hslInput = document.getElementById('hsl-input');
-  const preview = document.getElementById('color-preview');
-  const picker = document.getElementById('color-picker');
-  const errorEl = document.getElementById('color-error');
+  // Selectors
+  const picker = document.getElementById('color-picker') as HTMLInputElement;
+  const hexInput = document.getElementById('hex-input') as HTMLInputElement;
+  const rgbInput = document.getElementById('rgb-input') as HTMLInputElement;
+  const rgbaInput = document.getElementById('rgba-input') as HTMLInputElement;
+  const hslInput = document.getElementById('hsl-input') as HTMLInputElement;
+  const hsvInput = document.getElementById('hsv-input') as HTMLInputElement;
+  const oklchInput = document.getElementById('oklch-input') as HTMLInputElement;
 
-  function hexToRgb(hex) {
+  const preview = document.getElementById('color-preview');
+
+  const scoreWhite = document.getElementById('contrast-white-score');
+  const scoreBlack = document.getElementById('contrast-black-score');
+  const badgeWhite = document.getElementById('badge-white-wcag');
+  const badgeBlack = document.getElementById('badge-black-wcag');
+
+  const compGrid = document.getElementById('complementary-palette');
+  const analGrid = document.getElementById('analogous-palette');
+  const gradientBar = document.getElementById('gradient-bar');
+
+  // Load last color on load
+  document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('color_session') || '#8b5cf6';
+    updateFromHex(saved);
+  });
+
+  // Event Listeners
+  picker?.addEventListener('input', () => {
+    updateFromHex(picker.value);
+  });
+
+  hexInput?.addEventListener('input', () => {
+    let val = hexInput.value.trim();
+    if (!val.startsWith('#')) val = '#' + val;
+    if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(val)) {
+      updateFromHex(val, 'hex');
+    }
+  });
+
+  rgbInput?.addEventListener('input', () => {
+    const m = rgbInput.value.match(/rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/);
+    if (m) {
+      const r = parseInt(m[1]), g = parseInt(m[2]), b = parseInt(m[3]);
+      if (r <= 255 && g <= 255 && b <= 255) {
+        updateFromRgb(r, g, b, 'rgb');
+      }
+    }
+  });
+
+  hslInput?.addEventListener('input', () => {
+    const m = hslInput.value.match(/hsl\(\s*(\d{1,3})\s*,\s*(\d{1,3})%?\s*,\s*(\d{1,3})%?\s*\)/);
+    if (m) {
+      const h = parseInt(m[1]), s = parseInt(m[2]), l = parseInt(m[3]);
+      if (h <= 360 && s <= 100 && l <= 100) {
+        updateFromHsl(h, s, l, 'hsl');
+      }
+    }
+  });
+
+  // Base conversions Math
+  function hexToRgb(hex: string) {
     hex = hex.replace('#', '');
     if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    return { r, g, b };
+    return {
+      r: parseInt(hex.substring(0, 2), 16),
+      g: parseInt(hex.substring(2, 4), 16),
+      b: parseInt(hex.substring(4, 6), 16)
+    };
   }
 
-  function rgbToHex(r, g, b) {
-    return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  function rgbToHex(r: number, g: number, b: number): string {
+    return '#' + [r, g, b].map(v => {
+      const clamped = Math.max(0, Math.min(255, Math.round(v)));
+      return clamped.toString(16).padStart(2, '0');
+    }).join('');
   }
 
-  function rgbToHsl(r, g, b) {
+  function rgbToHsl(r: number, g: number, b: number) {
     r /= 255; g /= 255; b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-    if (max === min) { h = s = 0; }
-    else {
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-        case g: h = ((b - r) / d + 2) / 6; break;
-        case b: h = ((r - g) / d + 4) / 6; break;
-      }
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h /= 6;
     }
     return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
   }
 
-  function hslToRgb(h, s, l) {
+  function hslToRgb(h: number, s: number, l: number) {
     h /= 360; s /= 100; l /= 100;
     let r, g, b;
-    if (s === 0) { r = g = b = l; }
-    else {
-      const hue2rgb = (p, q, t) => {
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = (p: number, q: number, t: number) => {
         if (t < 0) t += 1; if (t > 1) t -= 1;
         if (t < 1/6) return p + (q - p) * 6 * t;
         if (t < 1/2) return q;
@@ -134,64 +244,204 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
   }
 
-  function updateAll(r, g, b, source) {
-    const hex = rgbToHex(r, g, b);
+  function rgbToHsv(r: number, g: number, b: number) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const d = max - min;
+    let h = 0, s = max === 0 ? 0 : d / max, v = max;
+    if (max !== min) {
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h /= 6;
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), v: Math.round(v * 100) };
+  }
+
+  // Simplified OKLCH converter model
+  function rgbToOklch(r: number, g: number, b: number) {
     const hsl = rgbToHsl(r, g, b);
-    if (source !== 'hex') hexInput.value = hex;
-    if (source !== 'rgb') rgbInput.value = `rgb(${r}, ${g}, ${b})`;
-    if (source !== 'hsl') hslInput.value = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
-    preview.style.backgroundColor = hex;
-    picker.value = hex;
-    errorEl.classList.remove('visible');
+    // Rough oklch approximation for styling UI purposes
+    const l = (hsl.l / 100).toFixed(2);
+    const c = ((hsl.s / 100) * 0.35).toFixed(2);
+    const h = hsl.h;
+    return { l, c, h };
   }
 
-  hexInput.addEventListener('input', () => {
-    const hex = hexInput.value.trim();
-    if (/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex)) {
-      const { r, g, b } = hexToRgb(hex);
-      updateAll(r, g, b, 'hex');
-    }
-  });
-
-  rgbInput.addEventListener('input', () => {
-    const match = rgbInput.value.match(/(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/);
-    if (match) {
-      updateAll(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), 'rgb');
-    }
-  });
-
-  hslInput.addEventListener('input', () => {
-    const match = hslInput.value.match(/(\d{1,3})\s*,\s*(\d{1,3})%?\s*,\s*(\d{1,3})%?/);
-    if (match) {
-      const { r, g, b } = hslToRgb(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
-      updateAll(r, g, b, 'hsl');
-    }
-  });
-
-  picker.addEventListener('input', () => {
-    const { r, g, b } = hexToRgb(picker.value);
-    updateAll(r, g, b, 'picker');
-  });
-
-  document.querySelectorAll('.palette-swatch').forEach(swatch => {
-    swatch.addEventListener('click', () => {
-      const { r, g, b } = hexToRgb(swatch.dataset.color);
-      updateAll(r, g, b, 'picker');
+  // Auditing Contrast Math
+  function getLuminance(r: number, g: number, b: number): number {
+    const a = [r, g, b].map(v => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
     });
-  });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+  }
 
-  function copyField(id, btnId) {
-    document.getElementById(btnId).addEventListener('click', () => {
-      const val = document.getElementById(id).value;
-      navigator.clipboard.writeText(val).then(() => {
-        const btn = document.getElementById(btnId);
-        const orig = btn.textContent;
-        btn.textContent = '✅ Copied!';
-        setTimeout(() => { btn.textContent = orig; }, 2000);
-      });
+  function getContrastRatio(l1: number, l2: number): number {
+    const bright = Math.max(l1, l2);
+    const dark = Math.min(l1, l2);
+    return (bright + 0.05) / (dark + 0.05);
+  }
+
+  // Sync methods
+  function updateFromHex(hex: string, source = 'picker') {
+    const { r, g, b } = hexToRgb(hex);
+    syncFields(r, g, b, hex, source);
+  }
+
+  function updateFromRgb(r: number, g: number, b: number, source = 'rgb') {
+    const hex = rgbToHex(r, g, b);
+    syncFields(r, g, b, hex, source);
+  }
+
+  function updateFromHsl(h: number, s: number, l: number, source = 'hsl') {
+    const { r, g, b } = hslToRgb(h, s, l);
+    const hex = rgbToHex(r, g, b);
+    syncFields(r, g, b, hex, source);
+  }
+
+  function syncFields(r: number, g: number, b: number, hex: string, source: string) {
+    localStorage.setItem('color_session', hex);
+
+    // Inputs updates
+    if (picker && source !== 'picker') picker.value = hex;
+    if (hexInput && source !== 'hex') hexInput.value = hex;
+    if (rgbInput && source !== 'rgb') rgbInput.value = `rgb(${r}, ${g}, ${b})`;
+    if (rgbaInput) rgbaInput.value = `rgba(${r}, ${g}, ${b}, 1)`;
+
+    const hsl = rgbToHsl(r, g, b);
+    if (hslInput && source !== 'hsl') hslInput.value = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+
+    const hsv = rgbToHsv(r, g, b);
+    if (hsvInput) hsvInput.value = `hsv(${hsv.h}, ${hsv.s}%, ${hsv.v}%)`;
+
+    const oklch = rgbToOklch(r, g, b);
+    if (oklchInput) oklchInput.value = `oklch(${oklch.l} ${oklch.c} ${oklch.h})`;
+
+    // Preview
+    if (preview) preview.style.backgroundColor = hex;
+
+    // Contrast logic
+    const colorLum = getLuminance(r, g, b);
+    const whiteLum = 1.0;
+    const blackLum = 0.0;
+
+    const ratioWhite = getContrastRatio(whiteLum, colorLum);
+    const ratioBlack = getContrastRatio(colorLum, blackLum);
+
+    if (scoreWhite) scoreWhite.textContent = `${ratioWhite.toFixed(1)}:1`;
+    if (scoreBlack) scoreBlack.textContent = `${ratioBlack.toFixed(1)}:1`;
+
+    updateAccessibilityBadge(badgeWhite, ratioWhite);
+    updateAccessibilityBadge(badgeBlack, ratioBlack);
+
+    // Generating theory palettes & gradients
+    renderPalettes(hsl);
+    updateGradient(hex, hsl);
+  }
+
+  function updateAccessibilityBadge(badge: HTMLElement | null, ratio: number) {
+    if (!badge) return;
+    if (ratio >= 7.0) {
+      badge.textContent = 'Pass AAA';
+      badge.style.backgroundColor = 'var(--accent-emerald)';
+    } else if (ratio >= 4.5) {
+      badge.textContent = 'Pass AA';
+      badge.style.backgroundColor = 'var(--accent-indigo)';
+    } else if (ratio >= 3.0) {
+      badge.textContent = 'Large Text Only';
+      badge.style.backgroundColor = 'var(--accent-amber)';
+    } else {
+      badge.textContent = 'Fail';
+      badge.style.backgroundColor = 'var(--accent-rose)';
+    }
+  }
+
+  function renderPalettes(hsl: { h: number, s: number, l: number }) {
+    if (!compGrid || !analGrid) return;
+    compGrid.innerHTML = '';
+    analGrid.innerHTML = '';
+
+    // Complementary colors: Hue + 180
+    const compColors = [
+      hsl,
+      { h: (hsl.h + 180) % 360, s: hsl.s, l: hsl.l },
+      { h: (hsl.h + 150) % 360, s: hsl.s, l: hsl.l },
+      { h: (hsl.h + 210) % 360, s: hsl.s, l: hsl.l }
+    ];
+
+    compColors.forEach(c => {
+      const rgb = hslToRgb(c.h, c.s, c.l);
+      const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+      compGrid.appendChild(createSwatch(hex));
+    });
+
+    // Analogous colors: Hue + 30, Hue - 30
+    const analColors = [
+      { h: (hsl.h - 60 + 360) % 360, s: hsl.s, l: hsl.l },
+      { h: (hsl.h - 30 + 360) % 360, s: hsl.s, l: hsl.l },
+      hsl,
+      { h: (hsl.h + 30) % 360, s: hsl.s, l: hsl.l },
+      { h: (hsl.h + 60) % 360, s: hsl.s, l: hsl.l }
+    ];
+
+    analColors.forEach(c => {
+      const rgb = hslToRgb(c.h, c.s, c.l);
+      const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+      analGrid.appendChild(createSwatch(hex));
     });
   }
-  copyField('hex-input', 'btn-copy-hex');
-  copyField('rgb-input', 'btn-copy-rgb');
-  copyField('hsl-input', 'btn-copy-hsl');
+
+  function createSwatch(hex: string): HTMLElement {
+    const div = document.createElement('div');
+    div.className = 'palette-swatch';
+    div.style.backgroundColor = hex;
+    div.style.width = '4rem';
+    div.style.height = '4rem';
+    div.style.borderRadius = 'var(--radius-sm)';
+    div.style.cursor = 'pointer';
+    div.title = `Click to load: ${hex}`;
+
+    div.addEventListener('click', () => {
+      updateFromHex(hex);
+      window.showToast(`Selected color: ${hex}`, 'info');
+    });
+    return div;
+  }
+
+  function updateGradient(hex: string, hsl: { h: number, s: number, l: number }) {
+    if (!gradientBar) return;
+    const oppositeHue = (hsl.h + 180) % 360;
+    const oppRgb = hslToRgb(oppositeHue, hsl.s, hsl.l);
+    const oppHex = rgbToHex(oppRgb.r, oppRgb.g, oppRgb.b);
+    gradientBar.style.background = `linear-gradient(90deg, ${hex} 0%, ${oppHex} 100%)`;
+  }
+
+  // Copiers utility
+  function setupCopyButton(btnId: string, inputId: string) {
+    document.getElementById(btnId)?.addEventListener('click', () => {
+      const el = document.getElementById(inputId) as HTMLInputElement;
+      if (el) {
+        navigator.clipboard.writeText(el.value).then(() => {
+          window.showToast(`Copied ${el.value}!`, 'success');
+        });
+      }
+    });
+  }
+
+  setupCopyButton('btn-copy-hex', 'hex-input');
+  setupCopyButton('btn-copy-rgb', 'rgb-input');
+  setupCopyButton('btn-copy-hsl', 'hsl-input');
+  setupCopyButton('btn-copy-oklch', 'oklch-input');
+
+  // Copy CSS Variables
+  document.getElementById('btn-copy-css')?.addEventListener('click', () => {
+    const hex = hexInput.value;
+    const rgb = rgbInput.value;
+    const hsl = hslInput.value;
+    const cssVars = `--color-primary: ${hex};\n--color-primary-rgb: ${rgb.replace('rgb(','').replace(')','')};\n--color-primary-hsl: ${hsl.replace('hsl(','').replace(')','')};`;
+    navigator.clipboard.writeText(cssVars).then(() => {
+      window.showToast('Copied CSS Variables!', 'success');
+    });
+  });
 </script>

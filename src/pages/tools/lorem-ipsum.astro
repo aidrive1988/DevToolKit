@@ -2,51 +2,100 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 ---
 
-<ToolLayout title="Lorem Ipsum Generator — Free Online Tool | DevToolKit" description="Generate placeholder text instantly. Free online Lorem Ipsum generator with paragraphs, sentences, and words modes." toolName="Lorem Ipsum Generator" category="Text">
+<ToolLayout title="Lorem Ipsum Generator — Custom Placeholder Text Suite" description="Generate placeholder text instantly. Customize paragraphs, sentences, or word limits with range sliders." toolName="Lorem Ipsum Generator" category="Text">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions" style="display:flex; align-items:center; gap:1.2rem;">
+      <button class="btn btn-primary" id="btn-generate">
+        <span>✨ Generate</span>
+      </button>
+      <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 1.3rem; cursor: pointer;">
+        <input type="checkbox" id="check-live" checked style="accent-color: var(--accent-purple);" />
+        <span>Live Preview</span>
+      </label>
+    </div>
 
-  <div class="tool-container">
-    <div style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center;margin-bottom:1.6rem;">
-      <div>
-        <label style="font-size:1.3rem;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Quantity</label>
-        <input type="number" id="lorem-count" value="3" min="1" max="100" style="width:80px;padding:0.8rem;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.4rem;" />
-      </div>
-      <div>
-        <label style="font-size:1.3rem;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Type</label>
-        <select id="lorem-type" style="padding:0.8rem 1.2rem;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.4rem;">
+    <div class="toolbar-actions">
+      <button class="btn btn-secondary" id="btn-download" title="Download output text file">
+        <span>📥 Download</span>
+      </button>
+      <button class="btn btn-danger" id="btn-clear" title="Clear generated output">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Grid Workspace -->
+  <div class="workspace-grid">
+    <!-- Left Workspace: Configuration Controls -->
+    <div class="editor-container" style="padding:2.4rem; gap:2.4rem;">
+      <h3 style="font-size:1.8rem; border-bottom:1px solid var(--border-color); padding-bottom:1rem;">Configuration</h3>
+
+      <!-- Format Type -->
+      <div style="display:flex; flex-direction:column; gap:0.6rem;">
+        <label style="font-size:1.3rem; font-weight:600; color:var(--text-secondary);">Generation Type</label>
+        <select id="lorem-type" style="padding:1rem 1.4rem; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-primary); font-size:1.4rem; outline:none; cursor:pointer;">
           <option value="paragraphs">Paragraphs</option>
           <option value="sentences">Sentences</option>
           <option value="words">Words</option>
         </select>
       </div>
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-top:1.8rem;">
-        <input type="checkbox" id="lorem-classic" checked style="accent-color:var(--accent-purple);width:18px;height:18px;" />
-        <label for="lorem-classic" style="font-size:1.4rem;color:var(--text-secondary);cursor:pointer;">Start with "Lorem ipsum..."</label>
+
+      <!-- Quantity Slider -->
+      <div class="slider-group">
+        <div class="slider-header-lbl">
+          <span>Quantity</span>
+          <span><strong id="slider-val-lbl">3</strong> <span id="slider-unit-lbl">Paragraphs</span></span>
+        </div>
+        <div class="slider-input-wrapper">
+          <input type="range" id="lorem-slider" min="1" max="20" value="3" />
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div style="display:flex; flex-direction:column; gap:1.2rem;">
+        <label style="font-size:1.3rem; font-weight:600; color:var(--text-secondary);">Opening Options</label>
+        <label style="display:flex; align-items:center; gap:0.8rem; cursor:pointer; font-size:1.4rem;">
+          <input type="checkbox" id="lorem-classic" checked style="accent-color:var(--accent-purple); width:16px; height:16px;" />
+          <span>Start with "Lorem ipsum dolor..."</span>
+        </label>
       </div>
     </div>
 
-    <div class="tool-actions">
-      <button class="btn btn-primary" id="btn-generate">✨ Generate</button>
-      <button class="btn btn-secondary" id="btn-copy">📋 Copy</button>
-      <button class="btn btn-danger" id="btn-clear">🗑 Clear</button>
-    </div>
+    <!-- Right Workspace: Output Panel -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Generated Text</span>
+        <button class="toolbar-btn" id="btn-copy" title="Copy to clipboard">
+          <svg viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m-2 4h5m0 0l-2-2m2 2l-2 2"></path></svg>
+        </button>
+      </div>
 
-    <div class="tool-stats">
-      <span class="tool-stat"><strong id="stat-words">0</strong> Words</span>
-      <span class="tool-stat"><strong id="stat-chars">0</strong> Characters</span>
-      <span class="tool-stat"><strong id="stat-paras">0</strong> Paragraphs</span>
-    </div>
+      <!-- Result Pre block -->
+      <div class="editor-main-area" style="flex-grow: 1; position:relative;">
+        <div id="processing-loader" style="display:none; position:absolute; inset:0; background:rgba(var(--bg-card),0.8); z-index:30; align-items:center; justify-content:center; flex-direction:column; gap:1.2rem;">
+          <div class="spinner" style="width:3rem; height:3rem; border-top-color:var(--accent-purple);"></div>
+          <p style="font-size:1.3rem; color:var(--text-secondary);">Generating placeholder text...</p>
+        </div>
 
-    <div class="tool-output" id="lorem-output">
-      <pre><span class="placeholder">Generated lorem ipsum text will appear here...</span></pre>
+        <pre class="editor-output-pre" id="lorem-output-text" style="height:320px; overflow-y:auto; white-space:pre-wrap;"><span class="editor-empty-state"><svg viewBox="0 0 24 24"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>Generated text will load here...</span></pre>
+      </div>
+
+      <!-- Footer stats -->
+      <div class="editor-footer-status">
+        <span id="stat-paras">0 Paragraphs</span>
+        <span id="stat-words">0 Words</span>
+        <span id="stat-chars">0 Chars</span>
+      </div>
     </div>
   </div>
 
   <div class="info-section" slot="how-to-use">
     <h2>How to Use the Lorem Ipsum Generator</h2>
     <ol class="steps-list">
-      <li>Set the quantity and choose between paragraphs, sentences, or words</li>
-      <li>Toggle "Start with Lorem ipsum..." for the classic opening</li>
-      <li>Click <strong>Generate</strong> and then <strong>Copy</strong> the result</li>
+      <li>Choose your generation format (Paragraphs, Sentences, or Words) inside the Configuration panel.</li>
+      <li>Move the range slider to select the quantity. If **Live Preview** is checked, the layout will update instantly.</li>
+      <li>Click **Copy** or **Download** to extract the formatted dummy text into your project.</li>
     </ol>
   </div>
 
@@ -54,15 +103,11 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     <h2>Frequently Asked Questions</h2>
     <div class="faq-item">
       <p class="faq-question">What is Lorem Ipsum?</p>
-      <p class="faq-answer">Lorem Ipsum is dummy text used in the printing and typesetting industry since the 1500s. It's used as placeholder text in designs and layouts to simulate the appearance of real content.</p>
+      <p class="faq-answer">Lorem Ipsum is dummy placeholder text. By mimicking standard spelling structures and character distributions, it allows layout designers and developers to review visual typography properties without being distracted by readable copy.</p>
     </div>
     <div class="faq-item">
-      <p class="faq-question">Is Lorem Ipsum real Latin?</p>
-      <p class="faq-answer">It's derived from a work by Cicero written in 45 BC, but it's been altered and scrambled over the centuries, so it's not meaningful Latin anymore.</p>
-    </div>
-    <div class="faq-item">
-      <p class="faq-question">Why use Lorem Ipsum instead of real text?</p>
-      <p class="faq-answer">Using placeholder text helps designers and developers focus on visual layout and typography without being distracted by readable content. It provides a natural-looking text distribution.</p>
+      <p class="faq-question">Where does this dummy text originate?</p>
+      <p class="faq-answer">The vocabulary words originate from Cicero's book, *De Finibus Bonorum et Malorum* written in 45 BC. The layout was scrambled and altered during the 1500s to form the classic typesetting standard.</p>
     </div>
   </div>
 </ToolLayout>
@@ -123,9 +168,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
   const WORDS = SENTENCES.join(' ').replace(/[.,]/g, '').toLowerCase().split(/\s+/);
 
-  function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function getRandom(arr: any[]) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-  function shuffle(arr) {
+  function shuffle(arr: any[]) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -139,10 +184,100 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     return shuffle(SENTENCES).slice(0, count).join(' ');
   }
 
-  document.getElementById('btn-generate').addEventListener('click', () => {
-    const count = parseInt(document.getElementById('lorem-count').value) || 1;
-    const type = document.getElementById('lorem-type').value;
-    const classic = document.getElementById('lorem-classic').checked;
+  // Selectors
+  const typeSelect = document.getElementById('lorem-type') as HTMLSelectElement;
+  const slider = document.getElementById('lorem-slider') as HTMLInputElement;
+  const sliderVal = document.getElementById('slider-val-lbl');
+  const sliderUnit = document.getElementById('slider-unit-lbl');
+  const checkClassic = document.getElementById('lorem-classic') as HTMLInputElement;
+  const checkLive = document.getElementById('check-live') as HTMLInputElement;
+
+  const outputText = document.getElementById('lorem-output-text');
+  const loaderEl = document.getElementById('processing-loader');
+
+  const statParas = document.getElementById('stat-paras');
+  const statWords = document.getElementById('stat-words');
+  const statChars = document.getElementById('stat-chars');
+
+  // Load last session configurations
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedType = localStorage.getItem('lorem_type') || 'paragraphs';
+    const savedVal = localStorage.getItem('lorem_val') || '3';
+    
+    if (typeSelect) typeSelect.value = savedType;
+    updateSliderLimits();
+    if (slider) slider.value = savedVal;
+    updateSliderLabels();
+
+    if (checkLive?.checked) {
+      generateText(true);
+    }
+  });
+
+  typeSelect?.addEventListener('change', () => {
+    localStorage.setItem('lorem_type', typeSelect.value);
+    updateSliderLimits();
+    updateSliderLabels();
+    if (checkLive?.checked) generateText(true);
+  });
+
+  slider?.addEventListener('input', () => {
+    updateSliderLabels();
+    localStorage.setItem('lorem_val', slider.value);
+    if (checkLive?.checked) generateText(true); // run silently
+  });
+
+  checkClassic?.addEventListener('change', () => {
+    if (checkLive?.checked) generateText(true);
+  });
+
+  function updateSliderLimits() {
+    if (!slider) return;
+    const type = typeSelect.value;
+    if (type === 'paragraphs') {
+      slider.min = '1';
+      slider.max = '20';
+      if (parseInt(slider.value) > 20) slider.value = '3';
+    } else if (type === 'sentences') {
+      slider.min = '1';
+      slider.max = '100';
+      if (parseInt(slider.value) > 100) slider.value = '15';
+    } else {
+      slider.min = '5';
+      slider.max = '500';
+      if (parseInt(slider.value) > 500) slider.value = '50';
+    }
+  }
+
+  function updateSliderLabels() {
+    if (!slider || !sliderVal || !sliderUnit) return;
+    sliderVal.textContent = slider.value;
+    const type = typeSelect.value;
+    sliderUnit.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+  }
+
+  function generateText(silent = false) {
+    const count = parseInt(slider.value) || 1;
+    const type = typeSelect.value;
+    const classic = checkClassic.checked;
+
+    if (silent) {
+      const result = computeLorem(count, type, classic);
+      displayOutput(result);
+    } else {
+      if (!loaderEl) return;
+      loaderEl.style.display = 'flex';
+      
+      setTimeout(() => {
+        const result = computeLorem(count, type, classic);
+        displayOutput(result);
+        if (loaderEl) loaderEl.style.display = 'none';
+        window.showToast('Generated placeholder text!', 'success');
+      }, 250);
+    }
+  }
+
+  function computeLorem(count: number, type: string, classic: boolean): string {
     let result = '';
 
     if (type === 'paragraphs') {
@@ -164,25 +299,55 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       result = words.join(' ');
     }
 
-    document.getElementById('lorem-output').innerHTML = '<pre>' + result + '</pre>';
-    document.getElementById('stat-words').textContent = result.split(/\s+/).filter(w => w).length;
-    document.getElementById('stat-chars').textContent = result.length;
-    document.getElementById('stat-paras').textContent = result.split(/\n\n/).length;
+    return result;
+  }
+
+  function displayOutput(result: string) {
+    if (!outputText) return;
+    const escaped = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    outputText.innerHTML = escaped;
+
+    // Update statistics
+    if (statParas) statParas.textContent = `${result.split('\n\n').filter(p => p.trim()).length} Paragraphs`;
+    if (statWords) statWords.textContent = `${result.split(/\s+/).filter(w => w).length} Words`;
+    if (statChars) statChars.textContent = `${result.length} Chars`;
+  }
+
+  // Trigger Manual generate
+  document.getElementById('btn-generate')?.addEventListener('click', () => {
+    generateText(false);
   });
 
-  document.getElementById('btn-copy').addEventListener('click', () => {
-    const text = document.getElementById('lorem-output').innerText;
+  // Clear output
+  document.getElementById('btn-clear')?.addEventListener('click', () => {
+    displayOutput('');
+    window.showToast('Cleared generated outputs', 'info');
+  });
+
+  // Copy output
+  document.getElementById('btn-copy')?.addEventListener('click', () => {
+    const text = outputText?.innerText || '';
+    if (!text || text.includes('Generated text will load')) {
+      window.showToast('Nothing to copy!', 'error');
+      return;
+    }
     navigator.clipboard.writeText(text).then(() => {
-      const btn = document.getElementById('btn-copy');
-      btn.textContent = '✅ Copied!';
-      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+      window.showToast('Copied dummy text!', 'success');
     });
   });
 
-  document.getElementById('btn-clear').addEventListener('click', () => {
-    document.getElementById('lorem-output').innerHTML = '<pre><span class="placeholder">Generated lorem ipsum text will appear here...</span></pre>';
-    document.getElementById('stat-words').textContent = '0';
-    document.getElementById('stat-chars').textContent = '0';
-    document.getElementById('stat-paras').textContent = '0';
+  // Download File
+  document.getElementById('btn-download')?.addEventListener('click', () => {
+    const text = outputText?.innerText || '';
+    if (!text || text.includes('Generated text will load')) {
+      window.showToast('No output to download!', 'error');
+      return;
+    }
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'placeholder-lorem.txt';
+    link.click();
+    window.showToast('Downloaded text file!', 'success');
   });
 </script>

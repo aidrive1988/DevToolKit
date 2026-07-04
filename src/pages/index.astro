@@ -5,80 +5,257 @@ import Footer from '../components/Footer.astro';
 import ToolCard from '../components/ToolCard.astro';
 
 const tools = [
-  { title: 'JSON Formatter & Validator', description: 'Format, validate, and beautify JSON data instantly with syntax highlighting.', href: '/tools/json-formatter', icon: '📋', category: 'Developer' },
-  { title: 'Base64 Encoder & Decoder', description: 'Encode and decode Base64 strings instantly. Supports UTF-8 text.', href: '/tools/base64', icon: '🔐', category: 'Encoding' },
-  { title: 'URL Encoder & Decoder', description: 'Encode and decode URLs with encodeURI and encodeURIComponent support.', href: '/tools/url-encoder', icon: '🔗', category: 'Encoding' },
-  { title: 'Color Converter', description: 'Convert colors between HEX, RGB, and HSL formats with live preview.', href: '/tools/color-converter', icon: '🎨', category: 'Design' },
-  { title: 'Lorem Ipsum Generator', description: 'Generate placeholder text in paragraphs, sentences, or words.', href: '/tools/lorem-ipsum', icon: '📝', category: 'Text' },
-  { title: 'Word & Character Counter', description: 'Count words, characters, sentences, and paragraphs with reading time.', href: '/tools/word-counter', icon: '🔢', category: 'Text' },
+  { title: 'PDF Scanner', description: 'Scan documents with your camera or upload images. Apply filters and generate multi-page PDFs instantly.', href: '/tools/pdf-scanner', icon: '📄', category: 'Productivity' },
+  { title: 'JSON Formatter & Validator', description: 'Format, validate, beautify, and minify JSON data instantly with syntax highlighting.', href: '/tools/json-formatter', icon: '📋', category: 'Developer' },
+  { title: 'Base64 Encoder & Decoder', desc: 'Encode and decode Base64 strings instantly.', description: 'Encode and decode Base64 strings or binary data with drag-and-drop file support.', href: '/tools/base64', icon: '🔐', category: 'Encoding' },
+  { title: 'URL Encoder & Decoder', description: 'Encode and decode URLs with visual query parameter mapping.', href: '/tools/url-encoder', icon: '🔗', category: 'Encoding' },
+  { title: 'Color Converter & Preview', description: 'Convert colors between HEX, RGB, HSL, and OKLCH formats with WCAG contrast ratio analysis.', href: '/tools/color-converter', icon: '🎨', category: 'Design' },
+  { title: 'Lorem Ipsum Generator', description: 'Generate placeholder text using range sliders.', href: '/tools/lorem-ipsum', icon: '📝', category: 'Generators' },
+  { title: 'Word & Character Counter', description: 'Count words, characters, reading times, speaking times, and keyword density.', href: '/tools/word-counter', icon: '🔢', category: 'Text' },
 ];
+
+const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'Generators', 'Text'];
 ---
 
-<BaseLayout title="DevToolKit — Free Online Developer Tools" description="Lightning-fast, privacy-first developer tools that run in your browser. JSON Formatter, Base64 Encoder, Color Converter & more. No signup. 100% free.">
+<BaseLayout title="DevToolKit — Premium Online Developer Tools" description="Lightning-fast, privacy-first developer tools running entirely client-side. JSON Formatter, Base64 Encoder, Color Converter, Word Counter & more.">
   <Header />
 
+  <!-- Hero with Animated Mesh -->
   <section class="hero">
+    <div class="hero-mesh"></div>
     <div class="container hero-content">
-      <h1>Free Online<br/>Developer Tools</h1>
-      <p class="hero-subtitle">Lightning-fast, privacy-first tools that run entirely in your browser. No signup. No data collection. Just pure utility.</p>
+      <div class="badge-glow">
+        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="color: var(--accent-purple);"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+        DevToolKit 2.0
+      </div>
+      <h1>Private & Instant<br/><span class="gradient-text">Developer Utilities</span></h1>
+      <p class="hero-subtitle">Premium, client-side tools that run entirely in your browser. No cookies, no data collection. Just pure utility at your fingertips.</p>
+      
+      <!-- Universal Search Component -->
+      <div class="search-wrapper">
+        <input type="text" class="search-input" id="hero-search" placeholder="Search tools (Press '/' to focus)..." autocomplete="off" aria-label="Search tools">
+        <svg class="search-icon-svg" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <span class="search-shortcut-hint">/</span>
+      </div>
+
+      <!-- Hero Statistics -->
       <div class="hero-stats">
-        <span class="hero-stat"><span class="dot"></span> 6 Free Tools</span>
-        <span class="hero-stat"><span class="dot"></span> Zero Tracking</span>
-        <span class="hero-stat"><span class="dot"></span> 100% Client-Side</span>
+        <div class="hero-stat-card">
+          <div class="hero-stat-val">100%</div>
+          <div class="hero-stat-lbl">Client Side</div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="hero-stat-val">7</div>
+          <div class="hero-stat-lbl">Active Tools</div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="hero-stat-val">&lt;100ms</div>
+          <div class="hero-stat-lbl">Response Time</div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="tools-section container" id="tools">
-    <div class="section-header">
-      <h2>Our Tools</h2>
-      <p>Pick a tool and get started instantly — no setup required.</p>
+  <!-- Pinned / Favorite Tools Section -->
+  <section class="container recent-pinned-section" id="favorites-section">
+    <h2 style="font-size: 2.2rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.8rem;">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="color: var(--accent-rose);"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+      Pinned Tools
+    </h2>
+    <div class="recent-pinned-grid" id="favorites-grid"></div>
+  </section>
+
+  <!-- Recent Tools Section -->
+  <section class="container recent-pinned-section" id="recents-section">
+    <h2 style="font-size: 2.2rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.8rem;">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: var(--accent-purple);"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      Recently Used
+    </h2>
+    <div class="recent-pinned-grid" id="recents-grid"></div>
+  </section>
+
+  <!-- Main Tools Grid & Category Filters -->
+  <section class="container tools-grid-section" id="tools-section">
+    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 1.6rem; flex-wrap: wrap; gap: 1.6rem;">
+      <h2 style="font-size: 2.8rem;">All Utilities</h2>
+      
+      <!-- Category Filter Tabs -->
+      <div class="categories-filter" style="margin: 0;">
+        {categories.map((cat, i) => (
+          <button class={`filter-pill ${i === 0 ? 'active' : ''}`} data-category={cat}>{cat}</button>
+        ))}
+      </div>
     </div>
-    <div class="tools-grid">
-      {tools.map((tool, i) => (
-        <div class={`animate-in animate-delay-${i % 3 + 1}`}>
+
+    <!-- Grid List -->
+    <div class="tools-grid" style="margin-top: 3.2rem;">
+      {tools.map((tool) => (
+        <div class="tool-card-container" data-title={tool.title} data-desc={tool.description} data-category={tool.category}>
           <ToolCard {...tool} />
         </div>
       ))}
     </div>
   </section>
 
-  <section class="benefits-section container">
-    <div class="section-header">
-      <h2>Why DevToolKit?</h2>
-      <p>Built by developers, for developers.</p>
-    </div>
-    <div class="benefits-grid">
-      <div class="benefit-card">
-        <span class="benefit-icon">⚡</span>
-        <h3>Lightning Fast</h3>
-        <p>Zero JavaScript by default. Tools load instantly on any device.</p>
+  <!-- Why DevToolKit Bento Benefits Grid -->
+  <section class="container" style="padding: 6rem 0 10rem;">
+    <h2 style="font-size: 3.2rem; text-align: center; margin-bottom: 1.6rem;">Designed For Developers</h2>
+    <p style="text-align: center; color: var(--text-secondary); max-width: 600px; margin: 0 auto 5.6rem;">All calculations occur 100% locally inside your browser process space. Your information remains completely safe.</p>
+    
+    <div class="tools-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+      <div class="tool-grid-card" style="cursor: default;">
+        <div class="tool-icon-wrapper" style="color: var(--accent-purple);">
+          <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        </div>
+        <h3 style="font-size: 1.8rem; margin-bottom: 0.6rem;">Privacy Guarantee</h3>
+        <p style="font-size: 1.35rem; line-height: 1.6;">No data ever transfers to external hosts. Secure client execution prevents data logging.</p>
       </div>
-      <div class="benefit-card">
-        <span class="benefit-icon">🔒</span>
-        <h3>Privacy First</h3>
-        <p>Everything runs in your browser. We never see or store your data.</p>
-      </div>
-      <div class="benefit-card">
-        <span class="benefit-icon">💰</span>
-        <h3>100% Free</h3>
-        <p>No signup, no premium tiers, no hidden costs. Free forever.</p>
-      </div>
-      <div class="benefit-card">
-        <span class="benefit-icon">🌐</span>
-        <h3>Works Offline</h3>
-        <p>All tools work without an internet connection once loaded.</p>
-      </div>
-    </div>
-  </section>
 
-  <section class="cta-section container">
-    <div class="cta-box">
-      <h2>Bookmark DevToolKit</h2>
-      <p>Press <strong>Ctrl+D</strong> to bookmark this page and access all tools instantly whenever you need them.</p>
-      <a href="/#tools" class="btn btn-primary">Explore All Tools →</a>
+      <div class="tool-grid-card" style="cursor: default;">
+        <div class="tool-icon-wrapper" style="color: var(--accent-emerald);">
+          <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        </div>
+        <h3 style="font-size: 1.8rem; margin-bottom: 0.6rem;">Zero Delays</h3>
+        <p style="font-size: 1.35rem; line-height: 1.6;">Build structures compiled to run on lightweight modern browser sandboxes instantly.</p>
+      </div>
+
+      <div class="tool-grid-card" style="cursor: default;">
+        <div class="tool-icon-wrapper" style="color: var(--accent-cyan);">
+          <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </div>
+        <h3 style="font-size: 1.8rem; margin-bottom: 0.6rem;">Command Palette</h3>
+        <p style="font-size: 1.35rem; line-height: 1.6;">Press "/" or "Ctrl+K" at any point to search or navigate to specific utilities instantly.</p>
+      </div>
     </div>
   </section>
 
   <Footer />
+
+  <script is:inline>
+    // Universal filter and search logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('hero-search');
+      const filterPills = document.querySelectorAll('.filter-pill');
+      const cardContainers = document.querySelectorAll('.tool-card-container');
+      
+      let activeCategory = 'All';
+      let searchQuery = '';
+
+      function filterCards() {
+        cardContainers.forEach(container => {
+          const title = container.getAttribute('data-title').toLowerCase();
+          const desc = container.getAttribute('data-desc').toLowerCase();
+          const category = container.getAttribute('data-category');
+
+          const matchesSearch = title.includes(searchQuery) || desc.includes(searchQuery);
+          const matchesCategory = activeCategory === 'All' || category === activeCategory;
+
+          if (matchesSearch && matchesCategory) {
+            container.style.display = 'block';
+          } else {
+            container.style.display = 'none';
+          }
+        });
+      }
+
+      // Input listening
+      searchInput?.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase();
+        filterCards();
+      });
+
+      // Categories Pill clicking
+      filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          filterPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          activeCategory = pill.getAttribute('data-category');
+          filterCards();
+        });
+      });
+
+      // Page '/' focus shortcut
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== searchInput) {
+          const activeEl = document.activeElement;
+          const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+          if (!isInput) {
+            e.preventDefault();
+            searchInput?.focus();
+          }
+        }
+      });
+
+      // Local storage Favorites loader
+      function loadFavorites() {
+        const favSec = document.getElementById('favorites-section');
+        const favGrid = document.getElementById('favorites-grid');
+        if (!favSec || !favGrid) return;
+
+        try {
+          const favorites = JSON.parse(localStorage.getItem('favoriteTools') || '[]');
+          if (favorites.length === 0) {
+            favSec.classList.remove('has-items');
+            return;
+          }
+
+          favSec.classList.add('has-items');
+          favGrid.innerHTML = '';
+          favorites.forEach(tool => {
+            const a = document.createElement('a');
+            a.className = 'recent-tool-card';
+            a.href = tool.url;
+            a.innerHTML = `
+              <svg fill="currentColor" viewBox="0 0 24 24" style="color: var(--accent-rose);"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+              <div class="recent-tool-info">
+                <h4>${tool.name}</h4>
+                <p>${tool.category}</p>
+              </div>
+              <span class="tool-hotkey">➔</span>
+            `;
+            favGrid.appendChild(a);
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Local storage Recents loader
+      function loadRecents() {
+        const recSec = document.getElementById('recents-section');
+        const recGrid = document.getElementById('recents-grid');
+        if (!recSec || !recGrid) return;
+
+        try {
+          const recents = JSON.parse(localStorage.getItem('recentTools') || '[]');
+          if (recents.length === 0) {
+            recSec.classList.remove('has-items');
+            return;
+          }
+
+          recSec.classList.add('has-items');
+          recGrid.innerHTML = '';
+          recents.forEach(tool => {
+            const a = document.createElement('a');
+            a.className = 'recent-tool-card';
+            a.href = tool.url;
+            a.innerHTML = `
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div class="recent-tool-info">
+                <h4>${tool.name}</h4>
+                <p>${tool.category}</p>
+              </div>
+              <span class="tool-hotkey">➔</span>
+            `;
+            recGrid.appendChild(a);
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      loadFavorites();
+      loadRecents();
+    });
+  </script>
 </BaseLayout>

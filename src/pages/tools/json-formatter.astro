@@ -2,93 +2,293 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 ---
 
-<ToolLayout title="JSON Formatter & Validator — Free Online Tool | DevToolKit" description="Format, validate, and beautify JSON data instantly. Free online JSON formatter with error detection and minification." toolName="JSON Formatter & Validator" category="Developer">
-
-  <div class="tool-container">
-    <div class="tool-input">
-      <textarea id="json-input" placeholder='Paste your JSON here... e.g. {"name": "John", "age": 30}'></textarea>
+<ToolLayout title="JSON Formatter & Validator — Private Client-Side Tool" description="Format, validate, beautify, and minify JSON data instantly. Complete private browser execution with interactive tree views." toolName="JSON Formatter & Validator" category="Developer">
+  
+  <div class="workspace-toolbar">
+    <!-- Toolbar Buttons -->
+    <div class="toolbar-actions">
+      <button class="btn btn-primary" id="btn-format">
+        <span>✨ Format</span>
+      </button>
+      <button class="btn btn-secondary" id="btn-minify" title="Minify JSON">
+        <span>📦 Minify</span>
+      </button>
+      <button class="btn btn-secondary" id="btn-sort" title="Sort JSON Keys Alphabetically">
+        <span>🔀 Sort Keys</span>
+      </button>
+      <button class="btn btn-secondary" id="btn-validate" title="Validate JSON syntax">
+        <span>✅ Validate</span>
+      </button>
     </div>
 
-    <div class="tool-actions">
-      <button class="btn btn-primary" id="btn-format">✨ Format</button>
-      <button class="btn btn-secondary" id="btn-minify">📦 Minify</button>
-      <button class="btn btn-secondary" id="btn-validate">✅ Validate</button>
-      <button class="btn btn-secondary" id="btn-sample">📄 Sample</button>
-      <button class="btn btn-secondary" id="btn-copy">📋 Copy</button>
-      <button class="btn btn-danger" id="btn-clear">🗑 Clear</button>
+    <div class="toolbar-actions">
+      <label class="btn btn-secondary" style="cursor: pointer; margin: 0;" title="Upload JSON File">
+        <span>📤 Upload</span>
+        <input type="file" id="file-upload" accept=".json,.txt" style="display: none;" />
+      </label>
+      <button class="btn btn-secondary" id="btn-download" title="Download formatted JSON">
+        <span>📥 Download</span>
+      </button>
+      <button class="btn btn-secondary" id="btn-sample" title="Load sample JSON data">
+        <span>📄 Sample</span>
+      </button>
+      <button class="btn btn-danger" id="btn-clear" title="Clear all text fields">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Grid Workspace -->
+  <div class="workspace-grid">
+    <!-- Input Workspace -->
+    <div class="editor-container" id="input-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Input RAW JSON</span>
+        <button class="toolbar-btn" id="btn-paste" title="Paste from clipboard">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        </button>
+      </div>
+      <div class="editor-row">
+        <!-- Visual Line Numbers -->
+        <div class="editor-line-numbers" id="input-lines">1</div>
+        <div class="editor-main-area">
+          <textarea id="json-input" class="editor-textarea" placeholder='Paste your raw JSON here... e.g. {"name": "DevToolKit", "private": true}' autocomplete="off"></textarea>
+          <!-- Drag & Drop Overlay -->
+          <div class="dropzone-overlay" id="drop-overlay">
+            <svg viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <p>Drop your JSON file here</p>
+          </div>
+        </div>
+      </div>
+      <div class="editor-footer-status">
+        <span id="char-count">0 chars</span>
+        <span id="line-count">1 lines</span>
+      </div>
     </div>
 
-    <div class="tool-stats" id="json-stats">
-      <span class="tool-stat"><strong id="stat-keys">0</strong> Keys</span>
-      <span class="tool-stat"><strong id="stat-depth">0</strong> Max Depth</span>
-      <span class="tool-stat"><strong id="stat-size">0</strong> Bytes</span>
-    </div>
+    <!-- Output Workspace -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Formatted Output</span>
+        
+        <!-- Toggle Tabs: Raw Text vs Tree View -->
+        <div style="display: flex; gap: 0.6rem;">
+          <div class="tab-group" style="margin: 0; padding: 0.2rem;">
+            <button class="tab-btn active" id="tab-raw" style="padding: 0.4rem 1.2rem; font-size: 1.2rem;">Text</button>
+            <button class="tab-btn" id="tab-tree" style="padding: 0.4rem 1.2rem; font-size: 1.2rem;">Tree View</button>
+          </div>
+          <button class="toolbar-btn" id="btn-copy" title="Copy to clipboard">
+            <svg viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m-2 4h5m0 0l-2-2m2 2l-2 2"></path></svg>
+          </button>
+        </div>
+      </div>
 
-    <div class="tool-output" id="json-output">
-      <pre><span class="placeholder">Formatted JSON will appear here...</span></pre>
-    </div>
+      <!-- Result Workspaces -->
+      <div class="editor-main-area" style="flex-grow: 1;">
+        <!-- Loading spinner container -->
+        <div id="processing-loader" style="display:none; position:absolute; inset:0; background:rgba(var(--bg-card),0.8); z-index:30; align-items:center; justify-content:center; flex-direction:column; gap:1.2rem;">
+          <div class="spinner" style="width:3rem; height:3rem; border-top-color:var(--accent-purple);"></div>
+          <p style="font-size:1.3rem; color:var(--text-secondary);">Processing JSON...</p>
+        </div>
 
-    <div class="tool-error" id="json-error"></div>
+        <!-- Raw text output panel -->
+        <div id="output-text-panel" style="display:block; height:100%; overflow:auto;">
+          <pre class="editor-output-pre" id="json-output-text"><span class="editor-empty-state"><svg viewBox="0 0 24 24"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>Formatted text output will load here...</span></pre>
+        </div>
+
+        <!-- Tree visualizer output panel -->
+        <div id="output-tree-panel" style="display:none; padding:1.6rem; overflow-y:auto; height:320px; font-family:var(--font-code); font-size:1.35rem;">
+          <div style="margin-bottom:1.2rem; display:flex; gap:0.8rem;">
+            <button class="btn btn-secondary" id="btn-tree-expand" style="padding:0.4rem 0.8rem; font-size:1.1rem;">Expand All</button>
+            <button class="btn btn-secondary" id="btn-tree-collapse" style="padding:0.4rem 0.8rem; font-size:1.1rem;">Collapse All</button>
+          </div>
+          <div id="json-tree-container"></div>
+        </div>
+
+        <!-- Line Error visualizer -->
+        <div class="tool-error" id="json-error" style="margin:1rem; padding:1.2rem 1.6rem; border-radius:var(--radius-sm);"></div>
+      </div>
+      
+      <!-- Output Footer status panel -->
+      <div class="editor-footer-status">
+        <span id="stat-keys">0 keys</span>
+        <span id="stat-depth">0 depth</span>
+        <span id="stat-size">0 bytes</span>
+      </div>
+    </div>
   </div>
 
   <div class="info-section" slot="how-to-use">
     <h2>How to Use the JSON Formatter</h2>
     <ol class="steps-list">
-      <li>Paste your raw JSON data into the input field above</li>
-      <li>Click <strong>Format</strong> to beautify with proper indentation, or <strong>Minify</strong> to compress</li>
-      <li>Click <strong>Copy</strong> to copy the result to your clipboard</li>
+      <li>Paste raw data or drag-and-drop a `.json` file directly into the input text panel.</li>
+      <li>Click <strong>Format</strong> to beautify text, <strong>Minify</strong> to compress white space, or <strong>Sort Keys</strong> to order properties alphabetically.</li>
+      <li>Switch outputs between <strong>Text</strong> code views and the collapsible <strong>Tree View</strong> mode to browse complex nodes.</li>
     </ol>
   </div>
 
   <div class="info-section" slot="faq">
     <h2>Frequently Asked Questions</h2>
     <div class="faq-item">
-      <p class="faq-question">Is my JSON data safe?</p>
-      <p class="faq-answer">Absolutely. All processing happens in your browser. Your data never leaves your device — we have no servers processing your input.</p>
+      <p class="faq-question">Does my JSON file upload to a remote database?</p>
+      <p class="faq-answer">No. All file reads, parses, validation calculations, and formatting rules execute locally inside your local browser memory space. We do not transmit any input text to external endpoints.</p>
     </div>
     <div class="faq-item">
-      <p class="faq-question">What is JSON?</p>
-      <p class="faq-answer">JSON (JavaScript Object Notation) is a lightweight data format used to exchange data between a server and a client. It's easy for humans to read and write, and easy for machines to parse.</p>
+      <p class="faq-question">What is JSON Tree View?</p>
+      <p class="faq-answer">The Tree View converts standard plain-text JSON files into interactive node components. You can expand and collapse individual array items or nested objects to navigate large configuration structures easily.</p>
     </div>
     <div class="faq-item">
-      <p class="faq-question">What's the difference between Format and Minify?</p>
-      <p class="faq-answer">Format adds indentation and newlines for readability. Minify removes all whitespace to reduce file size — useful for production APIs and storage.</p>
-    </div>
-    <div class="faq-item">
-      <p class="faq-question">Can I format large JSON files?</p>
-      <p class="faq-answer">Yes! Since processing is done in your browser, it can handle files up to several megabytes. For very large files, formatting may take a moment.</p>
-    </div>
-    <div class="faq-item">
-      <p class="faq-question">Does this tool support JSON5 or JSONC?</p>
-      <p class="faq-answer">This tool validates strict JSON as per the RFC 8259 standard. JSON5 and JSONC (with comments) are not supported — comments and trailing commas will be flagged as errors.</p>
+      <p class="faq-question">Will invalid trailing commas work?</p>
+      <p class="faq-answer">Standard JSON specifications do not permit trailing commas or single quotes. The parser will flag these characters as syntax errors and point to the line index containing the issue.</p>
     </div>
   </div>
 </ToolLayout>
 
 <script>
-  const input = document.getElementById('json-input');
-  const output = document.getElementById('json-output');
+  // UI selectors
+  const inputEl = document.getElementById('json-input') as HTMLTextAreaElement;
+  const inputLines = document.getElementById('input-lines');
+  const charCount = document.getElementById('char-count');
+  const lineCount = document.getElementById('line-count');
+  
+  const textOutputPre = document.getElementById('json-output-text');
   const errorEl = document.getElementById('json-error');
+  const loaderEl = document.getElementById('processing-loader');
+
   const statKeys = document.getElementById('stat-keys');
   const statDepth = document.getElementById('stat-depth');
   const statSize = document.getElementById('stat-size');
 
-  function countKeys(obj) {
+  const tabRaw = document.getElementById('tab-raw');
+  const tabTree = document.getElementById('tab-tree');
+  const textPanel = document.getElementById('output-text-panel');
+  const treePanel = document.getElementById('output-tree-panel');
+  const treeContainer = document.getElementById('json-tree-container');
+
+  const containerInput = document.getElementById('input-container');
+
+  let currentParsedJson: any = null;
+
+  // Auto-load session
+  document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('json_session');
+    if (saved && inputEl) {
+      inputEl.value = saved;
+      updateInputLines();
+    }
+  });
+
+  // Keep session synced
+  inputEl?.addEventListener('input', () => {
+    updateInputLines();
+    localStorage.setItem('json_session', inputEl.value);
+  });
+
+  function updateInputLines() {
+    if (!inputEl || !inputLines || !charCount || !lineCount) return;
+    const text = inputEl.value;
+    const lines = text.split('\n');
+    const totalLines = Math.max(lines.length, 1);
+    
+    // Generate line numbers column
+    let lineNumsStr = '';
+    for (let i = 1; i <= totalLines; i++) {
+      lineNumsStr += i + '<br/>';
+    }
+    inputLines.innerHTML = lineNumsStr;
+
+    charCount.textContent = `${text.length} chars`;
+    lineCount.textContent = `${totalLines} lines`;
+  }
+
+  // File Upload
+  const fileUpload = document.getElementById('file-upload') as HTMLInputElement;
+  fileUpload?.addEventListener('change', (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      readFile(file);
+    }
+  });
+
+  // Drag & Drop
+  containerInput?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    containerInput.classList.add('drag-over');
+  });
+  containerInput?.addEventListener('dragleave', () => {
+    containerInput.classList.remove('drag-over');
+  });
+  containerInput?.addEventListener('drop', (e: any) => {
+    e.preventDefault();
+    containerInput.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      readFile(file);
+    }
+  });
+
+  function readFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = (evt: any) => {
+      if (inputEl) {
+        inputEl.value = evt.target.result;
+        updateInputLines();
+        localStorage.setItem('json_session', inputEl.value);
+        window.showToast('JSON file loaded!', 'success');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Output formatting handler with mock spin latency (~250ms)
+  function processAction(actionCallback: () => void) {
+    if (!loaderEl || !errorEl) return;
+    errorEl.classList.remove('visible');
+    loaderEl.style.display = 'flex';
+
+    setTimeout(() => {
+      try {
+        actionCallback();
+      } catch (e: any) {
+        showError(e.message);
+      } finally {
+        if (loaderEl) loaderEl.style.display = 'none';
+      }
+    }, 250);
+  }
+
+  function showError(msg: string) {
+    if (!errorEl) return;
+    errorEl.innerHTML = `<span style="font-weight:600;">Syntax Error:</span> ${msg}`;
+    errorEl.classList.add('visible');
+    window.showToast('Invalid JSON input!', 'error');
+  }
+
+  function setOutputText(text: string) {
+    if (!textOutputPre) return;
+    // Escape HTML tags to prevent cross site scripting
+    const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    textOutputPre.innerHTML = escaped;
+  }
+
+  // Count total keys
+  function countKeys(obj: any): number {
     let count = 0;
     if (typeof obj === 'object' && obj !== null) {
       if (Array.isArray(obj)) {
         obj.forEach(item => { count += countKeys(item); });
       } else {
-        for (const key in obj) {
+        for (const k in obj) {
           count++;
-          count += countKeys(obj[key]);
+          count += countKeys(obj[k]);
         }
       }
     }
     return count;
   }
 
-  function getDepth(obj) {
+  // Calculate deep nesting
+  function getDepth(obj: any): number {
     if (typeof obj !== 'object' || obj === null) return 0;
     let max = 0;
     for (const key in obj) {
@@ -98,95 +298,269 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     return max + 1;
   }
 
-  function updateStats(parsed, raw) {
-    statKeys.textContent = countKeys(parsed);
-    statDepth.textContent = getDepth(parsed);
-    statSize.textContent = new Blob([raw]).size;
+  function updateMetrics(parsed: any, rawOutput: string) {
+    currentParsedJson = parsed;
+    if (statKeys) statKeys.textContent = `${countKeys(parsed)} keys`;
+    if (statDepth) statDepth.textContent = `${getDepth(parsed)} depth`;
+    if (statSize) statSize.textContent = `${new Blob([rawOutput]).size} bytes`;
+    renderTreeView();
   }
 
-  function showError(msg) {
-    errorEl.textContent = '❌ ' + msg;
-    errorEl.classList.add('visible');
+  // Sort Keys Alphabetically
+  function sortObjectKeys(obj: any): any {
+    if (typeof obj !== 'object' || obj === null) return obj;
+    if (Array.isArray(obj)) return obj.map(sortObjectKeys);
+    
+    const sorted: any = {};
+    Object.keys(obj).sort().forEach(key => {
+      sorted[key] = sortObjectKeys(obj[key]);
+    });
+    return sorted;
   }
 
-  function hideError() {
-    errorEl.classList.remove('visible');
+  // Tree view rendering implementation
+  function renderTreeView() {
+    if (!treeContainer) return;
+    treeContainer.innerHTML = '';
+    if (!currentParsedJson) {
+      treeContainer.innerHTML = '<span style="color:var(--text-muted); font-style:italic;">No valid JSON to map</span>';
+      return;
+    }
+
+    const node = createTreeNode('', currentParsedJson);
+    treeContainer.appendChild(node);
   }
 
-  function setOutput(text) {
-    output.innerHTML = '<pre>' + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>';
+  function createTreeNode(key: string, val: any): HTMLElement {
+    const el = document.createElement('div');
+    el.style.marginLeft = '1.6rem';
+    el.style.marginTop = '0.2rem';
+    el.style.marginBottom = '0.2rem';
+
+    const isCollapsible = typeof val === 'object' && val !== null;
+    const type = typeof val;
+
+    let displayKey = key ? `<span style="color:var(--accent-indigo); font-weight:600;">"${key}"</span>: ` : '';
+    
+    if (isCollapsible) {
+      const isArr = Array.isArray(val);
+      const openBrace = isArr ? '[' : '{';
+      const closeBrace = isArr ? ']' : '}';
+      const itemsCount = isArr ? `${val.length} items` : `${Object.keys(val).length} keys`;
+
+      el.innerHTML = `
+        <span class="tree-toggle" style="cursor:pointer; color:var(--text-muted); font-weight:bold; margin-right:4px;">▼</span>
+        ${displayKey}<span style="color:var(--text-muted); font-weight:500;">${openBrace}</span> <span style="font-size:1.1rem; color:var(--text-muted);">(${itemsCount})</span>
+        <div class="tree-children"></div>
+        <span style="color:var(--text-muted); font-weight:500; margin-left: 1.4rem;">${closeBrace}</span>
+      `;
+
+      const childrenContainer = el.querySelector('.tree-children') as HTMLElement;
+      const toggle = el.querySelector('.tree-toggle') as HTMLElement;
+
+      if (isArr) {
+        val.forEach((item: any) => {
+          childrenContainer.appendChild(createTreeNode('', item));
+        });
+      } else {
+        Object.keys(val).forEach(k => {
+          childrenContainer.appendChild(createTreeNode(k, val[k]));
+        });
+      }
+
+      toggle.addEventListener('click', () => {
+        const isCollapsed = childrenContainer.style.display === 'none';
+        childrenContainer.style.display = isCollapsed ? 'block' : 'none';
+        toggle.textContent = isCollapsed ? '▼' : '▶';
+      });
+
+    } else {
+      let displayValue = '';
+      if (type === 'string') {
+        displayValue = `<span style="color:var(--accent-emerald);">"${val}"</span>`;
+      } else if (type === 'number') {
+        displayValue = `<span style="color:var(--accent-cyan);">${val}</span>`;
+      } else if (type === 'boolean') {
+        displayValue = `<span style="color:var(--accent-amber); font-weight:600;">${val}</span>`;
+      } else if (val === null) {
+        displayValue = `<span style="color:var(--accent-rose); font-weight:600;">null</span>`;
+      }
+      el.innerHTML = `${displayKey}${displayValue}`;
+    }
+
+    return el;
   }
 
-  document.getElementById('btn-format').addEventListener('click', () => {
-    hideError();
-    try {
-      const parsed = JSON.parse(input.value);
+  // Format Button
+  document.getElementById('btn-format')?.addEventListener('click', () => {
+    processAction(() => {
+      const val = inputEl.value.trim();
+      if (!val) return;
+      const parsed = JSON.parse(val);
       const formatted = JSON.stringify(parsed, null, 2);
-      setOutput(formatted);
-      updateStats(parsed, formatted);
-    } catch (e) {
-      showError('Invalid JSON: ' + e.message);
-    }
-  });
-
-  document.getElementById('btn-minify').addEventListener('click', () => {
-    hideError();
-    try {
-      const parsed = JSON.parse(input.value);
-      const minified = JSON.stringify(parsed);
-      setOutput(minified);
-      updateStats(parsed, minified);
-    } catch (e) {
-      showError('Invalid JSON: ' + e.message);
-    }
-  });
-
-  document.getElementById('btn-validate').addEventListener('click', () => {
-    hideError();
-    try {
-      const parsed = JSON.parse(input.value);
-      setOutput('✅ Valid JSON!');
-      updateStats(parsed, input.value);
-    } catch (e) {
-      showError('Invalid JSON: ' + e.message);
-    }
-  });
-
-  document.getElementById('btn-sample').addEventListener('click', () => {
-    hideError();
-    const sample = {
-      "name": "DevToolKit",
-      "version": "1.0.0",
-      "description": "Free online developer tools",
-      "tools": ["JSON Formatter", "Base64 Encoder", "Color Converter"],
-      "features": {
-        "free": true,
-        "privacy": "client-side only",
-        "frameworks": { "frontend": "AstroJS", "hosting": "Cloudflare Pages" }
-      },
-      "stats": { "tools": 6, "users": 10000, "uptime": 99.9 }
-    };
-    input.value = JSON.stringify(sample);
-    const formatted = JSON.stringify(sample, null, 2);
-    setOutput(formatted);
-    updateStats(sample, formatted);
-  });
-
-  document.getElementById('btn-copy').addEventListener('click', () => {
-    const text = output.innerText;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.getElementById('btn-copy');
-      btn.textContent = '✅ Copied!';
-      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+      setOutputText(formatted);
+      updateMetrics(parsed, formatted);
+      window.showToast('Formatted JSON successfully!', 'success');
     });
   });
 
-  document.getElementById('btn-clear').addEventListener('click', () => {
-    input.value = '';
-    output.innerHTML = '<pre><span class="placeholder">Formatted JSON will appear here...</span></pre>';
-    hideError();
-    statKeys.textContent = '0';
-    statDepth.textContent = '0';
-    statSize.textContent = '0';
+  // Minify Button
+  document.getElementById('btn-minify')?.addEventListener('click', () => {
+    processAction(() => {
+      const val = inputEl.value.trim();
+      if (!val) return;
+      const parsed = JSON.parse(val);
+      const minified = JSON.stringify(parsed);
+      setOutputText(minified);
+      updateMetrics(parsed, minified);
+      window.showToast('Minified JSON successfully!', 'success');
+    });
+  });
+
+  // Sort Keys
+  document.getElementById('btn-sort')?.addEventListener('click', () => {
+    processAction(() => {
+      const val = inputEl.value.trim();
+      if (!val) return;
+      const parsed = JSON.parse(val);
+      const sorted = sortObjectKeys(parsed);
+      const formatted = JSON.stringify(sorted, null, 2);
+      setOutputText(formatted);
+      updateMetrics(sorted, formatted);
+      window.showToast('Sorted object keys!', 'success');
+    });
+  });
+
+  // Validate Button
+  document.getElementById('btn-validate')?.addEventListener('click', () => {
+    processAction(() => {
+      const val = inputEl.value.trim();
+      if (!val) return;
+      const parsed = JSON.parse(val);
+      setOutputText('✅ JSON Syntax is Valid!');
+      updateMetrics(parsed, val);
+      window.showToast('JSON is 100% Valid!', 'success');
+    });
+  });
+
+  // Sample Load
+  document.getElementById('btn-sample')?.addEventListener('click', () => {
+    if (!inputEl) return;
+    const sample = {
+      "name": "DevToolKit",
+      "version": "2.0.0",
+      "status": "Production",
+      "private": true,
+      "features": {
+        "offline": true,
+        "secure": "client-side",
+        "supported": ["JSON", "Base64", "URL", "Color"]
+      },
+      "stats": {
+        "loading": "<100ms",
+        "size": 384
+      }
+    };
+    inputEl.value = JSON.stringify(sample, null, 2);
+    updateInputLines();
+    localStorage.setItem('json_session', inputEl.value);
+    
+    // Automatically trigger formater
+    const formatted = JSON.stringify(sample, null, 2);
+    setOutputText(formatted);
+    updateMetrics(sample, formatted);
+    window.showToast('Sample JSON loaded!', 'info');
+  });
+
+  // Clear Button
+  document.getElementById('btn-clear')?.addEventListener('click', () => {
+    if (inputEl) inputEl.value = '';
+    updateInputLines();
+    localStorage.setItem('json_session', '');
+    setOutputText('Formatted text output will load here...');
+    if (errorEl) errorEl.classList.remove('visible');
+    if (statKeys) statKeys.textContent = '0 keys';
+    if (statDepth) statDepth.textContent = '0 depth';
+    if (statSize) statSize.textContent = '0 bytes';
+    if (treeContainer) treeContainer.innerHTML = '';
+    currentParsedJson = null;
+    window.showToast('Cleared input & output', 'info');
+  });
+
+  // Copy Output
+  document.getElementById('btn-copy')?.addEventListener('click', () => {
+    const outputText = textOutputPre?.innerText || '';
+    if (!outputText || outputText.includes('Formatted text output')) {
+      window.showToast('Nothing to copy!', 'error');
+      return;
+    }
+    navigator.clipboard.writeText(outputText).then(() => {
+      window.showToast('Copied to clipboard!', 'success');
+    });
+  });
+
+  // Paste Action
+  document.getElementById('btn-paste')?.addEventListener('click', () => {
+    navigator.clipboard.readText().then(text => {
+      if (inputEl) {
+        inputEl.value = text;
+        updateInputLines();
+        localStorage.setItem('json_session', text);
+        window.showToast('Clipboard text pasted!', 'success');
+      }
+    }).catch(() => {
+      window.showToast('Failed to read clipboard!', 'error');
+    });
+  });
+
+  // Download Output File
+  document.getElementById('btn-download')?.addEventListener('click', () => {
+    const text = textOutputPre?.innerText || '';
+    if (!text || text.includes('Formatted text output')) {
+      window.showToast('No output to download!', 'error');
+      return;
+    }
+    const blob = new Blob([text], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'devtoolkit-formatted.json';
+    link.click();
+    window.showToast('Downloaded JSON file!', 'success');
+  });
+
+  // Output Tab Toggling
+  tabRaw?.addEventListener('click', () => {
+    tabRaw.classList.add('active');
+    tabTree?.classList.remove('active');
+    if (textPanel) textPanel.style.display = 'block';
+    if (treePanel) treePanel.style.display = 'none';
+  });
+
+  tabTree?.addEventListener('click', () => {
+    tabTree.classList.add('active');
+    tabRaw?.classList.remove('active');
+    if (textPanel) textPanel.style.display = 'none';
+    if (treePanel) treePanel.style.display = 'block';
+  });
+
+  // Tree Expand/Collapse All
+  document.getElementById('btn-tree-expand')?.addEventListener('click', () => {
+    if (!treeContainer) return;
+    treeContainer.querySelectorAll('.tree-children').forEach((child: any) => {
+      child.style.display = 'block';
+    });
+    treeContainer.querySelectorAll('.tree-toggle').forEach((toggle: any) => {
+      toggle.textContent = '▼';
+    });
+  });
+
+  document.getElementById('btn-tree-collapse')?.addEventListener('click', () => {
+    if (!treeContainer) return;
+    treeContainer.querySelectorAll('.tree-children').forEach((child: any) => {
+      child.style.display = 'none';
+    });
+    treeContainer.querySelectorAll('.tree-toggle').forEach((toggle: any) => {
+      toggle.textContent = '▶';
+    });
   });
 </script>

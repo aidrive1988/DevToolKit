@@ -10,6 +10,8 @@ const { title, description, canonicalURL, ogImage } = Astro.props;
 const siteURL = 'https://devtoolkit.pages.dev';
 const canonical = canonicalURL || new URL(Astro.url.pathname, siteURL).href;
 const image = ogImage || `${siteURL}/og-default.png`;
+
+import '../styles/global.css';
 ---
 
 <!DOCTYPE html>
@@ -23,30 +25,33 @@ const image = ogImage || `${siteURL}/og-default.png`;
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
 
+  <!-- OpenGraph Metadata -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonical} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:image" content={image} />
 
+  <!-- Twitter Card Metadata -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={image} />
 
   <meta name="robots" content="index, follow" />
-  <meta name="theme-color" content="#7c3aed" />
+  <meta name="theme-color" content="#8b5cf6" />
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
+  <!-- Structured Metadata -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "DevToolKit",
     "url": siteURL,
-    "description": "Free online developer tools — JSON Formatter, Base64 Encoder, Color Converter & more.",
+    "description": "Premium client-side developer utility platform. Zero tracking. 100% private.",
     "potentialAction": {
       "@type": "SearchAction",
       "target": `${siteURL}/tools/{search_term_string}`,
@@ -54,11 +59,229 @@ const image = ogImage || `${siteURL}/og-default.png`;
     }
   })} />
 
-  <style>
-    @import '../styles/global.css';
-  </style>
+  <!-- Inline Script to prevent FOUC (theme rendering) -->
+  <script is:inline>
+    (function () {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else if (savedTheme === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+      } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+
 </head>
 <body>
   <slot />
+
+  <!-- Toast Stack Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Raycast Command Palette Modal -->
+  <div class="command-palette-overlay" id="command-palette-overlay">
+    <div class="command-palette">
+      <div class="command-palette-search">
+        <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <input type="text" class="command-palette-input" id="command-palette-input" placeholder="Type a tool name or command..." autocomplete="off">
+        <span class="command-palette-esc">ESC</span>
+      </div>
+      <ul class="command-palette-results" id="command-palette-results"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Global Toast API implementation
+    window.showToast = function(message, type = 'success', duration = 3000) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast-notification toast-${type}`;
+
+      // Select icon based on type
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = '<svg class="toast-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+      } else if (type === 'error') {
+        iconSvg = '<svg class="toast-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+      } else {
+        iconSvg = '<svg class="toast-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+      }
+
+      toast.innerHTML = `
+        ${iconSvg}
+        <span>${message}</span>
+        <button class="toast-close">&times;</button>
+      `;
+
+      container.appendChild(toast);
+
+      // Bind close action
+      const closeBtn = toast.querySelector('.toast-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => dismissToast(toast));
+      }
+
+      // Auto dismiss
+      const timer = setTimeout(() => {
+        dismissToast(toast);
+      }, duration);
+
+      function dismissToast(el: HTMLElement) {
+        clearTimeout(timer);
+        el.classList.add('fade-out');
+        el.addEventListener('animationend', () => {
+          el.remove();
+        });
+      }
+    };
+
+    // Command Palette Logic
+    const tools = [
+      { name: 'JSON Formatter & Validator', desc: 'Format, validate, sort, and minify JSON data', url: '/tools/json-formatter', keywords: 'json format validate beautify minify compress' },
+      { name: 'Base64 Encoder & Decoder', desc: 'Encode and decode Base64 strings or files', url: '/tools/base64', keywords: 'base64 encode decode b64 text binary file' },
+      { name: 'URL Encoder & Decoder', desc: 'Encode/decode URLs with parameter visualization', url: '/tools/url-encoder', keywords: 'url encode decode percent link query params' },
+      { name: 'Color Converter & Preview', desc: 'Convert colors between HEX, RGB, HSL, and OKLCH', url: '/tools/color-converter', keywords: 'color converter hex rgb hsl oklch palette wcag contrast' },
+      { name: 'Lorem Ipsum Generator', desc: 'Generate placeholder text using range sliders', url: '/tools/lorem-ipsum', keywords: 'lorem ipsum text generator dummy sentences words paragraphs' },
+      { name: 'Word & Character Counter', desc: 'Count text length, word statistics, and speaking times', url: '/tools/word-counter', keywords: 'word counter characters paragraphs speaking density stats' },
+      { name: 'Homepage', desc: 'Go back to landing dashboard', url: '/', keywords: 'home dashboard tools suite utility list' },
+      { name: 'About Platform', desc: 'Details on platform security, speed, and privacy features', url: '/about', keywords: 'about security client side privacy tracking details open source' }
+    ];
+
+    const overlay = document.getElementById('command-palette-overlay');
+    const input = document.getElementById('command-palette-input') as HTMLInputElement;
+    const resultsList = document.getElementById('command-palette-results');
+    let selectedIndex = 0;
+    let filteredTools = [...tools];
+
+    function openPalette() {
+      if (!overlay || !input) return;
+      overlay.classList.add('open');
+      input.value = '';
+      selectedIndex = 0;
+      renderResults();
+      setTimeout(() => input.focus(), 50);
+    }
+
+    function closePalette() {
+      if (!overlay) return;
+      overlay.classList.remove('open');
+    }
+
+    function renderResults() {
+      if (!resultsList || !input) return;
+      resultsList.innerHTML = '';
+      const val = input.value.trim().toLowerCase();
+
+      filteredTools = tools.filter(t => 
+        t.name.toLowerCase().includes(val) || 
+        t.desc.toLowerCase().includes(val) || 
+        t.keywords.toLowerCase().includes(val)
+      );
+
+      if (filteredTools.length === 0) {
+        resultsList.innerHTML = `<li class="editor-empty-state"><p>No tools matched "${val}"</p></li>`;
+        return;
+      }
+
+      filteredTools.forEach((tool, idx) => {
+        const li = document.createElement('li');
+        li.className = `command-palette-item ${idx === selectedIndex ? 'active' : ''}`;
+        
+        // Custom tool SVG icons
+        let iconHtml = '';
+        if (tool.url.includes('json')) {
+          iconHtml = '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7"></path></svg>';
+        } else if (tool.url.includes('base64')) {
+          iconHtml = '<svg viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>';
+        } else if (tool.url.includes('url')) {
+          iconHtml = '<svg viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>';
+        } else if (tool.url.includes('color')) {
+          iconHtml = '<svg viewBox="0 0 24 24"><path d="M7 21a4 4 0 01-4-4c0-2.2 1-4.8 2.6-6.4L12 4.3l7.7 7.7L12 19.7c-1.4 1.4-3.1 2.3-5 2.3z"></path></svg>';
+        } else if (tool.url.includes('lorem')) {
+          iconHtml = '<svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
+        } else if (tool.url.includes('word')) {
+          iconHtml = '<svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h10M7 16h10"></path></svg>';
+        } else {
+          iconHtml = '<svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>';
+        }
+
+        li.innerHTML = `
+          ${iconHtml}
+          <div class="command-palette-item-details">
+            <div class="command-palette-item-title">${tool.name}</div>
+            <div class="command-palette-item-desc">${tool.desc}</div>
+          </div>
+          <span class="command-palette-item-shortcut">↵</span>
+        `;
+
+        li.addEventListener('click', () => {
+          window.location.href = tool.url;
+        });
+
+        resultsList.appendChild(li);
+      });
+    }
+
+    // Bind click events to triggers
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.nav-search-trigger') || target.closest('#hero-search-trigger')) {
+        openPalette();
+      } else if (overlay && e.target === overlay) {
+        closePalette();
+      }
+    });
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Toggle palette on Ctrl+K or / (excluding when typing in elements)
+      const activeEl = document.activeElement;
+      const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+      if (((e.ctrlKey || e.metaKey) && e.key === 'k') || (e.key === '/' && !isInput)) {
+        e.preventDefault();
+        openPalette();
+      } else if (e.key === 'Escape') {
+        closePalette();
+      }
+
+      // Inside open palette navigation
+      if (overlay?.classList.contains('open')) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex + 1) % filteredTools.length;
+          renderResults();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex - 1 + filteredTools.length) % filteredTools.length;
+          renderResults();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (filteredTools[selectedIndex]) {
+            window.location.href = filteredTools[selectedIndex].url;
+          }
+        }
+      }
+    });
+
+    input?.addEventListener('input', () => {
+      selectedIndex = 0;
+      renderResults();
+    });
+
+    // Register Service Worker for offline support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.error('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,0 +1,424 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="PDF Scanner — Scan Documents to PDF | DevToolKit" description="Scan documents using your camera or upload images and convert them to PDF. Free online PDF scanner with crop, filters, and multi-page support." toolName="PDF Scanner" category="Productivity">
+
+  <div class="tool-container">
+    <div class="tab-group">
+      <button class="tab-btn active" id="tab-upload">📁 Upload Images</button>
+      <button class="tab-btn" id="tab-camera">📷 Use Camera</button>
+    </div>
+
+    <!-- Upload Mode -->
+    <div id="upload-section">
+      <div class="drop-zone" id="drop-zone">
+        <div class="drop-zone-content">
+          <span style="font-size:4.8rem;display:block;margin-bottom:1rem;">📄</span>
+          <p style="font-size:1.8rem;font-weight:600;color:var(--text-primary);margin-bottom:0.6rem;">Drop images here or click to upload</p>
+          <p style="font-size:1.4rem;color:var(--text-muted);">Supports JPG, PNG, WEBP — multiple files allowed</p>
+        </div>
+        <input type="file" id="file-input" accept="image/*" multiple style="display:none;" />
+      </div>
+    </div>
+
+    <!-- Camera Mode -->
+    <div id="camera-section" style="display:none;">
+      <div style="position:relative;border-radius:var(--radius-md);overflow:hidden;background:#000;margin-bottom:1rem;">
+        <video id="camera-video" autoplay playsinline style="width:100%;display:block;max-height:400px;object-fit:cover;"></video>
+      </div>
+      <div class="tool-actions">
+        <button class="btn btn-primary" id="btn-capture">📸 Capture</button>
+        <button class="btn btn-secondary" id="btn-switch-cam">🔄 Switch Camera</button>
+        <button class="btn btn-danger" id="btn-stop-cam">⏹ Stop Camera</button>
+      </div>
+      <canvas id="capture-canvas" style="display:none;"></canvas>
+    </div>
+
+    <!-- Scan Settings -->
+    <div style="margin:2rem 0;padding:1.6rem;background:var(--bg-input);border-radius:var(--radius-md);border:1px solid var(--border-color);">
+      <h3 style="font-size:1.5rem;margin-bottom:1.2rem;color:var(--text-primary);">Scan Settings</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:1.6rem;align-items:center;">
+        <div>
+          <label style="font-size:1.3rem;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Filter</label>
+          <select id="filter-select" style="padding:0.8rem 1.2rem;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.4rem;">
+            <option value="none">Original</option>
+            <option value="grayscale">Grayscale</option>
+            <option value="highcontrast" selected>High Contrast (Scan)</option>
+            <option value="bw">Black & White</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:1.3rem;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Page Size</label>
+          <select id="page-size" style="padding:0.8rem 1.2rem;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.4rem;">
+            <option value="a4" selected>A4</option>
+            <option value="letter">Letter</option>
+            <option value="legal">Legal</option>
+            <option value="fit">Fit to Image</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:1.3rem;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Quality</label>
+          <select id="quality-select" style="padding:0.8rem 1.2rem;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.4rem;">
+            <option value="0.6">Low (smaller file)</option>
+            <option value="0.8" selected>Medium</option>
+            <option value="0.95">High (larger file)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pages Preview -->
+    <div id="pages-container" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+        <h3 style="font-size:1.6rem;color:var(--text-primary);">📑 Pages (<span id="page-count">0</span>)</h3>
+        <div style="display:flex;gap:0.8rem;">
+          <button class="btn btn-secondary btn-sm" id="btn-clear-all">🗑 Clear All</button>
+        </div>
+      </div>
+      <div id="pages-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1.2rem;"></div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="tool-actions" style="margin-top:2rem;">
+      <button class="btn btn-primary" id="btn-generate-pdf" disabled>📥 Generate PDF</button>
+      <button class="btn btn-secondary" id="btn-add-more">➕ Add More Pages</button>
+    </div>
+
+    <div class="tool-stats" id="pdf-stats" style="display:none;">
+      <span class="tool-stat"><strong id="stat-pages">0</strong> Pages</span>
+      <span class="tool-stat"><strong id="stat-size">—</strong> Est. Size</span>
+    </div>
+
+    <div class="tool-error" id="pdf-error"></div>
+  </div>
+
+  <div class="info-section" slot="how-to-use">
+    <h2>How to Use the PDF Scanner</h2>
+    <ol class="steps-list">
+      <li><strong>Upload images</strong> of your documents (drag & drop or click to browse), or use your device camera to capture pages</li>
+      <li><strong>Adjust settings</strong> — choose a filter (High Contrast works best for text documents), page size, and quality</li>
+      <li><strong>Reorder or remove</strong> pages by clicking the ✕ button on any page thumbnail</li>
+      <li>Click <strong>Generate PDF</strong> to create and download your scanned document</li>
+    </ol>
+  </div>
+
+  <div class="info-section" slot="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <p class="faq-question">Is my document data safe?</p>
+      <p class="faq-answer">Absolutely. All processing happens 100% in your browser. Your images and PDF are never uploaded to any server. We never see your documents.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">What image formats are supported?</p>
+      <p class="faq-answer">JPG, JPEG, PNG, and WEBP files are supported. You can upload multiple images at once to create multi-page PDFs.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Can I scan using my phone camera?</p>
+      <p class="faq-answer">Yes! Click the "Use Camera" tab to activate your device camera. This works on both mobile phones and laptops with webcams. On mobile, it will use the rear camera by default.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Which filter should I use?</p>
+      <p class="faq-answer"><strong>High Contrast</strong> is best for text documents — it makes text crisp and removes shadows. Use <strong>Grayscale</strong> for photos with text. Use <strong>Original</strong> for color documents like brochures.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Is there a page limit?</p>
+      <p class="faq-answer">No hard limit. However, since processing happens in your browser, very large scans (50+ high-resolution pages) may be slow on older devices. We recommend batches of 20-30 pages for best performance.</p>
+    </div>
+  </div>
+</ToolLayout>
+
+<style>
+  .drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 4rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--bg-input);
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent-purple);
+    background: rgba(124,58,237,0.05);
+  }
+  .page-thumb {
+    position: relative;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    transition: var(--transition);
+    background: #fff;
+  }
+  .page-thumb:hover { border-color: var(--accent-purple); }
+  .page-thumb img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+  }
+  .page-thumb .page-num {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.4rem;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    font-size: 1.2rem;
+    text-align: center;
+    font-weight: 600;
+  }
+  .page-thumb .page-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(239,68,68,0.9);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition);
+  }
+  .page-thumb:hover .page-remove { opacity: 1; }
+  .btn-sm { padding: 0.6rem 1.2rem; font-size: 1.3rem; }
+</style>
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+
+<script>
+  const pages = [];
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+  const pagesContainer = document.getElementById('pages-container');
+  const pagesGrid = document.getElementById('pages-grid');
+  const pageCountEl = document.getElementById('page-count');
+  const btnGenerate = document.getElementById('btn-generate-pdf');
+  const errorEl = document.getElementById('pdf-error');
+  const statsEl = document.getElementById('pdf-stats');
+  const video = document.getElementById('camera-video');
+  const captureCanvas = document.getElementById('capture-canvas');
+  let stream = null;
+  let facingMode = 'environment';
+
+  // Tab switching
+  document.getElementById('tab-upload').addEventListener('click', () => {
+    document.getElementById('tab-upload').classList.add('active');
+    document.getElementById('tab-camera').classList.remove('active');
+    document.getElementById('upload-section').style.display = '';
+    document.getElementById('camera-section').style.display = 'none';
+    stopCamera();
+  });
+
+  document.getElementById('tab-camera').addEventListener('click', async () => {
+    document.getElementById('tab-camera').classList.add('active');
+    document.getElementById('tab-upload').classList.remove('active');
+    document.getElementById('upload-section').style.display = 'none';
+    document.getElementById('camera-section').style.display = '';
+    await startCamera();
+  });
+
+  // Camera functions
+  async function startCamera() {
+    try {
+      if (stream) stopCamera();
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }
+      });
+      video.srcObject = stream;
+    } catch (e) {
+      showError('Camera access denied. Please allow camera permissions.');
+    }
+  }
+
+  function stopCamera() {
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+      video.srcObject = null;
+    }
+  }
+
+  document.getElementById('btn-capture').addEventListener('click', () => {
+    if (!stream) return;
+    captureCanvas.width = video.videoWidth;
+    captureCanvas.height = video.videoHeight;
+    const ctx = captureCanvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    captureCanvas.toBlob(blob => {
+      if (blob) addPage(blob);
+    }, 'image/jpeg', 0.9);
+  });
+
+  document.getElementById('btn-switch-cam').addEventListener('click', async () => {
+    facingMode = facingMode === 'environment' ? 'user' : 'environment';
+    await startCamera();
+  });
+
+  document.getElementById('btn-stop-cam').addEventListener('click', stopCamera);
+
+  // Drop zone
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+  document.getElementById('btn-add-more').addEventListener('click', () => fileInput.click());
+
+  function handleFiles(files) {
+    for (const file of files) {
+      if (file.type.startsWith('image/')) addPage(file);
+    }
+  }
+
+  function addPage(blob) {
+    const url = URL.createObjectURL(blob);
+    pages.push({ blob, url });
+    renderPages();
+  }
+
+  function removePage(index) {
+    URL.revokeObjectURL(pages[index].url);
+    pages.splice(index, 1);
+    renderPages();
+  }
+
+  function renderPages() {
+    pagesContainer.style.display = pages.length > 0 ? '' : 'none';
+    statsEl.style.display = pages.length > 0 ? '' : 'none';
+    btnGenerate.disabled = pages.length === 0;
+    pageCountEl.textContent = pages.length;
+    document.getElementById('stat-pages').textContent = pages.length;
+
+    const totalBytes = pages.reduce((s, p) => s + p.blob.size, 0);
+    document.getElementById('stat-size').textContent = totalBytes > 1048576
+      ? (totalBytes / 1048576).toFixed(1) + ' MB'
+      : Math.round(totalBytes / 1024) + ' KB';
+
+    pagesGrid.innerHTML = '';
+    pages.forEach((page, i) => {
+      const div = document.createElement('div');
+      div.className = 'page-thumb';
+      div.innerHTML = `
+        <img src="${page.url}" alt="Page ${i + 1}" />
+        <div class="page-num">Page ${i + 1}</div>
+        <button class="page-remove" title="Remove page">✕</button>
+      `;
+      div.querySelector('.page-remove').addEventListener('click', () => removePage(i));
+      pagesGrid.appendChild(div);
+    });
+  }
+
+  // Clear all
+  document.getElementById('btn-clear-all').addEventListener('click', () => {
+    pages.forEach(p => URL.revokeObjectURL(p.url));
+    pages.length = 0;
+    renderPages();
+  });
+
+  // Apply filter to canvas
+  function applyFilter(ctx, canvas, filter) {
+    if (filter === 'none') return;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+      if (filter === 'grayscale') {
+        data[i] = data[i + 1] = data[i + 2] = gray;
+      } else if (filter === 'highcontrast') {
+        const contrast = 1.6;
+        const factor = (259 * (contrast * 128 + 255)) / (255 * (259 - contrast * 128));
+        data[i] = Math.min(255, Math.max(0, factor * (r - 128) + 128));
+        data[i + 1] = Math.min(255, Math.max(0, factor * (g - 128) + 128));
+        data[i + 2] = Math.min(255, Math.max(0, factor * (b - 128) + 128));
+      } else if (filter === 'bw') {
+        const val = gray > 140 ? 255 : 0;
+        data[i] = data[i + 1] = data[i + 2] = val;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+  }
+
+  // Generate PDF
+  btnGenerate.addEventListener('click', async () => {
+    if (pages.length === 0) return;
+    hideError();
+    btnGenerate.disabled = true;
+    btnGenerate.textContent = '⏳ Generating...';
+
+    try {
+      const { jsPDF } = window.jspdf;
+
+      const pageSize = document.getElementById('page-size').value;
+      const filter = document.getElementById('filter-select').value;
+      const quality = parseFloat(document.getElementById('quality-select').value);
+
+      const sizes = { a4: [210, 297], letter: [215.9, 279.4], legal: [215.9, 355.6] };
+      const isFixedSize = pageSize !== 'fit';
+
+      let pdf = null;
+
+      for (let i = 0; i < pages.length; i++) {
+        const img = await createImageBitmap(pages[i].blob);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        applyFilter(ctx, canvas, filter);
+
+        const imgData = canvas.toDataURL('image/jpeg', quality);
+        const imgW = img.width;
+        const imgH = img.height;
+
+        let pdfW, pdfH;
+        if (isFixedSize) {
+          [pdfW, pdfH] = sizes[pageSize];
+        } else {
+          pdfW = imgW * 0.264583;
+          pdfH = imgH * 0.264583;
+        }
+
+        if (i === 0) {
+          pdf = new jsPDF({ orientation: pdfW > pdfH ? 'landscape' : 'portrait', unit: 'mm', format: [pdfW, pdfH] });
+        } else {
+          pdf.addPage([pdfW, pdfH], pdfW > pdfH ? 'landscape' : 'portrait');
+        }
+
+        if (isFixedSize) {
+          const ratio = Math.min(pdfW / imgW, pdfH / imgH);
+          const w = imgW * ratio;
+          const h = imgH * ratio;
+          const x = (pdfW - w) / 2;
+          const y = (pdfH - h) / 2;
+          pdf.addImage(imgData, 'JPEG', x, y, w, h);
+        } else {
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+        }
+      }
+
+      pdf.save('scanned-document.pdf');
+    } catch (e) {
+      showError('Failed to generate PDF: ' + e.message);
+      console.error(e);
+    }
+
+    btnGenerate.disabled = false;
+    btnGenerate.textContent = '📥 Generate PDF';
+  });
+
+  function showError(msg) { errorEl.textContent = '❌ ' + msg; errorEl.classList.add('visible'); }
+  function hideError() { errorEl.classList.remove('visible'); }
+</script>

@@ -2,128 +2,425 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 ---
 
-<ToolLayout title="URL Encoder & Decoder — Free Online Tool | DevToolKit" description="Encode and decode URLs instantly. Free online URL encoding tool with encodeURI and encodeURIComponent support." toolName="URL Encoder & Decoder" category="Encoding">
+<ToolLayout title="URL Encoder & Decoder — Live URL Parameter Utility" description="Encode and decode URLs with parameter mapping. Free online percent-encoding tool with instant live updates." toolName="URL Encoder & Decoder" category="Encoding">
+  
+  <div class="workspace-toolbar">
+    <!-- Toolbar Actions -->
+    <div class="toolbar-actions">
+      <!-- Encode/Decode toggle -->
+      <div class="tab-group" style="margin: 0; padding: 0.2rem;">
+        <button class="tab-btn active" id="tab-encode">Encode</button>
+        <button class="tab-btn" id="tab-decode">Decode</button>
+      </div>
 
-  <div class="tool-container">
-    <div class="tab-group">
-      <button class="tab-btn active" id="tab-encode">Encode</button>
-      <button class="tab-btn" id="tab-decode">Decode</button>
+      <!-- Action Select -->
+      <button class="btn btn-primary" id="btn-convert" title="Run encodeURIComponent">
+        <span>🔗 Component</span>
+      </button>
+      <button class="btn btn-secondary" id="btn-uri" title="Run encodeURI">
+        <span>🌐 Full URI</span>
+      </button>
+      <button class="btn btn-secondary" id="btn-swap" title="Swap input and output fields">
+        <span>🔄 Swap</span>
+      </button>
     </div>
 
-    <div class="tool-input">
-      <textarea id="url-input" placeholder="Enter URL or text to encode..."></textarea>
+    <div class="toolbar-actions">
+      <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 1.3rem; margin-right: 1rem; cursor: pointer;">
+        <input type="checkbox" id="check-live" checked style="accent-color: var(--accent-purple);" />
+        <span>Live Mode</span>
+      </label>
+      <label class="btn btn-secondary" style="cursor: pointer; margin: 0;" title="Upload File to Encode/Decode">
+        <span>📤 Upload</span>
+        <input type="file" id="file-upload" accept=".txt,.url" style="display: none;" />
+      </label>
+      <button class="btn btn-secondary" id="btn-download" title="Download output text file">
+        <span>📥 Download</span>
+      </button>
+      <button class="btn btn-danger" id="btn-clear" title="Clear all text fields">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Grid Workspace -->
+  <div class="workspace-grid">
+    <!-- Input Workspace -->
+    <div class="editor-container" id="input-container">
+      <div class="editor-header-bar">
+        <span class="editor-title" id="input-title">Input Text / URL</span>
+        <button class="toolbar-btn" id="btn-paste" title="Paste from clipboard">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        </button>
+      </div>
+      <div class="editor-row">
+        <!-- Visual Line Numbers -->
+        <div class="editor-line-numbers" id="input-lines">1</div>
+        <div class="editor-main-area">
+          <textarea id="url-input" class="editor-textarea" placeholder="Enter URL or text to encode..." autocomplete="off"></textarea>
+          <!-- Drag & Drop Overlay -->
+          <div class="dropzone-overlay" id="drop-overlay">
+            <svg viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <p>Drop text file here to load</p>
+          </div>
+        </div>
+      </div>
+      <div class="editor-footer-status">
+        <span id="char-count">0 chars</span>
+        <span id="line-count">1 lines</span>
+      </div>
     </div>
 
-    <div class="tool-actions">
-      <button class="btn btn-primary" id="btn-component">🔗 encodeURIComponent</button>
-      <button class="btn btn-secondary" id="btn-uri">🌐 encodeURI</button>
-      <button class="btn btn-secondary" id="btn-copy">📋 Copy</button>
-      <button class="btn btn-danger" id="btn-clear">🗑 Clear</button>
-    </div>
+    <!-- Output Workspace -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title" id="output-title">Encoded Output</span>
+        <button class="toolbar-btn" id="btn-copy" title="Copy to clipboard">
+          <svg viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m-2 4h5m0 0l-2-2m2 2l-2 2"></path></svg>
+        </button>
+      </div>
 
-    <div class="tool-stats">
-      <span class="tool-stat"><strong id="stat-input-len">0</strong> Input chars</span>
-      <span class="tool-stat"><strong id="stat-output-len">0</strong> Output chars</span>
-    </div>
+      <!-- Result Panel -->
+      <div class="editor-main-area" style="flex-grow: 1;">
+        <!-- Loading spinner -->
+        <div id="processing-loader" style="display:none; position:absolute; inset:0; background:rgba(var(--bg-card),0.8); z-index:30; align-items:center; justify-content:center; flex-direction:column; gap:1.2rem;">
+          <div class="spinner" style="width:3rem; height:3rem; border-top-color:var(--accent-purple);"></div>
+          <p style="font-size:1.3rem; color:var(--text-secondary);">Converting URL data...</p>
+        </div>
 
-    <div class="tool-output" id="url-output">
-      <pre><span class="placeholder">Encoded/Decoded URL will appear here...</span></pre>
-    </div>
+        <pre class="editor-output-pre" id="url-output-text"><span class="editor-empty-state"><svg viewBox="0 0 24 24"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>Result will load here...</span></pre>
 
-    <div class="tool-error" id="url-error"></div>
+        <!-- Error Alert -->
+        <div class="tool-error" id="url-error" style="margin:1rem; padding:1.2rem 1.6rem; border-radius:var(--radius-sm);"></div>
+      </div>
+      
+      <!-- Output Footer status panel -->
+      <div class="editor-footer-status">
+        <span id="stat-output-len">0 chars</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reserved Character Visualizer Dashboard -->
+  <div class="info-section">
+    <h2>URL Percent-Encoding Guide</h2>
+    <p style="margin-bottom: 2rem;">URLs can only contain standard ASCII characters. Reserved special symbols must be percent-encoded to prevent query parameter collisions.</p>
+    
+    <div class="tools-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.6rem; cursor: default;">
+      <div class="stat-card" style="padding: 1.6rem;">
+        <span class="stat-value" style="font-size: 2.2rem; font-family: var(--font-code);">Space ➔ %20</span>
+        <span class="stat-label">Space bar</span>
+      </div>
+      <div class="stat-card" style="padding: 1.6rem;">
+        <span class="stat-value" style="font-size: 2.2rem; font-family: var(--font-code);">/ ➔ %2F</span>
+        <span class="stat-label">Forward Slash</span>
+      </div>
+      <div class="stat-card" style="padding: 1.6rem;">
+        <span class="stat-value" style="font-size: 2.2rem; font-family: var(--font-code);">? ➔ %3F</span>
+        <span class="stat-label">Question Mark</span>
+      </div>
+      <div class="stat-card" style="padding: 1.6rem;">
+        <span class="stat-value" style="font-size: 2.2rem; font-family: var(--font-code);">& ➔ %26</span>
+        <span class="stat-label">Ampersand</span>
+      </div>
+      <div class="stat-card" style="padding: 1.6rem;">
+        <span class="stat-value" style="font-size: 2.2rem; font-family: var(--font-code);">= ➔ %3D</span>
+        <span class="stat-label">Equals Symbol</span>
+      </div>
+      <div class="stat-card" style="padding: 1.6rem;">
+        <span class="stat-value" style="font-size: 2.2rem; font-family: var(--font-code);"># ➔ %23</span>
+        <span class="stat-label">Hash Fragment</span>
+      </div>
+    </div>
   </div>
 
   <div class="info-section" slot="how-to-use">
     <h2>How to Use the URL Encoder/Decoder</h2>
     <ol class="steps-list">
-      <li>Select <strong>Encode</strong> or <strong>Decode</strong> mode</li>
-      <li>Paste your URL or text into the input field</li>
-      <li>Choose <strong>encodeURIComponent</strong> (for query params) or <strong>encodeURI</strong> (for full URLs)</li>
+      <li>Select **Encode** or **Decode** from the toolbar tabs.</li>
+      <li>Enter your input text. If **Live Mode** is checked, it will convert automatically as you type.</li>
+      <li>Use the **Component** button to encode query parameter variables specifically, or **Full URI** to preserve standard URL paths (protocol, slashes).</li>
     </ol>
-    <h3>encodeURIComponent vs encodeURI</h3>
-    <p><strong>encodeURIComponent</strong> encodes everything except: <code>A-Z a-z 0-9 - _ . ! ~ * ' ( )</code>. Use this for query parameter values.</p>
-    <p><strong>encodeURI</strong> preserves URL-special characters like <code>: / ? # [ ] @ ! $ & ' ( ) * + , ; =</code>. Use this for encoding a full URL.</p>
   </div>
 
   <div class="info-section" slot="faq">
     <h2>Frequently Asked Questions</h2>
     <div class="faq-item">
-      <p class="faq-question">What is URL encoding?</p>
-      <p class="faq-answer">URL encoding (percent-encoding) replaces special characters with a % sign followed by their hexadecimal value. For example, a space becomes %20. This ensures URLs are transmitted correctly over the internet.</p>
+      <p class="faq-question">What is encodeURIComponent?</p>
+      <p class="faq-answer">This function escapes all reserved URL characters (such as `/`, `?`, `&`, `=`, `:`) substituting them with percent codes. Use this for query values inside parameter strings (e.g. `?name=John%20Doe`).</p>
     </div>
     <div class="faq-item">
-      <p class="faq-question">When should I use encodeURIComponent?</p>
-      <p class="faq-answer">Use encodeURIComponent when encoding query parameter values, form data, or any text that will be part of a URL segment. It encodes characters like &, =, and ? that have special meaning in URLs.</p>
-    </div>
-    <div class="faq-item">
-      <p class="faq-question">When should I use encodeURI?</p>
-      <p class="faq-answer">Use encodeURI when encoding a complete URL. It preserves the URL structure (protocol, slashes, colons) while encoding spaces and other non-URL characters.</p>
+      <p class="faq-question">What is encodeURI?</p>
+      <p class="faq-answer">This function preserves the core routing markers of a URL (protocol, hostname, port, pathname slashes) while encoding spaces, special characters, and non-ASCII glyphs. Use this to format a full URL.</p>
     </div>
   </div>
 </ToolLayout>
 
 <script>
   let mode = 'encode';
-  const input = document.getElementById('url-input');
-  const output = document.getElementById('url-output');
+  let method = 'component'; // component or uri
+
+  const inputEl = document.getElementById('url-input') as HTMLTextAreaElement;
+  const inputLines = document.getElementById('input-lines');
+  const charCount = document.getElementById('char-count');
+  const lineCount = document.getElementById('line-count');
+
+  const textOutputPre = document.getElementById('url-output-text');
   const errorEl = document.getElementById('url-error');
-  const btnComponent = document.getElementById('btn-component');
-  const btnUri = document.getElementById('btn-uri');
+  const loaderEl = document.getElementById('processing-loader');
+  const statOutputLen = document.getElementById('stat-output-len');
+
   const tabEncode = document.getElementById('tab-encode');
   const tabDecode = document.getElementById('tab-decode');
+  const btnConvert = document.getElementById('btn-convert');
+  const btnUri = document.getElementById('btn-uri');
+  const btnSwap = document.getElementById('btn-swap');
+  const checkLive = document.getElementById('check-live') as HTMLInputElement;
 
-  function setMode(m) {
+  const containerInput = document.getElementById('input-container');
+
+  // Auto restore sessions
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedText = localStorage.getItem('url_session');
+    const savedMode = localStorage.getItem('url_mode');
+    if (savedMode) setMode(savedMode);
+    if (savedText && inputEl) {
+      inputEl.value = savedText;
+      updateInputLines();
+      if (checkLive?.checked) {
+        performConversion(true);
+      }
+    }
+  });
+
+  inputEl?.addEventListener('input', () => {
+    updateInputLines();
+    localStorage.setItem('url_session', inputEl.value);
+    if (checkLive?.checked) {
+      performConversion(true); // run silently without loader
+    }
+  });
+
+  function updateInputLines() {
+    if (!inputEl || !inputLines || !charCount || !lineCount) return;
+    const text = inputEl.value;
+    const lines = text.split('\n');
+    const totalLines = Math.max(lines.length, 1);
+
+    let lineNumsStr = '';
+    for (let i = 1; i <= totalLines; i++) {
+      lineNumsStr += i + '<br/>';
+    }
+    inputLines.innerHTML = lineNumsStr;
+
+    charCount.textContent = `${text.length} chars`;
+    lineCount.textContent = `${totalLines} lines`;
+  }
+
+  function setMode(m: string) {
     mode = m;
-    tabEncode.classList.toggle('active', m === 'encode');
-    tabDecode.classList.toggle('active', m === 'decode');
-    btnComponent.textContent = m === 'encode' ? '🔗 encodeURIComponent' : '🔗 decodeURIComponent';
-    btnUri.textContent = m === 'encode' ? '🌐 encodeURI' : '🌐 decodeURI';
-    input.placeholder = m === 'encode' ? 'Enter URL or text to encode...' : 'Enter encoded URL to decode...';
+    localStorage.setItem('url_mode', m);
+    
+    tabEncode?.classList.toggle('active', m === 'encode');
+    tabDecode?.classList.toggle('active', m === 'decode');
+
+    const inputTitle = document.getElementById('input-title');
+    const outputTitle = document.getElementById('output-title');
+
+    if (inputTitle) inputTitle.textContent = m === 'encode' ? 'Input Text / URL' : 'Input Encoded String';
+    if (outputTitle) outputTitle.textContent = m === 'encode' ? 'Encoded Output' : 'Decoded Output';
+
+    if (btnConvert) {
+      btnConvert.innerHTML = m === 'encode' ? '<span>🔗 Component</span>' : '<span>🔓 Component</span>';
+    }
+    if (btnUri) {
+      btnUri.innerHTML = m === 'encode' ? '<span>🌐 Full URI</span>' : '<span>🌐 Full URI</span>';
+    }
+    if (inputEl) {
+      inputEl.placeholder = m === 'encode' ? 'Enter URL or text to encode...' : 'Enter encoded URL to decode...';
+    }
+
+    if (checkLive?.checked) {
+      performConversion(true);
+    }
   }
 
-  tabEncode.addEventListener('click', () => setMode('encode'));
-  tabDecode.addEventListener('click', () => setMode('decode'));
+  tabEncode?.addEventListener('click', () => setMode('encode'));
+  tabDecode?.addEventListener('click', () => setMode('decode'));
 
-  function showError(msg) { errorEl.textContent = '❌ ' + msg; errorEl.classList.add('visible'); }
-  function hideError() { errorEl.classList.remove('visible'); }
-
-  function setOutput(text) {
-    output.innerHTML = '<pre>' + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>';
-    document.getElementById('stat-input-len').textContent = input.value.length;
-    document.getElementById('stat-output-len').textContent = text.length;
+  function showError(msg: string) {
+    if (!errorEl) return;
+    errorEl.textContent = '❌ ' + msg;
+    errorEl.classList.add('visible');
   }
 
-  btnComponent.addEventListener('click', () => {
-    hideError();
-    const val = input.value;
-    if (!val.trim()) { showError('Please enter some text.'); return; }
-    try {
-      setOutput(mode === 'encode' ? encodeURIComponent(val) : decodeURIComponent(val));
-    } catch (e) { showError('Error: ' + e.message); }
+  function hideError() {
+    errorEl?.classList.remove('visible');
+  }
+
+  function setOutputText(text: string) {
+    if (!textOutputPre || !statOutputLen) return;
+    const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    textOutputPre.innerHTML = escaped;
+    statOutputLen.textContent = `${text.length} chars`;
+  }
+
+  function performConversion(silent = false) {
+    const val = inputEl?.value;
+    if (!val) {
+      if (!silent) showError('Input is empty.');
+      return;
+    }
+
+    if (silent) {
+      hideError();
+      try {
+        let result = '';
+        if (mode === 'encode') {
+          result = method === 'component' ? encodeURIComponent(val) : encodeURI(val);
+        } else {
+          result = method === 'component' ? decodeURIComponent(val) : decodeURI(val);
+        }
+        setOutputText(result);
+      } catch (e: any) {
+        showError('URIError: ' + e.message);
+      }
+    } else {
+      if (!loaderEl) return;
+      hideError();
+      loaderEl.style.display = 'flex';
+      
+      setTimeout(() => {
+        try {
+          let result = '';
+          if (mode === 'encode') {
+            result = method === 'component' ? encodeURIComponent(val) : encodeURI(val);
+          } else {
+            result = method === 'component' ? decodeURIComponent(val) : decodeURI(val);
+          }
+          setOutputText(result);
+          window.showToast('URL converted successfully!', 'success');
+        } catch (e: any) {
+          showError('URIError: ' + e.message);
+          window.showToast('URI conversion failed!', 'error');
+        } finally {
+          if (loaderEl) loaderEl.style.display = 'none';
+        }
+      }, 250);
+    }
+  }
+
+  btnConvert?.addEventListener('click', () => {
+    method = 'component';
+    performConversion(false);
   });
 
-  btnUri.addEventListener('click', () => {
-    hideError();
-    const val = input.value;
-    if (!val.trim()) { showError('Please enter some text.'); return; }
-    try {
-      setOutput(mode === 'encode' ? encodeURI(val) : decodeURI(val));
-    } catch (e) { showError('Error: ' + e.message); }
+  btnUri?.addEventListener('click', () => {
+    method = 'uri';
+    performConversion(false);
   });
 
-  document.getElementById('btn-copy').addEventListener('click', () => {
-    navigator.clipboard.writeText(output.innerText).then(() => {
-      const btn = document.getElementById('btn-copy');
-      btn.textContent = '✅ Copied!';
-      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+  btnSwap?.addEventListener('click', () => {
+    const text = textOutputPre?.innerText || '';
+    if (!text || text.includes('Result will')) return;
+
+    if (inputEl) {
+      inputEl.value = text;
+      updateInputLines();
+      localStorage.setItem('url_session', text);
+      setMode(mode === 'encode' ? 'decode' : 'encode');
+      window.showToast('Inputs swapped!', 'info');
+    }
+  });
+
+  // File Upload
+  const fileUpload = document.getElementById('file-upload') as HTMLInputElement;
+  fileUpload?.addEventListener('change', (e: any) => {
+    const file = e.target.files[0];
+    if (file) readFile(file);
+  });
+
+  // Drag & drop
+  containerInput?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    containerInput.classList.add('drag-over');
+  });
+  containerInput?.addEventListener('dragleave', () => {
+    containerInput.classList.remove('drag-over');
+  });
+  containerInput?.addEventListener('drop', (e: any) => {
+    e.preventDefault();
+    containerInput.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) readFile(file);
+  });
+
+  function readFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = (evt: any) => {
+      if (inputEl) {
+        inputEl.value = evt.target.result;
+        updateInputLines();
+        localStorage.setItem('url_session', inputEl.value);
+        window.showToast('URL text file loaded!', 'success');
+        if (checkLive?.checked) {
+          performConversion(true);
+        }
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Clear Button
+  document.getElementById('btn-clear')?.addEventListener('click', () => {
+    if (inputEl) inputEl.value = '';
+    updateInputLines();
+    localStorage.setItem('url_session', '');
+    setOutputText('Result will load here...');
+    hideError();
+    if (statOutputLen) statOutputLen.textContent = '0 chars';
+    window.showToast('Workspaces cleared', 'info');
+  });
+
+  // Copy output
+  document.getElementById('btn-copy')?.addEventListener('click', () => {
+    const text = textOutputPre?.innerText || '';
+    if (!text || text.includes('Result will')) {
+      window.showToast('Nothing to copy!', 'error');
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      window.showToast('Copied to clipboard!', 'success');
     });
   });
 
-  document.getElementById('btn-clear').addEventListener('click', () => {
-    input.value = '';
-    output.innerHTML = '<pre><span class="placeholder">Encoded/Decoded URL will appear here...</span></pre>';
-    hideError();
-    document.getElementById('stat-input-len').textContent = '0';
-    document.getElementById('stat-output-len').textContent = '0';
+  // Paste action
+  document.getElementById('btn-paste')?.addEventListener('click', () => {
+    navigator.clipboard.readText().then(text => {
+      if (inputEl) {
+        inputEl.value = text;
+        updateInputLines();
+        localStorage.setItem('url_session', text);
+        window.showToast('URL text pasted!', 'success');
+        if (checkLive?.checked) performConversion(true);
+      }
+    }).catch(() => {
+      window.showToast('Failed to read clipboard!', 'error');
+    });
+  });
+
+  // Download Output File
+  document.getElementById('btn-download')?.addEventListener('click', () => {
+    const text = textOutputPre?.innerText || '';
+    if (!text || text.includes('Result will')) {
+      window.showToast('No output to download!', 'error');
+      return;
+    }
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = mode === 'encode' ? 'url-encoded.txt' : 'url-decoded.txt';
+    link.click();
+    window.showToast('Downloaded text file!', 'success');
   });
 </script>
