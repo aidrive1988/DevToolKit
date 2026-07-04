@@ -1,0 +1,266 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="PDF Unlock — Remove Password from PDF | DevToolKit" description="Remove password protection and encryption from PDF files instantly. 100% client-side processing for maximum privacy." toolName="PDF Unlock" category="Productivity">
+
+  <div class="tool-container">
+    <!-- Upload Zone -->
+    <div class="drop-zone" id="drop-zone">
+      <div class="drop-zone-content">
+        <span style="font-size:4.8rem;display:block;margin-bottom:1rem;">🔓</span>
+        <p style="font-size:1.8rem;font-weight:600;color:var(--text-primary);margin-bottom:0.6rem;">Drop a protected PDF here or click to upload</p>
+        <p style="font-size:1.4rem;color:var(--text-muted);">Select an encrypted PDF file to remove its password</p>
+      </div>
+      <input type="file" id="file-input" accept=".pdf,application/pdf" style="display:none;" />
+    </div>
+
+    <!-- Active File Info -->
+    <div id="file-info" style="display:none;margin-top:2rem;padding:1.6rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:1.2rem;">
+          <span style="font-size:2.4rem;">📄</span>
+          <div>
+            <div id="active-filename" style="font-size:1.5rem;font-weight:600;color:var(--text-primary);">filename.pdf</div>
+            <div id="active-filemeta" style="font-size:1.3rem;color:var(--text-muted);">0 KB</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btn-change-file">🔄 Change File</button>
+      </div>
+    </div>
+
+    <!-- Unlock Settings -->
+    <div id="unlock-settings" style="display:none;margin:2rem 0;padding:1.6rem;background:var(--bg-input);border-radius:var(--radius-md);border:1px solid var(--border-color);">
+      <h3 style="font-size:1.5rem;margin-bottom:1.6rem;color:var(--text-primary);">Decryption Details</h3>
+      
+      <div style="margin-bottom:1.6rem;">
+        <label style="font-size:1.4rem;font-weight:600;color:var(--text-primary);display:block;margin-bottom:0.6rem;">Current PDF Password</label>
+        <input type="password" id="current-password" placeholder="Enter the password required to open the PDF" style="width:100%;padding:1rem 1.2rem;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.5rem;" />
+        <p style="font-size:1.2rem;color:var(--text-muted);margin-top:0.6rem;">We need the current password to unlock and strip the encryption from the file.</p>
+      </div>
+
+      <div>
+        <label style="font-size:1.3rem;color:var(--text-secondary);display:block;margin-bottom:0.4rem;">Output Filename</label>
+        <input type="text" id="output-filename" value="unlocked-document" placeholder="unlocked-document" style="padding:0.8rem 1.2rem;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:1.4rem;width:100%;max-width:300px;" />
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="tool-actions" style="margin-top:2rem;">
+      <button class="btn btn-primary" id="btn-unlock" disabled>🔓 Remove Password</button>
+    </div>
+
+    <div class="tool-error" id="unlock-error"></div>
+
+    <!-- Progress Bar -->
+    <div id="progress-container" style="display:none;margin-top:1.6rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;">
+        <span style="font-size:1.3rem;color:var(--text-secondary);" id="progress-label">Decrypting document...</span>
+      </div>
+      <div style="height:6px;background:var(--bg-input);border-radius:3px;overflow:hidden;">
+        <div id="progress-bar" style="height:100%;width:100%;background:var(--gradient-primary);border-radius:3px;animation:pulse 1.5s infinite;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-section" slot="how-to-use">
+    <h2>How to Unlock a PDF</h2>
+    <ol class="steps-list">
+      <li><strong>Upload a PDF</strong> that is currently password-protected.</li>
+      <li><strong>Enter the current password</strong>. You must know the password to unlock the document. This tool does not "crack" unknown passwords.</li>
+      <li>Click <strong>Remove Password</strong>.</li>
+      <li>The tool will decrypt your file locally and download an unprotected copy of the PDF.</li>
+    </ol>
+  </div>
+
+  <div class="info-section" slot="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <p class="faq-question">Can you crack a password I forgot?</p>
+      <p class="faq-answer">No. This tool is designed to legitimately remove encryption from a document you already own and have the password for. It does not perform password cracking or bypassing.</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-question">Does my file get uploaded to a server?</p>
+      <p class="faq-answer">No! Just like our other tools, the decryption happens entirely locally in your web browser. Your document and your password are never uploaded anywhere, ensuring complete privacy.</p>
+    </div>
+  </div>
+</ToolLayout>
+
+<style>
+  .drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 4rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    background: var(--bg-input);
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent-purple);
+    background: rgba(139, 92, 246, 0.05);
+  }
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+  .btn-sm { padding: 0.6rem 1.2rem; font-size: 1.3rem; }
+</style>
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<script>
+  let activePdf = null; // { file, name, size, arrayBuffer, isEncrypted }
+  
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+  const fileInfoEl = document.getElementById('file-info');
+  const settingsEl = document.getElementById('unlock-settings');
+  const btnUnlock = document.getElementById('btn-unlock');
+  const errorEl = document.getElementById('unlock-error');
+  const progressContainer = document.getElementById('progress-container');
+  const passwordInput = document.getElementById('current-password');
+
+  // Drop zone events
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length > 0) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  });
+  
+  fileInput.addEventListener('change', () => { 
+    if (fileInput.files.length > 0) {
+      handleFile(fileInput.files[0]); 
+    }
+    fileInput.value = ''; 
+  });
+
+  document.getElementById('btn-change-file').addEventListener('click', () => {
+    activePdf = null;
+    dropZone.style.display = 'block';
+    fileInfoEl.style.display = 'none';
+    settingsEl.style.display = 'none';
+    btnUnlock.disabled = true;
+    hideError();
+    passwordInput.value = '';
+  });
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.style.display = 'block';
+  }
+
+  function hideError() {
+    errorEl.style.display = 'none';
+  }
+
+  async function handleFile(file) {
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      try {
+        hideError();
+        const arrayBuffer = await file.arrayBuffer();
+        
+        let isEncrypted = false;
+        try {
+          // Attempt to load without password to check for encryption
+          await PDFLib.PDFDocument.load(arrayBuffer);
+        } catch (e) {
+          if (e.message.toLowerCase().includes('encrypted') || e.message.toLowerCase().includes('password')) {
+            isEncrypted = true;
+          } else {
+            throw e;
+          }
+        }
+
+        if (!isEncrypted) {
+          showError('This PDF is not password-protected. No need to unlock it!');
+          return;
+        }
+        
+        activePdf = { file, name: file.name, size: file.size, arrayBuffer, isEncrypted };
+        
+        // Update UI
+        dropZone.style.display = 'none';
+        fileInfoEl.style.display = 'block';
+        settingsEl.style.display = 'block';
+        btnUnlock.disabled = false;
+        
+        document.getElementById('active-filename').textContent = file.name;
+        document.getElementById('active-filemeta').textContent = `${formatSize(file.size)}`;
+        
+        // Suggest filename
+        const baseName = file.name.replace(/\.pdf$/i, '');
+        document.getElementById('output-filename').value = `${baseName}-unlocked`;
+        
+        // Focus password input
+        passwordInput.focus();
+        
+      } catch (err) {
+        showError(`Could not read "${file.name}": ${err.message}`);
+      }
+    } else {
+      showError('Please select a valid PDF file.');
+    }
+  }
+
+  function formatSize(bytes) {
+    if (bytes > 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+    return Math.round(bytes / 1024) + ' KB';
+  }
+
+  // Unlock / Remove Password
+  btnUnlock.addEventListener('click', async () => {
+    if (!activePdf) return;
+    hideError();
+    
+    const pwd = passwordInput.value;
+    if (!pwd) {
+      showError('Please enter the current password to unlock the document.');
+      return;
+    }
+
+    btnUnlock.disabled = true;
+    btnUnlock.textContent = '⏳ Unlocking...';
+    progressContainer.style.display = '';
+
+    try {
+      // Load the document with the provided password
+      const pdfDoc = await PDFLib.PDFDocument.load(activePdf.arrayBuffer, { password: pwd });
+      
+      // Save it (pdf-lib will save it unencrypted by default since it doesn't support writing encrypted files)
+      const unlockedBytes = await pdfDoc.save();
+      
+      // Download the new unlocked file
+      const blob = new Blob([unlockedBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      const filenameInput = document.getElementById('output-filename');
+      let filename = (filenameInput.value || 'unlocked-document').trim();
+      if (!filename.toLowerCase().endsWith('.pdf')) filename += '.pdf';
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+    } catch (err) {
+      if (err.message.toLowerCase().includes('encrypted') || err.message.toLowerCase().includes('password')) {
+        showError('Incorrect password. Please try again.');
+      } else {
+        showError(`Error unlocking PDF: ${err.message}`);
+      }
+      console.error(err);
+    } finally {
+      btnUnlock.disabled = false;
+      btnUnlock.textContent = '🔓 Remove Password';
+      progressContainer.style.display = 'none';
+    }
+  });
+</script>

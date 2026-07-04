@@ -51,6 +51,7 @@ DevToolKit is a fast, free, privacy-first collection of developer utilities. All
 │   │       ├── pdf-protect.astro      # Document Protect (encrypt PDFs)
 │   │       ├── pdf-scanner.astro      # Document-to-PDF Scanner (camera & upload)
 │   │       ├── pdf-split.astro        # Document Split (extract pages)
+│   │       ├── pdf-unlock.astro       # Document Unlock (remove password)
 │   │       ├── url-encoder.astro      # URL Percent-Encoder/Decoder
 │   │       └── word-counter.astro     # Word, Character & Read Time Counter
 │   │
@@ -115,6 +116,7 @@ Below is the implementation logic summary for each tool under `src/pages/tools/`
 | `pdf-merge.astro` | **PDF Merge** | Loads multiple PDFs via drag-and-drop. Reorders files using native drag-and-drop API and combines them sequentially using `pdf-lib` via CDN. |
 | `pdf-split.astro` | **PDF Split** | Accepts a single PDF and a range input (e.g. `1, 3-5`). Parses ranges, validates against `pageCount`, and extracts specified pages to a new document using `pdf-lib`. |
 | `pdf-protect.astro` | **PDF Protect** | Accepts a single PDF and passwords. Encrypts the PDF bytes using RC4 128-bit encryption client-side via `@pdfsmaller/pdf-encrypt-lite`. |
+| `pdf-unlock.astro` | **PDF Unlock** | Accepts an encrypted PDF and its password. Decrypts it in-memory via `pdf-lib` and saves an unprotected copy. |
 | `json-formatter.astro` | **JSON Formatter & Validator** | Parses text input with `JSON.parse`. Formats output with indentation using `JSON.stringify(..., null, 2)` or minifies it. Calculates object properties like total keys, nesting depth, and size in bytes. |
 | `base64.astro` | **Base64 Encoder/Decoder** | Encodes text using `btoa(unescape(encodeURIComponent(str)))` and decodes using `decodeURIComponent(escape(atob(str)))` to safely preserve UTF-8 strings. Includes copy-to-clipboard functionality. |
 | `url-encoder.astro` | **URL Encoder/Decoder** | Uses standard browser APIs `encodeURIComponent` / `decodeURIComponent` for strict component encoding, and `encodeURI` / `decodeURI` for full url paths. |
