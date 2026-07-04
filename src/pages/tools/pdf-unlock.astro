@@ -108,10 +108,10 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   .btn-sm { padding: 0.6rem 1.2rem; font-size: 1.3rem; }
 </style>
 
-<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-
 <script>
-  let activePdf = null; // { file, name, size, arrayBuffer, isEncrypted }
+  import { decryptPDF, isEncrypted } from '@pdfsmaller/pdf-decrypt';
+
+  let activePdf = null; // { file, name, size, arrayBuffer, encryptionInfo }
   
   const dropZone = document.getElementById('drop-zone');
   const fileInput = document.getElementById('file-input');
@@ -165,25 +165,14 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       try {
         hideError();
         const arrayBuffer = await file.arrayBuffer();
-        
-        let isEncrypted = false;
-        try {
-          // Attempt to load without password to check for encryption
-          await PDFLib.PDFDocument.load(arrayBuffer);
-        } catch (e) {
-          if (e.message.toLowerCase().includes('encrypted') || e.message.toLowerCase().includes('password')) {
-            isEncrypted = true;
-          } else {
-            throw e;
-          }
-        }
+        const encryptionInfo = await isEncrypted(new Uint8Array(arrayBuffer));
 
-        if (!isEncrypted) {
+        if (!encryptionInfo.encrypted) {
           showError('This PDF is not password-protected. No need to unlock it!');
           return;
         }
         
-        activePdf = { file, name: file.name, size: file.size, arrayBuffer, isEncrypted };
+        activePdf = { file, name: file.name, size: file.size, arrayBuffer, encryptionInfo };
         
         // Update UI
         dropZone.style.display = 'none';
@@ -230,11 +219,8 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     progressContainer.style.display = '';
 
     try {
-      // Load the document with the provided password
-      const pdfDoc = await PDFLib.PDFDocument.load(activePdf.arrayBuffer, { password: pwd });
-      
-      // Save it (pdf-lib will save it unencrypted by default since it doesn't support writing encrypted files)
-      const unlockedBytes = await pdfDoc.save();
+      const pdfBytes = new Uint8Array(activePdf.arrayBuffer);
+      const unlockedBytes = await decryptPDF(pdfBytes, pwd);
       
       // Download the new unlocked file
       const blob = new Blob([unlockedBytes], { type: 'application/pdf' });
