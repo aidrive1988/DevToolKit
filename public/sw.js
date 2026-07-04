@@ -1,4 +1,4 @@
-const CACHE_NAME = 'devtoolkit-cache-v2';
+const CACHE_NAME = 'devtoolkit-cache-v3';
 const ASSETS = [
   '/',
   '/favicon.svg',
