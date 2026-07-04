@@ -48,6 +48,7 @@ DevToolKit is a fast, free, privacy-first collection of developer utilities. All
 │   │       ├── json-formatter.astro   # JSON Formatter, Minifier & Validator
 │   │       ├── lorem-ipsum.astro      # Placeholder Lorem Ipsum Text Generator
 │   │       ├── pdf-merge.astro        # Document Merge (combine PDFs)
+│   │       ├── pdf-protect.astro      # Document Protect (encrypt PDFs)
 │   │       ├── pdf-scanner.astro      # Document-to-PDF Scanner (camera & upload)
 │   │       ├── pdf-split.astro        # Document Split (extract pages)
 │   │       ├── url-encoder.astro      # URL Percent-Encoder/Decoder
@@ -113,6 +114,7 @@ Below is the implementation logic summary for each tool under `src/pages/tools/`
 | `pdf-scanner.astro` | **PDF Scanner** | Accepts image uploads (drag-and-drop) or live camera capture. Renders pages to `<canvas>` for preview, supports reordering/deleting pages, and generates multi-page PDFs client-side using the `jspdf` library. |
 | `pdf-merge.astro` | **PDF Merge** | Loads multiple PDFs via drag-and-drop. Reorders files using native drag-and-drop API and combines them sequentially using `pdf-lib` via CDN. |
 | `pdf-split.astro` | **PDF Split** | Accepts a single PDF and a range input (e.g. `1, 3-5`). Parses ranges, validates against `pageCount`, and extracts specified pages to a new document using `pdf-lib`. |
+| `pdf-protect.astro` | **PDF Protect** | Accepts a single PDF and passwords. Encrypts the PDF bytes using RC4 128-bit encryption client-side via `@pdfsmaller/pdf-encrypt-lite`. |
 | `json-formatter.astro` | **JSON Formatter & Validator** | Parses text input with `JSON.parse`. Formats output with indentation using `JSON.stringify(..., null, 2)` or minifies it. Calculates object properties like total keys, nesting depth, and size in bytes. |
 | `base64.astro` | **Base64 Encoder/Decoder** | Encodes text using `btoa(unescape(encodeURIComponent(str)))` and decodes using `decodeURIComponent(escape(atob(str)))` to safely preserve UTF-8 strings. Includes copy-to-clipboard functionality. |
 | `url-encoder.astro` | **URL Encoder/Decoder** | Uses standard browser APIs `encodeURIComponent` / `decodeURIComponent` for strict component encoding, and `encodeURI` / `decodeURI` for full url paths. |
