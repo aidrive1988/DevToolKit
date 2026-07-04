@@ -87,6 +87,10 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       <p class="faq-question">What happens to the original PDF?</p>
       <p class="faq-answer">Your original PDF remains completely untouched on your device. The tool creates a brand new PDF file containing only the extracted pages.</p>
     </div>
+    <div class="faq-item">
+      <p class="faq-question">Can I extract pages from password-protected PDFs?</p>
+      <p class="faq-answer">Yes! If you upload an encrypted or password-protected PDF, the tool will securely prompt you for the password to unlock it locally. The password is never stored or sent anywhere.</p>
+    </div>
   </div>
 </ToolLayout>
 
@@ -152,10 +156,26 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       try {
         hideError();
         const arrayBuffer = await file.arrayBuffer();
-        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        let pdfDoc;
+        let filePassword;
+        try {
+          pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+        } catch (e) {
+          if (e.message.toLowerCase().includes('encrypted') || e.message.toLowerCase().includes('password')) {
+            const pwd = prompt(`"${file.name}" is password protected. Enter password to unlock it:`);
+            if (pwd !== null && pwd.trim() !== '') {
+              pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { password: pwd });
+              filePassword = pwd;
+            } else {
+              throw new Error("Password required to unlock this file.");
+            }
+          } else {
+            throw e;
+          }
+        }
         const pageCount = pdfDoc.getPageCount();
         
-        activePdf = { file, name: file.name, size: file.size, pageCount, arrayBuffer };
+        activePdf = { file, name: file.name, size: file.size, pageCount, arrayBuffer, password: filePassword };
         
         // Update UI
         dropZone.style.display = 'none';
@@ -235,7 +255,8 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     progressContainer.style.display = '';
 
     try {
-      const srcDoc = await PDFLib.PDFDocument.load(activePdf.arrayBuffer, { ignoreEncryption: true });
+      const loadOpts = activePdf.password ? { password: activePdf.password } : { ignoreEncryption: true };
+      const srcDoc = await PDFLib.PDFDocument.load(activePdf.arrayBuffer, loadOpts);
       const newPdf = await PDFLib.PDFDocument.create();
       
       // pdf-lib uses 0-indexed page numbers

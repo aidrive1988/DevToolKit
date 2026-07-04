@@ -92,7 +92,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     </div>
     <div class="faq-item">
       <p class="faq-question">Can I merge password-protected PDFs?</p>
-      <p class="faq-answer">Currently, encrypted/password-protected PDFs are not supported. You'll need to remove the password first using your PDF reader before merging.</p>
+      <p class="faq-answer">Yes! If you upload an encrypted or password-protected PDF, the tool will securely prompt you for the password to unlock it locally before merging. The password is never stored or sent anywhere.</p>
     </div>
     <div class="faq-item">
       <p class="faq-question">How many files can I merge at once?</p>
@@ -228,9 +228,26 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
         try {
           const arrayBuffer = await file.arrayBuffer();
-          const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+          let pdfDoc;
+          let filePassword;
+          try {
+            pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+          } catch (e) {
+            if (e.message.toLowerCase().includes('encrypted') || e.message.toLowerCase().includes('password')) {
+              const pwd = prompt(`"${file.name}" is password protected. Enter password to unlock it:`);
+              if (pwd !== null && pwd.trim() !== '') {
+                pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { password: pwd });
+                filePassword = pwd;
+              } else {
+                throw new Error("Password required to unlock this file.");
+              }
+            } else {
+              throw e;
+            }
+          }
+          
           const pageCount = pdfDoc.getPageCount();
-          pdfFiles.push({ file, name: file.name, size: file.size, pageCount, arrayBuffer });
+          pdfFiles.push({ file, name: file.name, size: file.size, pageCount, arrayBuffer, password: filePassword });
         } catch (err) {
           showError(`Could not read "${file.name}": ${err.message}`);
         }
@@ -330,7 +347,8 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       
       for (let i = 0; i < pdfFiles.length; i++) {
         setProgress(Math.round((i / pdfFiles.length) * 90), `Processing file ${i + 1} of ${pdfFiles.length}...`);
-        const srcDoc = await PDFLib.PDFDocument.load(pdfFiles[i].arrayBuffer, { ignoreEncryption: true });
+        const loadOpts = pdfFiles[i].password ? { password: pdfFiles[i].password } : { ignoreEncryption: true };
+        const srcDoc = await PDFLib.PDFDocument.load(pdfFiles[i].arrayBuffer, loadOpts);
         const copiedPages = await mergedPdf.copyPages(srcDoc, srcDoc.getPageIndices());
         copiedPages.forEach(page => mergedPdf.addPage(page));
       }
