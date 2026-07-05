@@ -79,32 +79,16 @@ export const tools: Tool[] = [
   },
 
   // Design
-  { 
-    name: 'Color Converter & Preview', 
-    description: 'Convert colors between HEX, RGB, HSL, and OKLCH', 
-    url: '/tools/color-converter', 
-    icon: '🎨', 
-    category: 'Design',
-    keywords: 'color converter hex rgb hsl oklch palette wcag contrast' 
-  },
-
-  // Generators & Text
-  { 
-    name: 'Lorem Ipsum Generator', 
-    description: 'Generate placeholder text using range sliders', 
-    url: '/tools/lorem-ipsum', 
-    icon: '📝', 
-    category: 'Generators',
-    keywords: 'lorem ipsum text generator dummy sentences words paragraphs' 
-  },
-  { 
-    name: 'Word & Character Counter', 
-    description: 'Count text length, word statistics, and speaking times', 
-    url: '/tools/word-counter', 
-    icon: '🔢', 
-    category: 'Text',
-    keywords: 'word counter characters paragraphs speaking density stats' 
-  }
+  { name: 'Color Converter & Preview', description: 'Convert colors between HEX, RGB, HSL, and OKLCH formats with WCAG contrast ratio analysis.', url: '/tools/color-converter', icon: '🎨', category: 'Design', keywords: 'color hex rgb hsl palette convert wcag contrast' },
+  { name: 'Lorem Ipsum Generator', description: 'Generate placeholder text using range sliders.', url: '/tools/lorem-ipsum', icon: '📝', category: 'Generators', keywords: 'lorem ipsum text generator placeholder words paragraphs' },
+  { name: 'Word & Character Counter', description: 'Count words, characters, reading times, speaking times, and keyword density.', url: '/tools/word-counter', icon: '🔢', category: 'Text', keywords: 'word counter characters reading speaking time density' },
+  { name: 'Hash Generator', description: 'Generate secure cryptographic hashes (MD5, SHA-1, SHA-256, SHA-512) instantly from text or files.', url: '/tools/hash-generator', icon: '🔐', category: 'Text', keywords: 'hash md5 sha1 sha256 sha512 generator crypto secure' },
+  { name: 'JWT Decoder', description: 'Decode JSON Web Tokens (JWT) safely and instantly. Inspect header, payload, and signature.', url: '/tools/jwt-decoder', icon: '🔑', category: 'Text', keywords: 'jwt json web token decode payload signature header' },
+  { name: 'Markdown to HTML', description: 'Convert Markdown to HTML instantly with live rendering preview. Export the generated HTML.', url: '/tools/markdown-to-html', icon: '📝', category: 'Text', keywords: 'markdown html convert live preview render export' },
+  { name: 'JSON ↔ CSV Converter', description: 'Convert JSON arrays to CSV format and vice versa. Instantly map data structures.', url: '/tools/json-csv', icon: '📊', category: 'Developer', keywords: 'json csv convert format spreadsheet data' },
+  { name: 'JSON/YAML/XML Converter', description: 'Convert data formats interchangeably between JSON, YAML, and XML.', url: '/tools/json-yaml-xml', icon: '🔄', category: 'Developer', keywords: 'json yaml xml convert format data' },
+  { name: 'JSON to TS Converter', description: 'Instantly generate TypeScript interfaces from JSON data structures.', url: '/tools/json-to-ts', icon: '🦕', category: 'Developer', keywords: 'json ts typescript interface types generate convert' },
+  { name: 'Diff Checker', description: 'Instantly compare two texts and highlight the differences. 100% client-side.', url: '/tools/diff-checker', icon: '⚖️', category: 'Text', keywords: 'diff checker text compare difference changes' }
 ];
 
 // Helper for Sidebar grouping

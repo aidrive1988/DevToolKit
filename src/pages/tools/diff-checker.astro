@@ -1,0 +1,133 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="Text Diff Checker — Compare Files or Strings" description="Instantly compare two texts and highlight the differences. 100% client-side." toolName="Diff Checker" category="Text">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions">
+      <button class="btn btn-primary" id="btn-compare">
+        <span>⚖️ Compare Texts</span>
+      </button>
+      <button class="btn btn-secondary" id="btn-swap">
+        <span>🔄 Swap</span>
+      </button>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-danger" id="btn-clear">
+        <span>🗑 Clear All</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace-grid" style="grid-template-columns: 1fr 1fr;">
+    <!-- Original Text -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Original Text</span>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="text-original" class="editor-textarea" placeholder="Paste original text here..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modified Text -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Modified Text</span>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="text-modified" class="editor-textarea" placeholder="Paste modified text here..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diff Output Workspace -->
+  <div class="editor-container" style="margin-top: 1.6rem; min-height: 300px; display: none;" id="diff-output-container">
+    <div class="editor-header-bar" style="background: var(--bg-card); border: 1px solid var(--border-color); border-bottom: none;">
+      <span class="editor-title">Differences</span>
+    </div>
+    <div class="editor-row" style="background: var(--bg-primary); border: 1px solid var(--border-color); border-top: none; border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md);">
+      <div class="editor-main-area" style="padding: 1.6rem;">
+        <div id="diff-output" style="white-space: pre-wrap; font-family: 'Fira Code', monospace; line-height: 1.5; font-size: 1.4rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Diff specific styles */
+    :global(span.diff-added) {
+      background-color: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+      text-decoration: none;
+    }
+    :global(span.diff-removed) {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      text-decoration: line-through;
+    }
+    :global(span.diff-unchanged) {
+      color: var(--text-primary);
+    }
+  </style>
+
+  <script>
+    import { diffWordsWithSpace } from 'diff';
+
+    const textOriginal = document.getElementById('text-original') as HTMLTextAreaElement;
+    const textModified = document.getElementById('text-modified') as HTMLTextAreaElement;
+    const diffOutputContainer = document.getElementById('diff-output-container') as HTMLDivElement;
+    const diffOutput = document.getElementById('diff-output') as HTMLDivElement;
+    
+    const btnCompare = document.getElementById('btn-compare');
+    const btnSwap = document.getElementById('btn-swap');
+    const btnClear = document.getElementById('btn-clear');
+
+    function compare() {
+      const orig = textOriginal.value;
+      const mod = textModified.value;
+
+      if (!orig && !mod) {
+        diffOutputContainer.style.display = 'none';
+        return;
+      }
+
+      diffOutputContainer.style.display = 'block';
+      const differences = diffWordsWithSpace(orig, mod);
+      
+      diffOutput.innerHTML = '';
+      
+      differences.forEach(part => {
+        const span = document.createElement('span');
+        span.className = part.added ? 'diff-added' : part.removed ? 'diff-removed' : 'diff-unchanged';
+        // Escape HTML
+        const escaped = part.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        span.innerHTML = escaped;
+        diffOutput.appendChild(span);
+      });
+    }
+
+    btnCompare?.addEventListener('click', compare);
+    
+    textOriginal.addEventListener('input', compare);
+    textModified.addEventListener('input', compare);
+
+    btnSwap?.addEventListener('click', () => {
+      const temp = textOriginal.value;
+      textOriginal.value = textModified.value;
+      textModified.value = temp;
+      compare();
+    });
+
+    btnClear?.addEventListener('click', () => {
+      textOriginal.value = '';
+      textModified.value = '';
+      diffOutputContainer.style.display = 'none';
+      diffOutput.innerHTML = '';
+    });
+  </script>
+</ToolLayout>

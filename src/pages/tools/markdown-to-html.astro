@@ -1,0 +1,195 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="Markdown to HTML Converter — Live Preview & Export" description="Convert Markdown to HTML instantly with live rendering preview. Export the generated HTML code directly. 100% client-side." toolName="Markdown to HTML Converter" category="Text">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions">
+      <!-- Tabs for toggling output view on mobile/split view -->
+      <div class="tab-group" style="margin: 0; padding: 0.2rem;">
+        <button class="tab-btn active" id="tab-preview">Live Preview</button>
+        <button class="tab-btn" id="tab-source">HTML Source</button>
+      </div>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-secondary" id="btn-copy" title="Copy HTML source to clipboard">
+        <span>📋 Copy HTML</span>
+      </button>
+      <button class="btn btn-danger" id="btn-clear" title="Clear input">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace-grid" style="grid-template-columns: 1fr 1fr;">
+    <!-- Markdown Input -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Markdown Input</span>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="md-input" class="editor-textarea" placeholder="# Hello Markdown&#10;&#10;Start typing your markdown here..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- HTML Output -->
+    <div class="editor-container" id="out-container">
+      <div class="editor-header-bar">
+        <span class="editor-title" id="out-title">Live Preview</span>
+      </div>
+      
+      <!-- Rendered HTML -->
+      <div id="html-preview" class="markdown-body" style="padding: 1.6rem; overflow-y: auto; height: 100%; background: var(--bg-primary); border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md);"></div>
+      
+      <!-- HTML Source (Hidden by default) -->
+      <div class="editor-row" id="html-source-row" style="display: none;">
+        <div class="editor-main-area">
+          <textarea id="html-source" class="editor-textarea" readonly style="font-family: 'Fira Code', monospace;"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Basic Github-like Markdown Styling for Preview */
+    .markdown-body {
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 1.6rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+      margin-top: 24px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    .markdown-body h1 { font-size: 2em; border-bottom: 1px solid var(--border-color); padding-bottom: .3em; }
+    .markdown-body h2 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); padding-bottom: .3em; }
+    .markdown-body h3 { font-size: 1.25em; }
+    .markdown-body p { margin-top: 0; margin-bottom: 16px; }
+    .markdown-body blockquote {
+      padding: 0 1em;
+      color: var(--text-secondary);
+      border-left: .25em solid var(--border-color);
+      margin: 0 0 16px 0;
+    }
+    .markdown-body ul, .markdown-body ol { padding-left: 2em; margin-bottom: 16px; }
+    .markdown-body pre {
+      padding: 16px;
+      overflow: auto;
+      font-size: 85%;
+      line-height: 1.45;
+      background-color: rgba(0,0,0,0.3);
+      border-radius: 6px;
+    }
+    .markdown-body code {
+      padding: .2em .4em;
+      margin: 0;
+      font-size: 85%;
+      background-color: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      font-family: 'Fira Code', monospace;
+    }
+    .markdown-body pre code { padding: 0; background-color: transparent; }
+    
+    @media (max-width: 900px) {
+      .workspace-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .editor-container {
+        height: 50vh;
+      }
+    }
+  </style>
+
+  <script>
+    import { marked } from 'marked';
+
+    const input = document.getElementById('md-input') as HTMLTextAreaElement;
+    const htmlPreview = document.getElementById('html-preview') as HTMLDivElement;
+    const htmlSource = document.getElementById('html-source') as HTMLTextAreaElement;
+    const htmlSourceRow = document.getElementById('html-source-row') as HTMLDivElement;
+    const outTitle = document.getElementById('out-title') as HTMLSpanElement;
+    
+    const tabPreview = document.getElementById('tab-preview');
+    const tabSource = document.getElementById('tab-source');
+    
+    const btnClear = document.getElementById('btn-clear');
+    const btnCopy = document.getElementById('btn-copy');
+
+    let currentMode = 'preview';
+
+    async function parseMarkdown() {
+      const text = input.value;
+      if (!text) {
+        htmlPreview.innerHTML = '';
+        htmlSource.value = '';
+        return;
+      }
+      
+      try {
+        const parsed = await marked.parse(text);
+        htmlPreview.innerHTML = parsed;
+        htmlSource.value = parsed;
+      } catch (e) {
+        console.error('Markdown parsing error', e);
+      }
+    }
+
+    input.addEventListener('input', parseMarkdown);
+
+    // Initial Example
+    input.value = `# Hello Markdown
+This is a live preview tool!
+
+## Features
+- **Fast:** Renders instantly as you type
+- *Secure:* 100% client side
+- \`Code support\`: Yep!
+
+> "Markdown is great!"
+`;
+    parseMarkdown();
+
+    // Tab Switching
+    function setMode(mode: string) {
+      currentMode = mode;
+      if (mode === 'preview') {
+        tabPreview?.classList.add('active');
+        tabSource?.classList.remove('active');
+        htmlPreview.style.display = 'block';
+        htmlSourceRow.style.display = 'none';
+        outTitle.textContent = 'Live Preview';
+      } else {
+        tabSource?.classList.add('active');
+        tabPreview?.classList.remove('active');
+        htmlSourceRow.style.display = 'block';
+        htmlPreview.style.display = 'none';
+        outTitle.textContent = 'HTML Source';
+      }
+    }
+
+    tabPreview?.addEventListener('click', () => setMode('preview'));
+    tabSource?.addEventListener('click', () => setMode('source'));
+
+    // Actions
+    btnClear?.addEventListener('click', () => {
+      input.value = '';
+      parseMarkdown();
+      input.focus();
+    });
+
+    btnCopy?.addEventListener('click', () => {
+      if (htmlSource.value) {
+        navigator.clipboard.writeText(htmlSource.value);
+        if (window.showToast) window.showToast('HTML copied to clipboard!');
+      }
+    });
+
+  </script>
+</ToolLayout>

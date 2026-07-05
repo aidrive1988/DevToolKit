@@ -1,0 +1,152 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="JSON ↔ CSV Converter" description="Convert JSON arrays to CSV format and vice versa. Instantly map data structures completely client-side." toolName="JSON ↔ CSV Converter" category="Developer">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions">
+      <div class="tab-group" style="margin: 0; padding: 0.2rem;">
+        <button class="tab-btn active" id="mode-json-csv">JSON to CSV</button>
+        <button class="tab-btn" id="mode-csv-json">CSV to JSON</button>
+      </div>
+      <button class="btn btn-primary" id="btn-convert">
+        <span>🔄 Convert</span>
+      </button>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-secondary" id="btn-copy">
+        <span>📋 Copy Result</span>
+      </button>
+      <button class="btn btn-danger" id="btn-clear">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace-grid" style="grid-template-columns: 1fr 1fr;">
+    <!-- Input -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title" id="input-title">Input JSON</span>
+        <button class="toolbar-btn" id="btn-paste" title="Paste from clipboard">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        </button>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="data-input" class="editor-textarea" style="font-family: 'Fira Code', monospace;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title" id="output-title">Output CSV</span>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="data-output" class="editor-textarea" readonly style="font-family: 'Fira Code', monospace;"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import Papa from 'papaparse';
+
+    const input = document.getElementById('data-input') as HTMLTextAreaElement;
+    const output = document.getElementById('data-output') as HTMLTextAreaElement;
+    const inputTitle = document.getElementById('input-title') as HTMLSpanElement;
+    const outputTitle = document.getElementById('output-title') as HTMLSpanElement;
+    
+    const modeJsonCsv = document.getElementById('mode-json-csv');
+    const modeCsvJson = document.getElementById('mode-csv-json');
+    
+    const btnConvert = document.getElementById('btn-convert');
+    const btnClear = document.getElementById('btn-clear');
+    const btnCopy = document.getElementById('btn-copy');
+    const btnPaste = document.getElementById('btn-paste');
+
+    let isJsonToCsv = true;
+
+    function setMode(mode: 'json-csv' | 'csv-json') {
+      isJsonToCsv = mode === 'json-csv';
+      if (isJsonToCsv) {
+        modeJsonCsv?.classList.add('active');
+        modeCsvJson?.classList.remove('active');
+        inputTitle.textContent = 'Input JSON';
+        outputTitle.textContent = 'Output CSV';
+        input.placeholder = '[\n  {\n    "name": "Alice",\n    "age": 30\n  }\n]';
+      } else {
+        modeCsvJson?.classList.add('active');
+        modeJsonCsv?.classList.remove('active');
+        inputTitle.textContent = 'Input CSV';
+        outputTitle.textContent = 'Output JSON';
+        input.placeholder = 'name,age\nAlice,30\nBob,25';
+      }
+      convert();
+    }
+
+    function convert() {
+      const val = input.value.trim();
+      if (!val) {
+        output.value = '';
+        return;
+      }
+
+      try {
+        if (isJsonToCsv) {
+          // JSON to CSV
+          const data = JSON.parse(val);
+          // Papa.unparse expects an array of objects
+          const csv = Papa.unparse(data);
+          output.value = csv;
+        } else {
+          // CSV to JSON
+          const result = Papa.parse(val, { header: true, skipEmptyLines: true });
+          if (result.errors.length && result.data.length === 0) {
+            output.value = 'Error parsing CSV:\n' + result.errors.map(e => e.message).join('\n');
+          } else {
+            output.value = JSON.stringify(result.data, null, 2);
+          }
+        }
+      } catch (e: any) {
+        output.value = 'Error:\n' + e.message;
+      }
+    }
+
+    modeJsonCsv?.addEventListener('click', () => setMode('json-csv'));
+    modeCsvJson?.addEventListener('click', () => setMode('csv-json'));
+
+    input.addEventListener('input', convert);
+    btnConvert?.addEventListener('click', convert);
+
+    btnClear?.addEventListener('click', () => {
+      input.value = '';
+      output.value = '';
+      input.focus();
+    });
+
+    btnCopy?.addEventListener('click', () => {
+      if (output.value) {
+        navigator.clipboard.writeText(output.value);
+        if (window.showToast) window.showToast('Result copied to clipboard!');
+      }
+    });
+
+    btnPaste?.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        input.value = text;
+        convert();
+      } catch (err) {
+        if (window.showToast) window.showToast('Failed to read clipboard', 'error');
+      }
+    });
+
+    // Init
+    setMode('json-csv');
+  </script>
+</ToolLayout>

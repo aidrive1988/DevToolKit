@@ -1,0 +1,149 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="JSON ↔ YAML ↔ XML Converter" description="Convert data formats interchangeably between JSON, YAML, and XML. Fast, reliable, and completely client-side." toolName="JSON/YAML/XML Converter" category="Developer">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions" style="display: flex; gap: 1rem; align-items: center;">
+      <!-- Format Selectors -->
+      <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+        <span style="font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Input Format</span>
+        <select id="in-format" class="editor-textarea" style="height: 36px; padding: 0.4rem; background: var(--bg-card); border-color: var(--border-color); color: var(--text-primary); border-radius: var(--radius-sm); font-size: 1.3rem;">
+          <option value="json">JSON</option>
+          <option value="yaml">YAML</option>
+          <option value="xml">XML</option>
+        </select>
+      </div>
+
+      <span style="color: var(--text-secondary); font-size: 1.6rem; margin-top: 1.2rem;">➔</span>
+
+      <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+        <span style="font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Output Format</span>
+        <select id="out-format" class="editor-textarea" style="height: 36px; padding: 0.4rem; background: var(--bg-card); border-color: var(--border-color); color: var(--text-primary); border-radius: var(--radius-sm); font-size: 1.3rem;">
+          <option value="yaml">YAML</option>
+          <option value="json">JSON</option>
+          <option value="xml">XML</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="toolbar-actions" style="margin-top: 1.2rem;">
+      <button class="btn btn-secondary" id="btn-copy">
+        <span>📋 Copy Result</span>
+      </button>
+      <button class="btn btn-danger" id="btn-clear">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace-grid" style="grid-template-columns: 1fr 1fr;">
+    <!-- Input -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title" id="input-title">Input</span>
+        <button class="toolbar-btn" id="btn-paste" title="Paste from clipboard">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        </button>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="data-input" class="editor-textarea" style="font-family: 'Fira Code', monospace;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title" id="output-title">Output</span>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="data-output" class="editor-textarea" readonly style="font-family: 'Fira Code', monospace;"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import * as yaml from 'js-yaml';
+    import { json2xml, xml2json } from 'xml-js';
+
+    const input = document.getElementById('data-input') as HTMLTextAreaElement;
+    const output = document.getElementById('data-output') as HTMLTextAreaElement;
+    
+    const inFormat = document.getElementById('in-format') as HTMLSelectElement;
+    const outFormat = document.getElementById('out-format') as HTMLSelectElement;
+    
+    const btnClear = document.getElementById('btn-clear');
+    const btnCopy = document.getElementById('btn-copy');
+    const btnPaste = document.getElementById('btn-paste');
+
+    function convert() {
+      const val = input.value.trim();
+      if (!val) {
+        output.value = '';
+        return;
+      }
+
+      const typeIn = inFormat.value;
+      const typeOut = outFormat.value;
+
+      try {
+        let jsObject: any;
+
+        // Parse Input to JS Object
+        if (typeIn === 'json') {
+          jsObject = JSON.parse(val);
+        } else if (typeIn === 'yaml') {
+          jsObject = yaml.load(val);
+        } else if (typeIn === 'xml') {
+          jsObject = JSON.parse(xml2json(val, { compact: true, spaces: 2 }));
+        }
+
+        // Convert JS Object to Output
+        if (typeOut === 'json') {
+          output.value = JSON.stringify(jsObject, null, 2);
+        } else if (typeOut === 'yaml') {
+          output.value = yaml.dump(jsObject);
+        } else if (typeOut === 'xml') {
+          // If the root object has multiple keys, xml-js needs a single root element usually,
+          // but we will just pass it to json2xml.
+          output.value = json2xml(JSON.stringify(jsObject), { compact: true, spaces: 2 });
+        }
+      } catch (e: any) {
+        output.value = 'Error:\n' + e.message;
+      }
+    }
+
+    inFormat.addEventListener('change', convert);
+    outFormat.addEventListener('change', convert);
+    input.addEventListener('input', convert);
+
+    btnClear?.addEventListener('click', () => {
+      input.value = '';
+      output.value = '';
+      input.focus();
+    });
+
+    btnCopy?.addEventListener('click', () => {
+      if (output.value) {
+        navigator.clipboard.writeText(output.value);
+        if (window.showToast) window.showToast('Result copied to clipboard!');
+      }
+    });
+
+    btnPaste?.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        input.value = text;
+        convert();
+      } catch (err) {
+        if (window.showToast) window.showToast('Failed to read clipboard', 'error');
+      }
+    });
+
+  </script>
+</ToolLayout>

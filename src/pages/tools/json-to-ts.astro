@@ -1,0 +1,169 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="JSON to TypeScript Interfaces" description="Instantly generate TypeScript interfaces from JSON data structures. 100% client-side." toolName="JSON to TS Converter" category="Developer">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions">
+      <button class="btn btn-primary" id="btn-convert">
+        <span>🔄 Generate Types</span>
+      </button>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-left: 1rem;">
+        <label for="root-name" style="color: var(--text-secondary); font-size: 1.2rem;">Root Name:</label>
+        <input type="text" id="root-name" value="RootObject" class="editor-textarea" style="height: 32px; width: 140px; padding: 0.2rem 0.6rem; min-height: auto; border-radius: var(--radius-sm);" />
+      </div>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-secondary" id="btn-copy">
+        <span>📋 Copy Result</span>
+      </button>
+      <button class="btn btn-danger" id="btn-clear">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace-grid" style="grid-template-columns: 1fr 1fr;">
+    <!-- Input -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Input JSON</span>
+        <button class="toolbar-btn" id="btn-paste" title="Paste from clipboard">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        </button>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="data-input" class="editor-textarea" style="font-family: 'Fira Code', monospace;" placeholder="{\n  &quot;name&quot;: &quot;DevToolKit&quot;,\n  &quot;version&quot;: 2,\n  &quot;isActive&quot;: true\n}"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">TypeScript Interfaces</span>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="data-output" class="editor-textarea" readonly style="font-family: 'Fira Code', monospace; color: #a855f7;"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('data-input') as HTMLTextAreaElement;
+    const output = document.getElementById('data-output') as HTMLTextAreaElement;
+    const rootNameInput = document.getElementById('root-name') as HTMLInputElement;
+    
+    const btnConvert = document.getElementById('btn-convert');
+    const btnClear = document.getElementById('btn-clear');
+    const btnCopy = document.getElementById('btn-copy');
+    const btnPaste = document.getElementById('btn-paste');
+
+    // Simple custom TS generator
+    function jsonToTs(json: string, rootName: string = 'RootObject'): string {
+      const obj = JSON.parse(json);
+      let interfaces = '';
+      const interfaceSet = new Map<string, string>();
+
+      function toPascalCase(str: string) {
+        return str.replace(/(^\w|_\w|-\w)/g, clearAndUpper).replace(/[^a-zA-Z0-9]/g, '');
+      }
+      function clearAndUpper(text: string) {
+        return text.replace(/-|_/, '').toUpperCase();
+      }
+
+      function getType(val: any, key: string): string {
+        if (val === null) return 'any';
+        if (Array.isArray(val)) {
+          if (val.length === 0) return 'any[]';
+          const type = getType(val[0], key);
+          return `${type}[]`;
+        }
+        if (typeof val === 'object') {
+          const interfaceName = toPascalCase(key);
+          generateInterface(interfaceName, val);
+          return interfaceName;
+        }
+        return typeof val;
+      }
+
+      function generateInterface(name: string, obj: any) {
+        // If we already generated this exact interface, skip to avoid duplicates 
+        // (a more robust tool would compare keys, but this is a simple version)
+        
+        let intDef = `export interface ${name} {\n`;
+        for (const key in obj) {
+          const type = getType(obj[key], key);
+          // check if key has spaces or special chars
+          const safeKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : `'${key}'`;
+          intDef += `  ${safeKey}: ${type};\n`;
+        }
+        intDef += '}\n\n';
+        interfaceSet.set(name, intDef);
+      }
+
+      const rootType = getType(obj, rootName);
+      
+      // If root is array, generateInterface handles the object inside it
+      // we just output everything in the map
+      interfaceSet.forEach(val => {
+        interfaces = val + interfaces; // prepend dependencies
+      });
+      
+      if (Array.isArray(obj)) {
+        interfaces += `export type ${rootName} = ${rootType};\n`;
+      }
+
+      return interfaces.trim();
+    }
+
+    function convert() {
+      const val = input.value.trim();
+      if (!val) {
+        output.value = '';
+        return;
+      }
+
+      try {
+        const root = rootNameInput.value.trim() || 'RootObject';
+        output.value = jsonToTs(val, root);
+      } catch (e: any) {
+        output.value = 'Invalid JSON:\n' + e.message;
+      }
+    }
+
+    input.addEventListener('input', convert);
+    rootNameInput.addEventListener('input', convert);
+    btnConvert?.addEventListener('click', convert);
+
+    btnClear?.addEventListener('click', () => {
+      input.value = '';
+      output.value = '';
+      input.focus();
+    });
+
+    btnCopy?.addEventListener('click', () => {
+      if (output.value) {
+        navigator.clipboard.writeText(output.value);
+        if (window.showToast) window.showToast('Result copied to clipboard!');
+      }
+    });
+
+    btnPaste?.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        input.value = text;
+        convert();
+      } catch (err) {
+        if (window.showToast) window.showToast('Failed to read clipboard', 'error');
+      }
+    });
+
+    // Run if there is text initially
+    convert();
+  </script>
+</ToolLayout>

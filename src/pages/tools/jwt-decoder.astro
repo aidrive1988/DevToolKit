@@ -1,0 +1,200 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="JWT Decoder — Inspect Header, Payload, and Signature" description="Decode JSON Web Tokens (JWT) safely and instantly. Inspect header, payload, and verify signature structures entirely client-side." toolName="JWT Decoder" category="Text">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions">
+      <button class="btn btn-danger" id="btn-clear" title="Clear all fields">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace-grid">
+    <!-- Input Workspace -->
+    <div class="editor-container" id="input-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Encoded JWT Token</span>
+        <button class="toolbar-btn" id="btn-paste" title="Paste from clipboard">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        </button>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="jwt-input" class="editor-textarea" placeholder="Paste your JWT token here (e.g. eyJhbGci...)" autocomplete="off" style="font-family: monospace; word-break: break-all;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output Workspace -->
+    <div class="editor-container" style="display: flex; flex-direction: column; gap: 1rem; background: transparent; border: none; padding: 0;">
+      
+      <!-- Error Message -->
+      <div id="jwt-error" style="display: none; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(239, 68, 68, 0.3);">
+        Invalid JWT format. A valid JWT consists of 3 parts separated by dots.
+      </div>
+
+      <!-- Header -->
+      <div class="jwt-card header-card">
+        <div class="jwt-card-header">
+          <strong>Header</strong> <span class="jwt-badge" style="color: #ef4444;">ALGORITHM & TOKEN TYPE</span>
+        </div>
+        <textarea id="out-header" class="editor-textarea code-bg" readonly></textarea>
+      </div>
+
+      <!-- Payload -->
+      <div class="jwt-card payload-card">
+        <div class="jwt-card-header">
+          <strong>Payload</strong> <span class="jwt-badge" style="color: #a855f7;">DATA</span>
+        </div>
+        <textarea id="out-payload" class="editor-textarea code-bg" style="min-height: 200px;" readonly></textarea>
+      </div>
+
+      <!-- Signature -->
+      <div class="jwt-card signature-card">
+        <div class="jwt-card-header">
+          <strong>Signature</strong> <span class="jwt-badge" style="color: #06b6d4;">VERIFICATION</span>
+        </div>
+        <textarea id="out-signature" class="editor-textarea code-bg" style="height: 60px; min-height: 60px; word-break: break-all;" readonly></textarea>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .jwt-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .jwt-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .jwt-card-header strong {
+      color: var(--text-primary);
+      font-size: 1.4rem;
+      letter-spacing: 0.05em;
+    }
+    .jwt-badge {
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .code-bg {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Fira Code', monospace;
+      font-size: 1.3rem;
+      resize: vertical;
+    }
+    
+    .header-card { border-left: 4px solid #ef4444; }
+    .payload-card { border-left: 4px solid #a855f7; }
+    .signature-card { border-left: 4px solid #06b6d4; }
+  </style>
+
+  <script>
+    const input = document.getElementById('jwt-input') as HTMLTextAreaElement;
+    const outHeader = document.getElementById('out-header') as HTMLTextAreaElement;
+    const outPayload = document.getElementById('out-payload') as HTMLTextAreaElement;
+    const outSignature = document.getElementById('out-signature') as HTMLTextAreaElement;
+    const errorMsg = document.getElementById('jwt-error') as HTMLDivElement;
+    const btnClear = document.getElementById('btn-clear');
+    const btnPaste = document.getElementById('btn-paste');
+
+    function base64UrlDecode(str: string) {
+      // Add padding if needed and replace url-safe chars
+      str = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (str.length % 4) {
+        str += '=';
+      }
+      
+      try {
+        const decoded = atob(str);
+        // UTF-8 decode
+        return decodeURIComponent(escape(decoded));
+      } catch (e) {
+        throw new Error('Invalid base64');
+      }
+    }
+
+    function formatJson(str: string) {
+      try {
+        return JSON.stringify(JSON.parse(str), null, 2);
+      } catch (e) {
+        return str;
+      }
+    }
+
+    function decodeJwt(token: string) {
+      if (!token.trim()) {
+        errorMsg.style.display = 'none';
+        outHeader.value = '';
+        outPayload.value = '';
+        outSignature.value = '';
+        return;
+      }
+
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        errorMsg.style.display = 'block';
+        outHeader.value = '';
+        outPayload.value = '';
+        outSignature.value = '';
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+
+      try {
+        outHeader.value = formatJson(base64UrlDecode(parts[0]));
+      } catch (e) {
+        outHeader.value = 'Error decoding header';
+      }
+
+      try {
+        outPayload.value = formatJson(base64UrlDecode(parts[1]));
+      } catch (e) {
+        outPayload.value = 'Error decoding payload';
+      }
+
+      outSignature.value = parts[2]; // Signature is binary, just display the raw b64 string
+    }
+
+    input.addEventListener('input', () => decodeJwt(input.value));
+
+    btnClear?.addEventListener('click', () => {
+      input.value = '';
+      decodeJwt('');
+      input.focus();
+    });
+
+    btnPaste?.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        input.value = text;
+        decodeJwt(text);
+      } catch (err) {
+        if (window.showToast) window.showToast('Failed to read clipboard', 'error');
+      }
+    });
+  </script>
+
+  <Fragment slot="how-to-use">
+    <h3>About JWT Tokens</h3>
+    <p>A JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties. The token consists of three parts:</p>
+    <ul>
+      <li><strong>Header:</strong> Contains the type of token and the hashing algorithm being used (e.g., HMAC SHA256 or RSA).</li>
+      <li><strong>Payload:</strong> Contains the claims or statements about an entity (typically, the user) and additional data.</li>
+      <li><strong>Signature:</strong> Used to verify the message wasn't changed along the way.</li>
+    </ul>
+    <p><em>Security Note:</em> This tool decodes the token so you can read the data. It does <strong>not</strong> verify the signature. Decoding is done 100% locally in your browser.</p>
+  </Fragment>
+</ToolLayout>
