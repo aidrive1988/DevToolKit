@@ -12,6 +12,7 @@ const canonical = canonicalURL || new URL(Astro.url.pathname, siteURL).href;
 const image = ogImage || `${siteURL}/og-default.png`;
 
 import '../styles/global.css';
+import Sidebar from '../components/Sidebar.astro';
 ---
 
 <!DOCTYPE html>
@@ -74,9 +75,15 @@ import '../styles/global.css';
   </script>
 
 
+  <link rel="stylesheet" href="/src/styles/sidebar.css" />
 </head>
 <body>
-  <slot />
+  <div class="app-layout">
+    <Sidebar />
+    <div class="app-main">
+      <slot />
+    </div>
+  </div>
 
   <!-- Toast Stack Container -->
   <div class="toast-container" id="toast-container"></div>
@@ -141,21 +148,13 @@ import '../styles/global.css';
     };
 
     // Command Palette Logic
+    import { tools as rawTools } from '../data/tools';
     const tools = [
-      { name: 'JSON Formatter & Validator', desc: 'Format, validate, sort, and minify JSON data', url: '/tools/json-formatter', keywords: 'json format validate beautify minify compress' },
-      { name: 'Base64 Encoder & Decoder', desc: 'Encode and decode Base64 strings or files', url: '/tools/base64', keywords: 'base64 encode decode b64 text binary file' },
-      { name: 'URL Encoder & Decoder', desc: 'Encode/decode URLs with parameter visualization', url: '/tools/url-encoder', keywords: 'url encode decode percent link query params' },
-      { name: 'Color Converter & Preview', desc: 'Convert colors between HEX, RGB, HSL, and OKLCH', url: '/tools/color-converter', keywords: 'color converter hex rgb hsl oklch palette wcag contrast' },
-      { name: 'Lorem Ipsum Generator', desc: 'Generate placeholder text using range sliders', url: '/tools/lorem-ipsum', keywords: 'lorem ipsum text generator dummy sentences words paragraphs' },
-      { name: 'Word & Character Counter', desc: 'Count text length, word statistics, and speaking times', url: '/tools/word-counter', keywords: 'word counter characters paragraphs speaking density stats' },
-      { name: 'PDF Scanner', desc: 'Scan documents with camera or generate from images', url: '/tools/pdf-scanner', keywords: 'pdf scanner camera picture image convert multiple pages scan' },
-      { name: 'PDF Merge', desc: 'Combine multiple PDF files into a single document instantly', url: '/tools/pdf-merge', keywords: 'pdf merge combine join multiple files documents' },
-      { name: 'PDF Split', desc: 'Extract specific pages or split PDF into smaller files', url: '/tools/pdf-split', keywords: 'pdf split extract separate pages split divide' },
-      { name: 'PDF Protect', desc: 'Secure your PDF files with passwords and encryption', url: '/tools/pdf-protect', keywords: 'pdf protect secure password encrypt lock security' },
-      { name: 'PDF Unlock', desc: 'Remove password protection and encryption from PDF files', url: '/tools/pdf-unlock', keywords: 'pdf unlock decrypt remove password security open unprotect' },
-      { name: 'Homepage', desc: 'Go back to landing dashboard', url: '/', keywords: 'home dashboard tools suite utility list' },
-      { name: 'About Platform', desc: 'Details on platform security, speed, and privacy features', url: '/about', keywords: 'about security client side privacy tracking details open source' }
-    ];
+      ...rawTools,
+      { name: 'Homepage', description: 'Go back to landing dashboard', url: '/', keywords: 'home dashboard tools suite utility list', icon: '🏠', category: 'Platform' },
+      { name: 'About Platform', description: 'Details on platform security, speed, and privacy features', url: '/about', keywords: 'about security client side privacy tracking details open source', icon: 'ℹ️', category: 'Platform' }
+    ].map(t => ({ ...t, desc: t.description })); // mapping desc for backward compatibility with command palette filter logic
+
 
     const overlay = document.getElementById('command-palette-overlay');
     const input = document.getElementById('command-palette-input') as HTMLInputElement;

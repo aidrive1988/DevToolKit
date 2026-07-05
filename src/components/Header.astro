@@ -3,35 +3,17 @@ const currentPath = Astro.url.pathname;
 ---
 
 <header class="header" id="main-header">
-  <div class="container header-inner">
-    <a href="/" class="logo-link" aria-label="DevToolKit Home">
-      <svg viewBox="0 0 24 24" width="24" height="24" style="flex-shrink: 0; fill: url(#logo-grad);">
-        <defs>
-          <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#8b5cf6" />
-            <stop offset="100%" stop-color="#06b6d4" />
-          </linearGradient>
-        </defs>
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-      </svg>
-      DevToolKit
-    </a>
-
-    <button class="mobile-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+  <div class="container header-inner" style="justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <button class="mobile-sidebar-toggle" id="mobile-sidebar-toggle" aria-label="Toggle Menu">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      <!-- Optional: Page title could go here dynamically if we wanted -->
+    </div>
     
     <nav style="display: flex; align-items: center; gap: 1.6rem;">
-      <ul class="nav-links" id="nav-links">
-        <li><a href="/" class={currentPath === '/' ? 'active' : ''}>Home</a></li>
-        <li><a href="/#tools" class={currentPath.includes('/tools') ? 'active' : ''}>Tools</a></li>
-        <li><a href="/about" class={currentPath === '/about/' || currentPath === '/about' ? 'active' : ''}>About</a></li>
-        <li>
-          <a href="https://docs.google.com/forms/d/e/1FAIpQLSdkB0nhzGXD9Cuop6GW7ScTKZyt8bkj5EQBGL3Fn3nCRYfFRw/viewform" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 0.6rem;">
-            Submit Feedback
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-top: 2px;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"></path></svg>
-          </a>
-        </li>
-      </ul>
-
       <!-- Universal Search Button -->
       <button class="nav-search-trigger" aria-label="Search tools" id="nav-search-trigger">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-top: 1px;"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>

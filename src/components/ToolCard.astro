@@ -1,43 +1,43 @@
 ---
 interface Props {
-  title: string;
+  name: string;
   description: string;
-  href: string;
+  url: string;
   icon: string; // fallback
   category: string;
 }
 
-const { title, description, href, category } = Astro.props;
+const { name, description, url, category } = Astro.props;
 
 // Determine custom SVG based on tool URL path
 let svgIconHtml = '';
-if (href.includes('json')) {
+if (url.includes('json')) {
   // Braces/Code SVG
   svgIconHtml = `<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>`;
-} else if (href.includes('base64')) {
+} else if (url.includes('base64')) {
   // Key Lock / Encrypt SVG
   svgIconHtml = `<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>`;
-} else if (href.includes('url')) {
+} else if (url.includes('url')) {
   // URL Link Chain SVG
   svgIconHtml = `<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>`;
-} else if (href.includes('color')) {
+} else if (url.includes('color')) {
   // Swatch/Art Palette SVG
   svgIconHtml = `<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4c0-2.2 1-4.8 2.6-6.4L12 4.3l7.7 7.7L12 19.7c-1.4 1.4-3.1 2.3-5 2.3z" /></svg>`;
-} else if (href.includes('lorem')) {
+} else if (url.includes('lorem')) {
   // Page/Text Generator SVG
   svgIconHtml = `<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`;
-} else if (href.includes('word')) {
-  // Lines Counter SVG
-  svgIconHtml = `<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h10M7 16h10" /></svg>`;
+} else if (url.includes('pdf')) {
+  // Document SVG for PDF tools
+  svgIconHtml = `<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>`;
 } else {
-  // Default utility SVG
-  svgIconHtml = `<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>`;
+  // Default Tools SVG
+  svgIconHtml = `<svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`;
 }
 ---
 
-<a href={href} class={`tool-grid-card card-${href.split('/').pop()}`}>
+<a href={url} class={`tool-grid-card card-${url.split('/').pop()}`}>
   <div class="tool-icon-wrapper" set:html={svgIconHtml}></div>
-  <h3>{title}</h3>
+  <h3>{name}</h3>
   <p>{description}</p>
   <div class="tool-meta-wrapper">
     <span class="tool-badge">{category}</span>

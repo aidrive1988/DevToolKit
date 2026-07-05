@@ -1,0 +1,59 @@
+---
+import { groupedTools } from '../data/tools';
+
+const currentPath = Astro.url.pathname;
+
+// Sort categories (Productivity first, then others alphabetically)
+const categories = Object.keys(groupedTools).sort((a, b) => {
+  if (a === 'Productivity') return -1;
+  if (b === 'Productivity') return 1;
+  return a.localeCompare(b);
+});
+---
+
+<aside class="app-sidebar" id="app-sidebar">
+  <div class="sidebar-brand">
+    <a href="/" aria-label="DevToolKit Home">
+      <svg viewBox="0 0 24 24" width="24" height="24" style="flex-shrink: 0; fill: url(#logo-grad-sidebar);">
+        <defs>
+          <linearGradient id="logo-grad-sidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#8b5cf6" />
+            <stop offset="100%" stop-color="#06b6d4" />
+          </linearGradient>
+        </defs>
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+      </svg>
+      DevToolKit
+    </a>
+  </div>
+
+  <nav class="sidebar-nav">
+    {categories.map(category => (
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">{category}</div>
+        {groupedTools[category].map(tool => (
+          <a 
+            href={tool.url} 
+            class={`sidebar-link ${currentPath === tool.url || currentPath === tool.url + '/' ? 'active' : ''}`}
+            title={tool.description}
+          >
+            <span class="sidebar-icon">{tool.icon}</span>
+            <span class="sidebar-text">{tool.name}</span>
+          </a>
+        ))}
+      </div>
+    ))}
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">Platform</div>
+      <a href="/about" class={`sidebar-link ${currentPath.includes('/about') ? 'active' : ''}`}>
+        <span class="sidebar-icon">ℹ️</span>
+        <span class="sidebar-text">About & Privacy</span>
+      </a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSdkB0nhzGXD9Cuop6GW7ScTKZyt8bkj5EQBGL3Fn3nCRYfFRw/viewform" target="_blank" rel="noopener noreferrer" class="sidebar-link">
+        <span class="sidebar-icon">💬</span>
+        <span class="sidebar-text">Submit Feedback</span>
+      </a>
+    </div>
+  </nav>
+</aside>

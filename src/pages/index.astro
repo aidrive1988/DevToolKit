@@ -3,20 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ToolCard from '../components/ToolCard.astro';
-
-const tools = [
-  { title: 'PDF Scanner', description: 'Scan documents with your camera or upload images. Apply filters and generate multi-page PDFs instantly.', href: '/tools/pdf-scanner', icon: '📄', category: 'Productivity' },
-  { title: 'PDF Merge', description: 'Combine multiple PDF files into a single document instantly. Reorder pages and download.', href: '/tools/pdf-merge', icon: '📑', category: 'Productivity' },
-  { title: 'PDF Split', description: 'Extract specific pages from a PDF document or split it into smaller files.', href: '/tools/pdf-split', icon: '✂️', category: 'Productivity' },
-  { title: 'PDF Protect', description: 'Secure your PDF files with passwords and 128-bit encryption. 100% client-side processing.', href: '/tools/pdf-protect', icon: '🔒', category: 'Productivity' },
-  { title: 'PDF Unlock', description: 'Remove password protection and encryption from PDF files instantly.', href: '/tools/pdf-unlock', icon: '🔓', category: 'Productivity' },
-  { title: 'JSON Formatter & Validator', description: 'Format, validate, beautify, and minify JSON data instantly with syntax highlighting.', href: '/tools/json-formatter', icon: '📋', category: 'Developer' },
-  { title: 'Base64 Encoder & Decoder', desc: 'Encode and decode Base64 strings instantly.', description: 'Encode and decode Base64 strings or binary data with drag-and-drop file support.', href: '/tools/base64', icon: '🔐', category: 'Encoding' },
-  { title: 'URL Encoder & Decoder', description: 'Encode and decode URLs with visual query parameter mapping.', href: '/tools/url-encoder', icon: '🔗', category: 'Encoding' },
-  { title: 'Color Converter & Preview', description: 'Convert colors between HEX, RGB, HSL, and OKLCH formats with WCAG contrast ratio analysis.', href: '/tools/color-converter', icon: '🎨', category: 'Design' },
-  { title: 'Lorem Ipsum Generator', description: 'Generate placeholder text using range sliders.', href: '/tools/lorem-ipsum', icon: '📝', category: 'Generators' },
-  { title: 'Word & Character Counter', description: 'Count words, characters, reading times, speaking times, and keyword density.', href: '/tools/word-counter', icon: '🔢', category: 'Text' },
-];
+import { tools } from '../data/tools';
 
 const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'Generators', 'Text'];
 ---
@@ -94,7 +81,7 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
     <!-- Grid List -->
     <div class="tools-grid" style="margin-top: 3.2rem;">
       {tools.map((tool) => (
-        <div class="tool-card-container" data-title={tool.title} data-desc={tool.description} data-category={tool.category}>
+        <div class="tool-card-container" data-title={tool.name} data-desc={tool.description} data-category={tool.category}>
           <ToolCard {...tool} />
         </div>
       ))}
