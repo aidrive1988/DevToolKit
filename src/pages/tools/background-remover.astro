@@ -1,0 +1,224 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="AI Background Remover" description="Remove image backgrounds instantly using client-side AI. The model runs locally in your browser so your images never leave your device." toolName="Background Remover" category="Media">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions">
+      <label class="btn btn-primary" style="cursor: pointer; margin: 0;">
+        <span>📤 Select Image</span>
+        <input type="file" id="file-upload" accept="image/*" style="display: none;" />
+      </label>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-danger" id="btn-clear" title="Clear loaded image">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- WASM Model Disclaimer -->
+  <div class="info-alert" style="margin-bottom: 2rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 1.2rem; border-radius: var(--radius-md); display: flex; align-items: start; gap: 1rem;">
+    <svg viewBox="0 0 24 24" width="24" height="24" style="color: #38bdf8; flex-shrink: 0; margin-top: 2px;" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <div>
+      <h4 style="margin: 0 0 0.5rem 0; color: #38bdf8; font-size: 1.4rem;">First-Time Load Disclaimer</h4>
+      <p style="margin: 0; font-size: 1.2rem; color: var(--text-primary); line-height: 1.5;">This tool uses advanced AI that runs <strong>entirely in your browser</strong> to ensure your privacy. On your very first use, it must securely download the AI model (~40MB). This may take a few moments depending on your connection. Once downloaded, it is cached locally and subsequent uses will be lightning fast!</p>
+    </div>
+  </div>
+
+  <div class="workspace-grid" style="grid-template-columns: 1fr 1fr;">
+    <!-- Original Image -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Original Image</span>
+      </div>
+      <div class="editor-row" style="background: var(--bg-primary); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
+        
+        <div class="dropzone-overlay" id="drop-overlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--border-color); border-radius: var(--radius-md); width: 100%; height: 300px;">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-secondary); margin-bottom: 1rem;"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <p style="color: var(--text-secondary); font-size: 1.4rem;">Drag & drop an image here</p>
+        </div>
+
+        <div id="original-preview" style="display: none; width: 100%; text-align: center;">
+          <img id="orig-img" style="max-width: 100%; max-height: 300px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" />
+          
+          <button class="btn btn-primary" id="btn-remove-bg" style="width: 100%; justify-content: center; font-size: 1.4rem; margin-top: 2rem;">
+            ✨ Remove Background
+          </button>
+          
+          <div id="loading-indicator" style="display: none; flex-direction: column; align-items: center; margin-top: 1rem;">
+             <svg class="spinner" viewBox="0 0 50 50" style="width: 30px; height: 30px; animation: spin 1s linear infinite;"><circle cx="25" cy="25" r="20" fill="none" stroke="var(--accent-purple)" stroke-width="4" stroke-dasharray="80" stroke-dashoffset="60" stroke-linecap="round"></circle></svg>
+             <span id="loading-text" style="margin-top: 0.5rem; font-size: 1.2rem; color: var(--text-secondary);">Initializing AI model...</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Processed Output -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Result</span>
+      </div>
+      <div class="editor-row" style="padding: 2rem; background: var(--bg-primary); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+        
+        <!-- Checkerboard background pattern to show transparency -->
+        <div id="checkerboard-bg" style="position: absolute; inset: 2rem; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; border-radius: var(--radius-md); opacity: 0.2; display: none;"></div>
+
+        <div id="result-preview" style="display: none; width: 100%; text-align: center; z-index: 1;">
+          <img id="result-img" style="max-width: 100%; max-height: 300px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));" />
+          
+          <button class="btn btn-secondary" id="btn-download" style="width: 100%; justify-content: center; font-size: 1.4rem; margin-top: 2rem;">
+            📥 Download Transparent PNG
+          </button>
+        </div>
+        
+        <div id="empty-result" style="color: var(--text-secondary); font-size: 1.4rem;">
+          Output will appear here
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+
+  <script>
+    import { removeBackground } from '@imgly/background-removal';
+
+    const fileUpload = document.getElementById('file-upload') as HTMLInputElement;
+    const dropOverlay = document.getElementById('drop-overlay') as HTMLDivElement;
+    const originalPreview = document.getElementById('original-preview') as HTMLDivElement;
+    const origImg = document.getElementById('orig-img') as HTMLImageElement;
+    
+    const btnClear = document.getElementById('btn-clear');
+    const btnRemoveBg = document.getElementById('btn-remove-bg') as HTMLButtonElement;
+    const btnDownload = document.getElementById('btn-download') as HTMLButtonElement;
+    
+    const loadingIndicator = document.getElementById('loading-indicator') as HTMLDivElement;
+    const loadingText = document.getElementById('loading-text') as HTMLSpanElement;
+    
+    const resultPreview = document.getElementById('result-preview') as HTMLDivElement;
+    const resultImg = document.getElementById('result-img') as HTMLImageElement;
+    const checkerboardBg = document.getElementById('checkerboard-bg') as HTMLDivElement;
+    const emptyResult = document.getElementById('empty-result') as HTMLDivElement;
+
+    let currentFile: File | null = null;
+    let resultBlob: Blob | null = null;
+
+    async function loadImage(file: File) {
+      if (!file.type.startsWith('image/')) {
+        if (window.showToast) window.showToast('Please upload a valid image file.', 'error');
+        return;
+      }
+
+      currentFile = file;
+      const url = URL.createObjectURL(file);
+      
+      dropOverlay.style.display = 'none';
+      originalPreview.style.display = 'block';
+      origImg.src = url;
+      
+      // Reset result
+      resultPreview.style.display = 'none';
+      checkerboardBg.style.display = 'none';
+      emptyResult.style.display = 'block';
+      btnRemoveBg.style.display = 'flex';
+      loadingIndicator.style.display = 'none';
+    }
+
+    fileUpload.addEventListener('change', (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) loadImage(file);
+    });
+
+    // Drag and Drop
+    const container = document.querySelector('.workspace-grid') as HTMLElement;
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropOverlay.style.borderColor = 'var(--accent-purple)';
+    });
+    container.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dropOverlay.style.borderColor = 'var(--border-color)';
+    });
+    container.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropOverlay.style.borderColor = 'var(--border-color)';
+      const file = e.dataTransfer?.files?.[0];
+      if (file) loadImage(file);
+    });
+
+    btnClear?.addEventListener('click', () => {
+      currentFile = null;
+      resultBlob = null;
+      fileUpload.value = '';
+      dropOverlay.style.display = 'flex';
+      originalPreview.style.display = 'none';
+      
+      resultPreview.style.display = 'none';
+      checkerboardBg.style.display = 'none';
+      emptyResult.style.display = 'block';
+    });
+
+    btnRemoveBg?.addEventListener('click', async () => {
+      if (!currentFile) return;
+      
+      btnRemoveBg.style.display = 'none';
+      loadingIndicator.style.display = 'flex';
+      
+      try {
+        // Run background removal
+        const config = {
+          progress: (key: string, current: number, total: number) => {
+            if (key === 'compute:inference') {
+              loadingText.textContent = `Processing AI inference...`;
+            } else if (key.startsWith('fetch:')) {
+              const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+              loadingText.textContent = `Downloading AI Model... ${pct}% (First time only)`;
+            } else {
+              loadingText.textContent = `Processing image...`;
+            }
+          }
+        };
+
+        const blob = await removeBackground(currentFile, config);
+        
+        resultBlob = blob;
+        const resultUrl = URL.createObjectURL(blob);
+        
+        resultImg.src = resultUrl;
+        
+        loadingIndicator.style.display = 'none';
+        btnRemoveBg.style.display = 'flex';
+        btnRemoveBg.textContent = '✨ Process Again';
+        
+        emptyResult.style.display = 'none';
+        checkerboardBg.style.display = 'block';
+        resultPreview.style.display = 'block';
+        
+        if (window.showToast) window.showToast(`Background removed successfully!`);
+      } catch (error) {
+        console.error('BG Removal error:', error);
+        loadingIndicator.style.display = 'none';
+        btnRemoveBg.style.display = 'flex';
+        if (window.showToast) window.showToast('Background removal failed.', 'error');
+      }
+    });
+    
+    btnDownload?.addEventListener('click', () => {
+      if (!resultBlob || !currentFile) return;
+      
+      const origName = currentFile.name.substring(0, currentFile.name.lastIndexOf('.'));
+      const url = URL.createObjectURL(resultBlob);
+      const link = document.createElement('a');
+      link.download = `${origName || 'image'}_nobg.png`; // Output is always PNG for transparency
+      link.href = url;
+      link.click();
+    });
+
+  </script>
+</ToolLayout>

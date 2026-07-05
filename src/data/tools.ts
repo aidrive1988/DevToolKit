@@ -88,7 +88,10 @@ export const tools: Tool[] = [
   { name: 'JSON ↔ CSV Converter', description: 'Convert JSON arrays to CSV format and vice versa. Instantly map data structures.', url: '/tools/json-csv', icon: '📊', category: 'Developer', keywords: 'json csv convert format spreadsheet data' },
   { name: 'JSON/YAML/XML Converter', description: 'Convert data formats interchangeably between JSON, YAML, and XML.', url: '/tools/json-yaml-xml', icon: '🔄', category: 'Developer', keywords: 'json yaml xml convert format data' },
   { name: 'JSON to TS Converter', description: 'Instantly generate TypeScript interfaces from JSON data structures.', url: '/tools/json-to-ts', icon: '🦕', category: 'Developer', keywords: 'json ts typescript interface types generate convert' },
-  { name: 'Diff Checker', description: 'Instantly compare two texts and highlight the differences. 100% client-side.', url: '/tools/diff-checker', icon: '⚖️', category: 'Text', keywords: 'diff checker text compare difference changes' }
+  { name: 'Diff Checker', description: 'Instantly compare two texts and highlight the differences. 100% client-side.', url: '/tools/diff-checker', icon: '⚖️', category: 'Text', keywords: 'diff checker text compare difference changes' },
+  { name: 'Image Format Converter', description: 'Convert images between formats (PNG, JPG, WebP) instantly directly in your browser.', url: '/tools/image-converter', icon: '🖼️', category: 'Media', keywords: 'image format convert png jpg jpeg webp picture' },
+  { name: 'Image Compressor', description: 'Compress and resize images directly in your browser. Reduce file size instantly.', url: '/tools/image-compressor', icon: '🗜️', category: 'Media', keywords: 'image compress resize reduce size picture webp jpeg' },
+  { name: 'Background Remover', description: 'Remove image backgrounds instantly using client-side AI. Model runs locally.', url: '/tools/background-remover', icon: '✨', category: 'Media', keywords: 'image background remove transparent ai client side cut out' },
 ];
 
 // Helper for Sidebar grouping
