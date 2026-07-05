@@ -1,0 +1,130 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="UUID & ULID Generator" description="Generate bulk Universal Unique Identifiers (UUIDv4) and Universally Unique Lexicographically Sortable Identifiers (ULID). 100% client-side." toolName="UUID / ULID Generator" category="Generators">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions">
+      <button class="btn btn-primary" id="btn-generate">
+        <span>⚡ Generate</span>
+      </button>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-left: 1rem;">
+        <label for="gen-count" style="color: var(--text-secondary); font-size: 1.2rem;">Count:</label>
+        <input type="number" id="gen-count" value="10" min="1" max="10000" class="editor-textarea" style="height: 32px; width: 80px; padding: 0.2rem 0.6rem; min-height: auto; border-radius: var(--radius-sm);" />
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-left: 1rem;">
+        <label for="gen-type" style="color: var(--text-secondary); font-size: 1.2rem;">Type:</label>
+        <select id="gen-type" class="editor-textarea" style="height: 32px; padding: 0.2rem 0.6rem; min-height: auto; border-radius: var(--radius-sm);">
+          <option value="uuid" selected>UUID v4</option>
+          <option value="ulid">ULID</option>
+        </select>
+      </div>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-secondary" id="btn-copy">
+        <span>📋 Copy Output</span>
+      </button>
+      <button class="btn btn-danger" id="btn-clear">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace-grid" style="grid-template-columns: 1fr;">
+    <!-- Output -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title" id="output-title">Generated IDs</span>
+        <span id="output-stats" style="color: var(--text-secondary); font-size: 1.2rem;"></span>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="data-output" class="editor-textarea" readonly style="font-family: 'Fira Code', monospace; min-height: 400px;"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const output = document.getElementById('data-output') as HTMLTextAreaElement;
+    const btnGenerate = document.getElementById('btn-generate');
+    const btnClear = document.getElementById('btn-clear');
+    const btnCopy = document.getElementById('btn-copy');
+    
+    const countInput = document.getElementById('gen-count') as HTMLInputElement;
+    const typeSelect = document.getElementById('gen-type') as HTMLSelectElement;
+    const outputStats = document.getElementById('output-stats') as HTMLSpanElement;
+
+    // A lightweight client-side ULID generator
+    // Based on Crockford's Base32
+    const ENCODING = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+    const ENCODING_LEN = ENCODING.length;
+    const TIME_MAX = Math.pow(2, 48) - 1;
+    const TIME_LEN = 10;
+    const RANDOM_LEN = 16;
+
+    function encodeTime(now: number, len: number): string {
+      let str = "";
+      for (; len > 0; len--) {
+        const mod = now % ENCODING_LEN;
+        str = ENCODING.charAt(mod) + str;
+        now = (now - mod) / ENCODING_LEN;
+      }
+      return str;
+    }
+
+    function encodeRandom(len: number): string {
+      let str = "";
+      const bytes = new Uint8Array(len);
+      crypto.getRandomValues(bytes);
+      for (let i = 0; i < len; i++) {
+        str += ENCODING.charAt(bytes[i] % ENCODING_LEN);
+      }
+      return str;
+    }
+
+    function generateULID(): string {
+      return encodeTime(Date.now(), TIME_LEN) + encodeRandom(RANDOM_LEN);
+    }
+
+    function generate() {
+      const count = Math.min(parseInt(countInput.value) || 1, 100000); // hard cap at 100k
+      const type = typeSelect.value;
+      
+      const startTime = performance.now();
+      const results: string[] = [];
+
+      if (type === 'uuid') {
+        for (let i = 0; i < count; i++) {
+          results.push(crypto.randomUUID());
+        }
+      } else {
+        for (let i = 0; i < count; i++) {
+          results.push(generateULID());
+        }
+      }
+
+      output.value = results.join('\n');
+      const timeTaken = Math.round(performance.now() - startTime);
+      outputStats.textContent = `Generated ${count} IDs in ${timeTaken}ms`;
+    }
+
+    btnGenerate?.addEventListener('click', generate);
+
+    btnClear?.addEventListener('click', () => {
+      output.value = '';
+      outputStats.textContent = '';
+    });
+
+    btnCopy?.addEventListener('click', () => {
+      if (output.value) {
+        navigator.clipboard.writeText(output.value);
+        if (window.showToast) window.showToast('Copied to clipboard!');
+      }
+    });
+
+    // Run once on load
+    generate();
+  </script>
+</ToolLayout>

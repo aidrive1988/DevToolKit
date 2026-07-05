@@ -1,0 +1,282 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="Video to GIF Converter" description="Convert local videos into animated GIFs entirely in your browser using FFmpeg WebAssembly. No files leave your device." toolName="Video to GIF Converter" category="Media">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions">
+      <label class="btn btn-primary" style="cursor: pointer; margin: 0;">
+        <span>📤 Select Video</span>
+        <input type="file" id="file-upload" accept="video/*" style="display: none;" />
+      </label>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-danger" id="btn-clear" title="Clear loaded video">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- WASM Model Disclaimer -->
+  <div class="info-alert" style="margin-bottom: 2rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 1.2rem; border-radius: var(--radius-md); display: flex; align-items: start; gap: 1rem;">
+    <svg viewBox="0 0 24 24" width="24" height="24" style="color: #38bdf8; flex-shrink: 0; margin-top: 2px;" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <div>
+      <h4 style="margin: 0 0 0.5rem 0; color: #38bdf8; font-size: 1.4rem;">WebAssembly First-Time Load</h4>
+      <p style="margin: 0; font-size: 1.2rem; color: var(--text-primary); line-height: 1.5;">This tool uses a powerful video engine (FFmpeg) compiled for the browser. The first time you use it, it will download ~30MB of engine files. <strong>Your videos are never uploaded to any server.</strong></p>
+    </div>
+  </div>
+
+  <div class="workspace-grid" style="grid-template-columns: 1fr 1fr;">
+    <!-- Original Video -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Original Video</span>
+      </div>
+      <div class="editor-row" style="background: var(--bg-primary); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
+        
+        <div class="dropzone-overlay" id="drop-overlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--border-color); border-radius: var(--radius-md); width: 100%; height: 300px;">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-secondary); margin-bottom: 1rem;"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          <p style="color: var(--text-secondary); font-size: 1.4rem;">Drag & drop a video here</p>
+        </div>
+
+        <div id="original-preview" style="display: none; width: 100%; text-align: center;">
+          <video id="orig-video" controls style="max-width: 100%; max-height: 300px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: #000;"></video>
+          <div id="orig-info" style="margin-top: 1rem; font-size: 1.2rem; color: var(--text-secondary);"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Output Settings -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">GIF Settings</span>
+      </div>
+      <div class="editor-row" style="padding: 2rem; background: var(--bg-primary);">
+        
+        <div style="display: flex; flex-direction: column; gap: 1.6rem; max-width: 400px;">
+          
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="fps-select" style="font-weight: 600; font-size: 1.3rem;">Frames Per Second (FPS)</label>
+            <select id="fps-select" class="editor-textarea" style="height: 40px; padding: 0.5rem;">
+              <option value="5">5 FPS (Smallest File)</option>
+              <option value="10" selected>10 FPS (Recommended)</option>
+              <option value="15">15 FPS (Smooth)</option>
+              <option value="30">30 FPS (Very Large File)</option>
+            </select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="width-select" style="font-weight: 600; font-size: 1.3rem;">Max Width</label>
+            <select id="width-select" class="editor-textarea" style="height: 40px; padding: 0.5rem;">
+              <option value="320">320px</option>
+              <option value="480" selected>480px (Recommended)</option>
+              <option value="640">640px</option>
+              <option value="-1">Original Width</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary" id="btn-convert" style="width: 100%; justify-content: center; font-size: 1.4rem;" disabled>
+            ✨ Convert to GIF
+          </button>
+          
+          <!-- Loading State -->
+          <div id="loading-state" style="display: none; flex-direction: column; align-items: center; margin-top: 1.5rem; text-align: center;">
+            <svg class="spinner" viewBox="0 0 50 50" style="width: 30px; height: 30px; animation: spin 1s linear infinite; margin-bottom: 0.5rem;"><circle cx="25" cy="25" r="20" fill="none" stroke="var(--accent-purple)" stroke-width="4" stroke-dasharray="80" stroke-dashoffset="60" stroke-linecap="round"></circle></svg>
+            <div id="progress-text" style="color: var(--text-primary); font-size: 1.3rem;">Loading FFmpeg engine...</div>
+          </div>
+
+          <!-- Result section -->
+          <div id="result-section" style="display: none; flex-direction: column; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <div style="color: var(--accent-green); font-weight: bold; font-size: 1.4rem; text-align: center;">Conversion Complete!</div>
+            
+            <img id="result-gif" style="max-width: 100%; max-height: 250px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); object-fit: contain; background: #000; margin: 0 auto;" />
+            <div id="result-info" style="font-size: 1.2rem; color: var(--text-secondary); text-align: center;"></div>
+            
+            <button class="btn btn-secondary" id="btn-download" style="width: 100%; justify-content: center; font-size: 1.4rem; margin-top: 1rem;">
+              📥 Download GIF
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+
+  <script>
+    import { FFmpeg } from '@ffmpeg/ffmpeg';
+    import { fetchFile, toBlobURL } from '@ffmpeg/util';
+
+    const fileUpload = document.getElementById('file-upload') as HTMLInputElement;
+    const dropOverlay = document.getElementById('drop-overlay') as HTMLDivElement;
+    const originalPreview = document.getElementById('original-preview') as HTMLDivElement;
+    const origVideo = document.getElementById('orig-video') as HTMLVideoElement;
+    const origInfo = document.getElementById('orig-info') as HTMLDivElement;
+    
+    const btnClear = document.getElementById('btn-clear');
+    const btnConvert = document.getElementById('btn-convert') as HTMLButtonElement;
+    const btnDownload = document.getElementById('btn-download') as HTMLButtonElement;
+    
+    const fpsSelect = document.getElementById('fps-select') as HTMLSelectElement;
+    const widthSelect = document.getElementById('width-select') as HTMLSelectElement;
+    
+    const loadingState = document.getElementById('loading-state') as HTMLDivElement;
+    const progressText = document.getElementById('progress-text') as HTMLDivElement;
+    const resultSection = document.getElementById('result-section') as HTMLDivElement;
+    const resultGif = document.getElementById('result-img') as HTMLImageElement;
+    const resultInfo = document.getElementById('result-info') as HTMLDivElement;
+
+    let currentFile: File | null = null;
+    let resultBlob: Blob | null = null;
+    let ffmpeg: FFmpeg | null = null;
+
+    function formatBytes(bytes: number) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function loadVideo(file: File) {
+      if (!file.type.startsWith('video/')) {
+        if (window.showToast) window.showToast('Please upload a valid video file.', 'error');
+        return;
+      }
+
+      currentFile = file;
+      const url = URL.createObjectURL(file);
+      
+      dropOverlay.style.display = 'none';
+      originalPreview.style.display = 'block';
+      origVideo.src = url;
+      origInfo.textContent = `${file.name} - ${formatBytes(file.size)}`;
+      
+      btnConvert.disabled = false;
+      resultSection.style.display = 'none';
+      loadingState.style.display = 'none';
+    }
+
+    fileUpload.addEventListener('change', (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) loadVideo(file);
+    });
+
+    // Drag and Drop
+    const container = document.querySelector('.workspace-grid') as HTMLElement;
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropOverlay.style.borderColor = 'var(--accent-purple)';
+    });
+    container.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dropOverlay.style.borderColor = 'var(--border-color)';
+    });
+    container.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropOverlay.style.borderColor = 'var(--border-color)';
+      const file = e.dataTransfer?.files?.[0];
+      if (file) loadVideo(file);
+    });
+
+    btnClear?.addEventListener('click', () => {
+      currentFile = null;
+      resultBlob = null;
+      fileUpload.value = '';
+      dropOverlay.style.display = 'flex';
+      originalPreview.style.display = 'none';
+      resultSection.style.display = 'none';
+      loadingState.style.display = 'none';
+      btnConvert.disabled = true;
+      if (origVideo.src) {
+        URL.revokeObjectURL(origVideo.src);
+        origVideo.src = '';
+      }
+    });
+
+    async function initFFmpeg() {
+      if (ffmpeg) return ffmpeg;
+
+      ffmpeg = new FFmpeg();
+      
+      ffmpeg.on('progress', ({ progress, time }) => {
+        progressText.textContent = `Processing: ${Math.round(progress * 100)}%`;
+      });
+
+      // Load core via unpkg to avoid local hosting complexities with wasm files in Astro
+      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+      await ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      });
+      
+      return ffmpeg;
+    }
+
+    btnConvert?.addEventListener('click', async () => {
+      if (!currentFile) return;
+      
+      btnConvert.disabled = true;
+      btnConvert.style.display = 'none';
+      loadingState.style.display = 'flex';
+      progressText.textContent = 'Loading FFmpeg engine... (First time takes longer)';
+      
+      try {
+        const ff = await initFFmpeg();
+        
+        progressText.textContent = 'Reading file into memory...';
+        await ff.writeFile('input_video.mp4', await fetchFile(currentFile));
+
+        progressText.textContent = 'Starting conversion...';
+        
+        const fps = fpsSelect.value;
+        const width = widthSelect.value;
+        const scaleFilter = width === '-1' ? '' : `,scale=${width}:-1`;
+        
+        // Optimize GIF creation using a palette
+        // 1. Generate palette
+        await ff.exec(['-i', 'input_video.mp4', '-vf', `fps=${fps}${scaleFilter}:flags=lanczos,palettegen`, 'palette.png']);
+        // 2. Output gif
+        await ff.exec(['-i', 'input_video.mp4', '-i', 'palette.png', '-filter_complex', `fps=${fps}${scaleFilter}:flags=lanczos[x];[x][1:v]paletteuse`, 'output.gif']);
+        
+        progressText.textContent = 'Finishing up...';
+
+        const data = await ff.readFile('output.gif');
+        resultBlob = new Blob([data.buffer as ArrayBuffer], { type: 'image/gif' });
+        
+        const url = URL.createObjectURL(resultBlob);
+        
+        const resultImg = document.getElementById('result-gif') as HTMLImageElement;
+        resultImg.src = url;
+        resultInfo.textContent = `Size: ${formatBytes(resultBlob.size)}`;
+        
+        loadingState.style.display = 'none';
+        resultSection.style.display = 'flex';
+        
+        if (window.showToast) window.showToast(`Converted to GIF successfully!`);
+      } catch (error) {
+        console.error('Conversion error:', error);
+        loadingState.style.display = 'none';
+        if (window.showToast) window.showToast('Conversion failed. See console for details.', 'error');
+        btnConvert.style.display = 'flex';
+        btnConvert.disabled = false;
+      }
+    });
+    
+    btnDownload?.addEventListener('click', () => {
+      if (!resultBlob || !currentFile) return;
+      
+      const origName = currentFile.name.substring(0, currentFile.name.lastIndexOf('.'));
+      const url = URL.createObjectURL(resultBlob);
+      const link = document.createElement('a');
+      link.download = `${origName || 'video'}.gif`;
+      link.href = url;
+      link.click();
+    });
+
+  </script>
+</ToolLayout>

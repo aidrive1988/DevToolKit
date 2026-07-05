@@ -1,0 +1,182 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout title="AI Text Summarizer" description="Summarize long texts or articles instantly using a state-of-the-art AI model running entirely in your browser. No data is sent to the cloud." toolName="AI Summarizer" category="AI Tools">
+  
+  <div class="workspace-toolbar">
+    <div class="toolbar-actions">
+      <button class="btn btn-primary" id="btn-summarize">
+        <span>✨ Summarize Text</span>
+      </button>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-danger" id="btn-clear">
+        <span>🗑 Clear</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- WASM Model Disclaimer -->
+  <div class="info-alert" style="margin-bottom: 2rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 1.2rem; border-radius: var(--radius-md); display: flex; align-items: start; gap: 1rem;">
+    <svg viewBox="0 0 24 24" width="24" height="24" style="color: #38bdf8; flex-shrink: 0; margin-top: 2px;" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <div>
+      <h4 style="margin: 0 0 0.5rem 0; color: #38bdf8; font-size: 1.4rem;">First-Time Load Disclaimer</h4>
+      <p style="margin: 0; font-size: 1.2rem; color: var(--text-primary); line-height: 1.5;">This tool uses advanced AI that runs <strong>entirely in your browser</strong> to ensure your privacy. On your very first use, it must securely download the Xenova DistilBART model (~200MB). This may take a moment depending on your connection. Once downloaded, it is cached locally and subsequent uses will be fast!</p>
+    </div>
+  </div>
+
+  <div class="workspace-grid" style="grid-template-columns: 1fr;">
+    <!-- Input Text -->
+    <div class="editor-container">
+      <div class="editor-header-bar">
+        <span class="editor-title">Input Text</span>
+        <button class="toolbar-btn" id="btn-paste" title="Paste from clipboard">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        </button>
+      </div>
+      <div class="editor-row">
+        <div class="editor-main-area">
+          <textarea id="text-input" class="editor-textarea" style="min-height: 250px; font-size: 1.4rem; line-height: 1.6;" placeholder="Paste an article or long text here (minimum a few paragraphs)..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output Text -->
+    <div class="editor-container" id="output-container" style="display: none;">
+      <div class="editor-header-bar">
+        <span class="editor-title" style="color: var(--accent-purple);">Summary Result</span>
+        <button class="toolbar-btn" id="btn-copy" title="Copy to clipboard">
+          📋 Copy
+        </button>
+      </div>
+      <div class="editor-row" style="background: var(--bg-card);">
+        <div class="editor-main-area" style="padding: 2rem;">
+          <div id="text-output" style="font-size: 1.5rem; line-height: 1.6; color: var(--text-primary);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" style="display: none; padding: 4rem; text-align: center; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+      <svg class="spinner" viewBox="0 0 50 50" style="width: 40px; height: 40px; margin: 0 auto 1.5rem auto; animation: spin 1s linear infinite;"><circle cx="25" cy="25" r="20" fill="none" stroke="var(--accent-purple)" stroke-width="4" stroke-dasharray="80" stroke-dashoffset="60" stroke-linecap="round"></circle></svg>
+      <h3 style="margin: 0 0 1rem 0; font-size: 1.6rem;">Loading AI Model...</h3>
+      <div style="width: 60%; margin: 0 auto; background: var(--bg-primary); height: 8px; border-radius: 4px; overflow: hidden; position: relative;">
+        <div id="progress-bar" style="width: 0%; height: 100%; background: var(--accent-purple); transition: width 0.3s ease;"></div>
+      </div>
+      <p id="progress-text" style="margin-top: 1rem; color: var(--text-secondary); font-size: 1.3rem;">Downloading (0%)</p>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+
+  <script>
+    import { pipeline, env } from '@xenova/transformers';
+
+    // Disable remote local models and enable cache
+    env.allowLocalModels = false;
+
+    const input = document.getElementById('text-input') as HTMLTextAreaElement;
+    const outputContainer = document.getElementById('output-container') as HTMLDivElement;
+    const output = document.getElementById('text-output') as HTMLDivElement;
+    const loadingState = document.getElementById('loading-state') as HTMLDivElement;
+    const progressBar = document.getElementById('progress-bar') as HTMLDivElement;
+    const progressText = document.getElementById('progress-text') as HTMLParagraphElement;
+    
+    const btnSummarize = document.getElementById('btn-summarize') as HTMLButtonElement;
+    const btnClear = document.getElementById('btn-clear');
+    const btnCopy = document.getElementById('btn-copy');
+    const btnPaste = document.getElementById('btn-paste');
+
+    // Singleton pipeline pattern to avoid loading multiple times
+    class PipelineSingleton {
+      static task = 'summarization';
+      static model = 'Xenova/distilbart-cnn-6-6';
+      static instance: any = null;
+
+      static async getInstance(progressCallback: Function) {
+        if (this.instance === null) {
+          this.instance = pipeline(this.task, this.model, {
+            progress_callback: progressCallback
+          });
+        }
+        return this.instance;
+      }
+    }
+
+    async function summarize() {
+      const text = input.value.trim();
+      if (!text) {
+        if (window.showToast) window.showToast('Please enter some text to summarize.', 'error');
+        return;
+      }
+
+      btnSummarize.disabled = true;
+      outputContainer.style.display = 'none';
+      loadingState.style.display = 'block';
+      progressBar.style.width = '0%';
+      progressText.textContent = 'Initializing model...';
+
+      try {
+        const summarizer = await PipelineSingleton.getInstance((x: any) => {
+          if (x.status === 'progress') {
+            const pct = Math.round((x.loaded / x.total) * 100);
+            progressBar.style.width = `${pct}%`;
+            progressText.textContent = `Downloading ${x.file} (${pct}%)`;
+          } else if (x.status === 'done') {
+            progressBar.style.width = `100%`;
+            progressText.textContent = `Model loaded! Summarizing...`;
+          }
+        });
+
+        progressText.textContent = 'Summarizing text... This might take a few seconds.';
+        progressBar.style.width = '100%';
+        progressBar.style.background = 'var(--accent-green)';
+
+        const result = await summarizer(text, {
+          max_new_tokens: 150,
+        });
+
+        output.textContent = result[0].summary_text;
+        loadingState.style.display = 'none';
+        outputContainer.style.display = 'block';
+
+      } catch (err) {
+        console.error('Summarization error:', err);
+        loadingState.style.display = 'none';
+        if (window.showToast) window.showToast('Failed to generate summary.', 'error');
+      } finally {
+        btnSummarize.disabled = false;
+        progressBar.style.background = 'var(--accent-purple)'; // Reset color
+      }
+    }
+
+    btnSummarize?.addEventListener('click', summarize);
+
+    btnClear?.addEventListener('click', () => {
+      input.value = '';
+      output.textContent = '';
+      outputContainer.style.display = 'none';
+      loadingState.style.display = 'none';
+    });
+
+    btnCopy?.addEventListener('click', () => {
+      if (output.textContent) {
+        navigator.clipboard.writeText(output.textContent);
+        if (window.showToast) window.showToast('Summary copied!');
+      }
+    });
+
+    btnPaste?.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        input.value = text;
+      } catch (err) {
+        if (window.showToast) window.showToast('Failed to read clipboard', 'error');
+      }
+    });
+
+  </script>
+</ToolLayout>
