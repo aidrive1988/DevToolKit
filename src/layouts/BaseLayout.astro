@@ -12,6 +12,7 @@ const canonical = canonicalURL || new URL(Astro.url.pathname, siteURL).href;
 const image = ogImage || `${siteURL}/og-default.png`;
 
 import '../styles/global.css';
+import '../styles/sidebar.css';
 import Sidebar from '../components/Sidebar.astro';
 ---
 
@@ -75,7 +76,6 @@ import Sidebar from '../components/Sidebar.astro';
   </script>
 
 
-  <link rel="stylesheet" href="/src/styles/sidebar.css" />
 </head>
 <body>
   <div class="app-layout">

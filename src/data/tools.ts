@@ -96,10 +96,7 @@ export const tools: Tool[] = [
   { name: 'Image Format Converter', description: 'Convert images between formats (PNG, JPG, WebP) instantly directly in your browser.', url: '/tools/image-converter', icon: '🖼️', category: 'Media', keywords: 'image format convert png jpg jpeg webp picture' },
   { name: 'Image Compressor', description: 'Compress and resize images directly in your browser. Reduce file size instantly.', url: '/tools/image-compressor', icon: '🗜️', category: 'Media', keywords: 'image compress resize reduce size picture webp jpeg' },
   { name: 'Background Remover', description: 'Remove image backgrounds instantly using client-side AI. Model runs locally.', url: '/tools/background-remover', icon: '✨', category: 'Media', keywords: 'image background remove transparent ai client side cut out' },
-  { name: 'Video to GIF Converter', description: 'Convert local videos into animated GIFs entirely in your browser using FFmpeg WebAssembly.', url: '/tools/video-to-gif', icon: '🎞️', category: 'Media', keywords: 'video gif convert animation mp4 ffmpeg' },
-
-  // AI Tools
-  { name: 'AI Text Summarizer', description: 'Summarize long texts or articles instantly using a state-of-the-art AI model running entirely in your browser.', url: '/tools/ai-summarizer', icon: '🤖', category: 'AI Tools', keywords: 'ai text summarizer summarize ai model nlp artificial intelligence' },
+  { name: 'Video to GIF Converter', description: 'Convert local videos into animated GIFs entirely in your browser using FFmpeg WebAssembly.', url: '/tools/video-to-gif', icon: '🎞️', category: 'Media', keywords: 'video gif convert animation mp4 ffmpeg' }
 ];
 
 // Helper for Sidebar grouping

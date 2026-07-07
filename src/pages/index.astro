@@ -11,9 +11,10 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
 <BaseLayout title="DevToolKit — Premium Online Developer Tools" description="Lightning-fast, privacy-first developer tools running entirely client-side. JSON Formatter, Base64 Encoder, Color Converter, Word Counter & more.">
   <Header />
 
-  <!-- Hero with Animated Mesh -->
+  <!-- Hero with Animated Background -->
   <section class="hero">
     <div class="hero-mesh"></div>
+    <div class="hero-particles"></div>
     <div class="container hero-content">
       <div class="badge-glow">
         <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="color: var(--accent-purple);"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
@@ -122,6 +123,8 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
 
   <Footer />
 
+  <div id="valid-tools-data" data-urls={JSON.stringify(tools.map(t => t.url))} style="display:none;" aria-hidden="true"></div>
+
   <script is:inline>
     // Universal filter and search logic
     document.addEventListener('DOMContentLoaded', () => {
@@ -177,6 +180,17 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
         }
       });
 
+      // Helper to get valid tools
+      function getValidTools() {
+        const dataEl = document.getElementById('valid-tools-data');
+        if (!dataEl) return [];
+        try {
+          return JSON.parse(dataEl.getAttribute('data-urls') || '[]');
+        } catch (e) {
+          return [];
+        }
+      }
+
       // Local storage Favorites loader
       function loadFavorites() {
         const favSec = document.getElementById('favorites-section');
@@ -184,7 +198,17 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
         if (!favSec || !favGrid) return;
 
         try {
-          const favorites = JSON.parse(localStorage.getItem('favoriteTools') || '[]');
+          const rawFavorites = JSON.parse(localStorage.getItem('favoriteTools') || '[]');
+          const validUrls = getValidTools();
+          
+          // Filter out invalid tools
+          const favorites = rawFavorites.filter(tool => validUrls.includes(tool.url));
+          
+          // Update local storage if we removed any invalid tools
+          if (favorites.length !== rawFavorites.length) {
+            localStorage.setItem('favoriteTools', JSON.stringify(favorites));
+          }
+
           if (favorites.length === 0) {
             favSec.classList.remove('has-items');
             return;
@@ -218,7 +242,17 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
         if (!recSec || !recGrid) return;
 
         try {
-          const recents = JSON.parse(localStorage.getItem('recentTools') || '[]');
+          const rawRecents = JSON.parse(localStorage.getItem('recentTools') || '[]');
+          const validUrls = getValidTools();
+          
+          // Filter out invalid tools
+          const recents = rawRecents.filter(tool => validUrls.includes(tool.url));
+          
+          // Update local storage if we removed any invalid tools
+          if (recents.length !== rawRecents.length) {
+            localStorage.setItem('recentTools', JSON.stringify(recents));
+          }
+
           if (recents.length === 0) {
             recSec.classList.remove('has-items');
             return;
