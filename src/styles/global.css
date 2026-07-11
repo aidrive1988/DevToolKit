@@ -1887,6 +1887,8 @@ input[type="range"]::-moz-range-thumb:hover {
   .nav-links.open { display: flex; }
   .mobile-toggle { display: block; }
   .nav-search-trigger { display: none; }
+  .mobile-header-brand { display: flex !important; }
+  .mobile-games-link { display: flex !important; }
 
   .workspace-title-section h1 { font-size: 3rem; }
 }

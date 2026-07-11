@@ -10,7 +10,13 @@ const currentPath = Astro.url.pathname;
           <path d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
       </button>
-      <!-- Optional: Page title could go here dynamically if we wanted -->
+      <!-- Mobile Brand Logo -->
+      <a href="/" class="mobile-header-brand" aria-label="Home" style="display: none; align-items: center; gap: 0.8rem; text-decoration: none; font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; color: var(--text-primary); letter-spacing: -0.02em;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-purple);">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+        </svg>
+        DevToolKit
+      </a>
     </div>
     
     <nav style="display: flex; align-items: center; gap: 1.6rem;">
@@ -20,6 +26,11 @@ const currentPath = Astro.url.pathname;
         <span>Search...</span>
         <kbd class="nav-search-key">/</kbd>
       </button>
+
+      <!-- Mobile Quick Games Link -->
+      <a href="/games" class="mobile-games-link" aria-label="Games Break" style="display: none; align-items: center; justify-content: center; width: 3.6rem; height: 3.6rem; border-radius: var(--radius-sm); color: var(--accent-rose); background: rgba(251, 113, 133, 0.1); border: 1px solid rgba(251, 113, 133, 0.2); transition: all var(--transition-fast);">
+        <i class="ph ph-game-controller" style="font-size: 2rem;"></i>
+      </a>
 
       <!-- Theme Switch Button -->
       <button class="theme-switch" id="theme-toggle" aria-label="Toggle color theme">
