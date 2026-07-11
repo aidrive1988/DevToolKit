@@ -1,30 +1,46 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
 ---
 
-<BaseLayout title="Privacy Policy — DevToolKit" description="DevToolKit privacy policy. Learn how we handle your data (spoiler: we don't collect any).">
-  <Header />
-  <div class="container static-page-container">
-    <h1>Privacy Policy</h1>
-    <p><strong>Last updated:</strong> January 1, 2025</p>
-    <h2>Information We Collect</h2>
-    <p>DevToolKit does <strong>not</strong> collect, store, or transmit any personal data. All tools run entirely in your browser using client-side JavaScript. Your input data never leaves your device.</p>
-    <h2>Cookies</h2>
-    <p>DevToolKit does not use cookies for tracking. Third-party services (such as Google AdSense, if enabled) may use cookies to serve relevant ads. You can manage cookie preferences through your browser settings.</p>
-    <h2>Third-Party Services</h2>
-    <p>We may use the following third-party services:</p>
-    <ul>
-      <li><strong>Google AdSense</strong> — For displaying advertisements. Google may use cookies to personalize ads. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.</li>
-      <li><strong>Cloudflare</strong> — For hosting and CDN services. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's Privacy Policy</a>.</li>
-    </ul>
-    <h2>Data Security</h2>
-    <p>Since we don't collect any data, there's nothing to secure. Your data stays on your device at all times.</p>
-    <h2>Changes to This Policy</h2>
-    <p>We may update this privacy policy from time to time. Any changes will be posted on this page.</p>
-    <h2>Contact</h2>
-    <p>Questions about this policy? Submit feedback via <a href="https://docs.google.com/forms/d/e/1FAIpQLSdkB0nhzGXD9Cuop6GW7ScTKZyt8bkj5EQBGL3Fn3nCRYfFRw/viewform" target="_blank" rel="noopener">Google Forms</a>.</p>
-  </div>
-  <Footer />
+<BaseLayout title="Privacy Policy" description="DevToolKit Privacy Policy. Your data never leaves your browser.">
+  <main class="container static-page-container">
+    <div style="text-align: center; margin-bottom: 4rem;">
+      <h1>Privacy <span class="gradient-text">Policy</span></h1>
+      <p style="font-size: 1.8rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+        Last Updated: July 2026
+      </p>
+    </div>
+
+    <div class="glass-panel" style="padding: 4rem; margin-bottom: 4rem;">
+      <h2>1. The Short Version</h2>
+      <p>
+        <strong>We don't collect your data.</strong> Because DevToolKit operates entirely within your web browser using client-side technologies (like WebAssembly and local JavaScript), your code, JSON files, PDFs, and any other inputs never leave your device.
+      </p>
+    </div>
+
+    <div class="glass-panel" style="padding: 4rem; margin-bottom: 4rem;">
+      <h2>2. What We Do Not Collect</h2>
+      <p>We absolutely do <strong>not</strong> collect, process, or store:</p>
+      <ul>
+        <li>Files you upload to our tools (e.g., PDFs, images)</li>
+        <li>Text or code you paste into our text areas (e.g., JSON, Base64 strings)</li>
+        <li>Personal Identifiable Information (PII)</li>
+        <li>Usage analytics or telemetry</li>
+      </ul>
+    </div>
+
+    <div class="glass-panel" style="padding: 4rem;">
+      <h2>3. Local Storage</h2>
+      <p>
+        We may use your browser's Local Storage to save user preferences, such as:
+      </p>
+      <ul>
+        <li>Your selected theme (Light/Dark mode)</li>
+        <li>Your recently used or favorite tools</li>
+      </ul>
+      <p>
+        This information remains on your local device and is never transmitted to us.
+      </p>
+    </div>
+  </main>
 </BaseLayout>

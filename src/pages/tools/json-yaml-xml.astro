@@ -109,9 +109,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         } else if (typeOut === 'yaml') {
           output.value = yaml.dump(jsObject);
         } else if (typeOut === 'xml') {
-          // If the root object has multiple keys, xml-js needs a single root element usually,
-          // but we will just pass it to json2xml.
-          output.value = json2xml(JSON.stringify(jsObject), { compact: true, spaces: 2 });
+          // XML requires a single root element
+          const xmlData = { root: jsObject };
+          output.value = json2xml(JSON.stringify(xmlData), { compact: true, spaces: 2 });
         }
       } catch (e: any) {
         output.value = 'Error:\n' + e.message;

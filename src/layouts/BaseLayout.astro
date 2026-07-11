@@ -4,9 +4,10 @@ interface Props {
   description: string;
   canonicalURL?: string;
   ogImage?: string;
+  sidebarType?: string;
 }
 
-const { title, description, canonicalURL, ogImage } = Astro.props;
+const { title, description, canonicalURL, ogImage, sidebarType } = Astro.props;
 const siteURL = 'https://devtoolkit.pages.dev';
 const canonical = canonicalURL || new URL(Astro.url.pathname, siteURL).href;
 const image = ogImage || `${siteURL}/og-default.png`;
@@ -14,10 +15,11 @@ const image = ogImage || `${siteURL}/og-default.png`;
 import '../styles/global.css';
 import '../styles/sidebar.css';
 import Sidebar from '../components/Sidebar.astro';
+import GamesSidebar from '../components/GamesSidebar.astro';
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -26,6 +28,9 @@ import Sidebar from '../components/Sidebar.astro';
   <title>{title}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
+
+  <!-- Phosphor Icons CDN -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <!-- OpenGraph Metadata -->
   <meta property="og:type" content="website" />
@@ -79,7 +84,7 @@ import Sidebar from '../components/Sidebar.astro';
 </head>
 <body>
   <div class="app-layout">
-    <Sidebar />
+    {sidebarType === 'games' ? <GamesSidebar /> : <Sidebar />}
     <div class="app-main">
       <slot />
     </div>

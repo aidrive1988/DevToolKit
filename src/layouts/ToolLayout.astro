@@ -2,6 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { getCategoryColor } from '../data/tools';
 
 interface Props {
   title: string;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const { title, description, toolName, category, canonicalURL } = Astro.props;
+const catColor = getCategoryColor(category);
 const siteURL = 'https://devtoolkit.pages.dev';
 const toolUrl = Astro.url.pathname;
 
@@ -33,15 +35,15 @@ const schemaData = {
   <main class="container workspace-container">
     <!-- Breadcrumbs -->
     <nav class="workspace-breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a>
-      <span class="sep">›</span>
-      <a href="/#tools">Tools</a>
-      <span class="sep">›</span>
+      <a href="/">Tools</a>
+      <span class="sep">/</span>
+      <span style={`color: ${catColor}; font-weight: 500;`}>{category}</span>
+      <span class="sep">/</span>
       <span>{toolName}</span>
     </nav>
 
     <!-- Tool header with Pinned/Favorite controls -->
-    <div class="workspace-title-section">
+    <div class="workspace-title-section" style={`--cat-color: ${catColor};`}>
       <div style="display: flex; align-items: center; gap: 1.6rem; flex-wrap: wrap;">
         <h1>{toolName}</h1>
         <button class="pin-toggle-btn" id="tool-favorite-btn" aria-label="Pin this tool" title="Pin tool to homepage">

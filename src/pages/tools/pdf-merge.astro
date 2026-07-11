@@ -193,9 +193,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   .btn-sm { padding: 0.6rem 1.2rem; font-size: 1.3rem; }
 </style>
 
-<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-
 <script>
+  import { PDFDocument } from 'pdf-lib';
+
   const pdfFiles = []; // { file, name, size, pageCount }
   const dropZone = document.getElementById('drop-zone');
   const fileInput = document.getElementById('file-input');
@@ -231,13 +231,12 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           let pdfDoc;
           let filePassword;
           try {
-            pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            pdfDoc = await PDFDocument.load(arrayBuffer);
           } catch (e) {
             if (e.message.toLowerCase().includes('encrypted') || e.message.toLowerCase().includes('password')) {
               const pwd = prompt(`"${file.name}" is password protected. Enter password to unlock it:`);
               if (pwd !== null && pwd.trim() !== '') {
-                pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { password: pwd });
-                filePassword = pwd;
+                pdfDoc = await PDFDocument.load(arrayBuffer, { password: pwd });
               } else {
                 throw new Error("Password required to unlock this file.");
               }
@@ -343,12 +342,12 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     setProgress(0, 'Starting merge...');
 
     try {
-      const mergedPdf = await PDFLib.PDFDocument.create();
+      const mergedPdf = await PDFDocument.create();
       
       for (let i = 0; i < pdfFiles.length; i++) {
         setProgress(Math.round((i / pdfFiles.length) * 90), `Processing file ${i + 1} of ${pdfFiles.length}...`);
         const loadOpts = pdfFiles[i].password ? { password: pdfFiles[i].password } : { ignoreEncryption: true };
-        const srcDoc = await PDFLib.PDFDocument.load(pdfFiles[i].arrayBuffer, loadOpts);
+        const srcDoc = await PDFDocument.load(pdfFiles[i].arrayBuffer, loadOpts);
         const copiedPages = await mergedPdf.copyPages(srcDoc, srcDoc.getPageIndices());
         copiedPages.forEach(page => mergedPdf.addPage(page));
       }

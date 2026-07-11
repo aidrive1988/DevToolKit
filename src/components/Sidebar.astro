@@ -1,26 +1,16 @@
 ---
-import { groupedTools } from '../data/tools';
+import { groupedTools, getCategoryColor } from '../data/tools';
+import { gamesData } from '../data/games';
+import '../styles/sidebar.css';
 
 const currentPath = Astro.url.pathname;
-
-// Sort categories (Productivity first, then others alphabetically)
-const categories = Object.keys(groupedTools).sort((a, b) => {
-  if (a === 'Productivity') return -1;
-  if (b === 'Productivity') return 1;
-  return a.localeCompare(b);
-});
+const isGamesPath = currentPath.startsWith('/games');
 ---
 
 <aside class="app-sidebar" id="app-sidebar">
   <div class="sidebar-brand">
-    <a href="/" aria-label="DevToolKit Home">
-      <svg viewBox="0 0 24 24" width="24" height="24" style="flex-shrink: 0; fill: url(#logo-grad-sidebar);">
-        <defs>
-          <linearGradient id="logo-grad-sidebar" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#8b5cf6" />
-            <stop offset="100%" stop-color="#06b6d4" />
-          </linearGradient>
-        </defs>
+    <a href="/">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-purple);">
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
       </svg>
       DevToolKit
@@ -28,32 +18,68 @@ const categories = Object.keys(groupedTools).sort((a, b) => {
   </div>
 
   <nav class="sidebar-nav">
-    {categories.map(category => (
-      <div class="sidebar-group">
-        <div class="sidebar-group-title">{category}</div>
-        {groupedTools[category].map(tool => (
-          <a 
-            href={tool.url} 
-            class={`sidebar-link ${currentPath === tool.url || currentPath === tool.url + '/' ? 'active' : ''}`}
-            title={tool.description}
-          >
-            <span class="sidebar-icon">{tool.icon}</span>
-            <span class="sidebar-text">{tool.name}</span>
-          </a>
-        ))}
+    <!-- Dev Tools Link -->
+    <a href="/" class={`sidebar-link ${!isGamesPath && currentPath === '/' ? 'active' : ''}`} style="--cat-color: var(--cat-developer);">
+      <div class="sidebar-icon">
+        <i class="ph ph-wrench" style="font-size: 18px;"></i>
       </div>
-    ))}
+      <span class="sidebar-text">Dev Tools</span>
+    </a>
+    
+    <!-- Games Link -->
+    <a href="/games" class={`sidebar-link ${isGamesPath ? 'active' : ''}`} style="--cat-color: var(--accent-rose);">
+      <div class="sidebar-icon">
+        <i class="ph ph-game-controller" style="font-size: 18px;"></i>
+      </div>
+      <span class="sidebar-text">Games Break</span>
+    </a>
 
-    <div class="sidebar-group">
-      <div class="sidebar-group-title">Platform</div>
-      <a href="/about" class={`sidebar-link ${currentPath.includes('/about') ? 'active' : ''}`}>
-        <span class="sidebar-icon">ℹ️</span>
-        <span class="sidebar-text">About & Privacy</span>
-      </a>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSdkB0nhzGXD9Cuop6GW7ScTKZyt8bkj5EQBGL3Fn3nCRYfFRw/viewform" target="_blank" rel="noopener noreferrer" class="sidebar-link">
-        <span class="sidebar-icon">💬</span>
-        <span class="sidebar-text">Submit Feedback</span>
-      </a>
-    </div>
+    <div style="height: 1px; background: var(--border-subtle); margin: 1.6rem 0;"></div>
+
+    <!-- Grouped Tools -->
+    {Object.entries(groupedTools).map(([category, tools]) => {
+      const catColor = getCategoryColor(category);
+      // Determine if any tool in this category is currently active
+      const isActiveCategory = tools.some(tool => currentPath === tool.url);
+      
+      return (
+        <details class="sidebar-group" open={isActiveCategory ? true : undefined} style={`--cat-color: ${catColor};`}>
+          <summary class="sidebar-group-title" style="cursor: pointer; user-select: none;">
+            <span style="display: flex; align-items: center; gap: 0.8rem;">
+              <span class="cat-title-text">{category}</span>
+            </span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="collapse-icon">
+              <path d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div style="display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.6rem;">
+            {tools.map(tool => (
+              <a 
+                href={tool.url} 
+                class={`sidebar-link ${currentPath === tool.url ? 'active' : ''}`}
+                title={tool.description}
+              >
+                <div class="sidebar-icon">
+                  <i class={`ph ${tool.icon}`} style="font-size: 16px;"></i>
+                </div>
+                <span class="sidebar-text">{tool.name}</span>
+              </a>
+            ))}
+          </div>
+        </details>
+      );
+    })}
   </nav>
 </aside>
+
+<style>
+  .sidebar-group summary::-webkit-details-marker {
+    display: none;
+  }
+  .collapse-icon {
+    transition: transform var(--transition-normal);
+  }
+  details[open] .collapse-icon {
+    transform: rotate(180deg);
+  }
+</style>

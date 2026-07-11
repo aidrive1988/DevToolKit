@@ -89,6 +89,47 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       convert();
     }
 
+    function flattenObj(ob: any): any {
+      let result: any = {};
+      for (const i in ob) {
+        if ((typeof ob[i]) === 'object' && !Array.isArray(ob[i]) && ob[i] !== null) {
+          const temp = flattenObj(ob[i]);
+          for (const j in temp) {
+            result[i + '.' + j] = temp[j];
+          }
+        } else if (Array.isArray(ob[i])) {
+          result[i] = JSON.stringify(ob[i]);
+        } else {
+          result[i] = ob[i];
+        }
+      }
+      return result;
+    }
+
+    function unflattenObj(data: any): any {
+      const result: any = {};
+      for (const i in data) {
+        const keys = i.split('.');
+        keys.reduce((acc: any, key: string, index: number) => {
+          if (index === keys.length - 1) {
+            try {
+              if (typeof data[i] === 'string' && data[i].startsWith('[') && data[i].endsWith(']')) {
+                 acc[key] = JSON.parse(data[i]);
+              } else {
+                 acc[key] = data[i];
+              }
+            } catch(e) {
+              acc[key] = data[i];
+            }
+          } else {
+            acc[key] = acc[key] || {};
+          }
+          return acc[key];
+        }, result);
+      }
+      return result;
+    }
+
     function convert() {
       const val = input.value.trim();
       if (!val) {
@@ -99,9 +140,11 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       try {
         if (isJsonToCsv) {
           // JSON to CSV
-          const data = JSON.parse(val);
-          // Papa.unparse expects an array of objects
-          const csv = Papa.unparse(data);
+          let data = JSON.parse(val);
+          // Ensure it's an array for PapaParse
+          if (!Array.isArray(data)) data = [data];
+          const flatData = data.map((item: any) => flattenObj(item));
+          const csv = Papa.unparse(flatData);
           output.value = csv;
         } else {
           // CSV to JSON
@@ -109,7 +152,8 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
           if (result.errors.length && result.data.length === 0) {
             output.value = 'Error parsing CSV:\n' + result.errors.map(e => e.message).join('\n');
           } else {
-            output.value = JSON.stringify(result.data, null, 2);
+            const unflattened = result.data.map((item: any) => unflattenObj(item));
+            output.value = JSON.stringify(unflattened, null, 2);
           }
         }
       } catch (e: any) {

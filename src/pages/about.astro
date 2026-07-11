@@ -1,27 +1,48 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
 ---
 
-<BaseLayout title="About DevToolKit — Free Developer Tools" description="DevToolKit is a collection of free, fast, privacy-first developer tools built with AstroJS.">
-  <Header />
-  <div class="container static-page-container">
-    <h1>About DevToolKit</h1>
-    <p>DevToolKit is a free, open-source collection of developer tools built by developers, for developers. Every tool runs entirely in your browser — your data never touches our servers.</p>
-    <h2>Our Mission</h2>
-    <p>We believe developer tools should be free, fast, and private. No accounts, no tracking, no data harvesting. Just useful utilities that help you get your work done.</p>
-    <h2>Tech Stack</h2>
-    <p>DevToolKit is built with modern, performance-first technologies:</p>
-    <ul>
-      <li><strong>AstroJS</strong> — Zero JavaScript by default for blazing-fast page loads</li>
-      <li><strong>Cloudflare Pages</strong> — Global CDN with edge caching for instant access worldwide</li>
-      <li><strong>Client-Side Processing</strong> — All tools run in your browser, keeping your data private</li>
-    </ul>
-    <h2>Open Source</h2>
-    <p>DevToolKit is open source. You can submit feedback and feature requests via <a href="https://docs.google.com/forms/d/e/1FAIpQLSdkB0nhzGXD9Cuop6GW7ScTKZyt8bkj5EQBGL3Fn3nCRYfFRw/viewform" target="_blank" rel="noopener">Google Forms</a>!</p>
-    <h2>Contact & Feedback</h2>
-    <p>Have a suggestion or found a bug? Submit feedback via <a href="https://docs.google.com/forms/d/e/1FAIpQLSdkB0nhzGXD9Cuop6GW7ScTKZyt8bkj5EQBGL3Fn3nCRYfFRw/viewform" target="_blank" rel="noopener">Google Forms</a>.</p>
-  </div>
-  <Footer />
+<BaseLayout title="About DevToolKit" description="Learn about DevToolKit, a privacy-first suite of developer utilities.">
+  <main class="container static-page-container">
+    <div style="text-align: center; margin-bottom: 4rem;">
+      <h1>About <span class="gradient-text">DevToolKit</span></h1>
+      <p style="font-size: 1.8rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+        A premium, zero-latency developer suite built for speed, privacy, and productivity.
+      </p>
+    </div>
+
+    <div class="glass-panel" style="padding: 4rem; margin-bottom: 4rem;">
+      <h2>Our Philosophy: 100% Client-Side</h2>
+      <p>
+        In an era where every small utility site wants to upload your sensitive JSON files, API keys, or proprietary PDF documents to their servers, DevToolKit takes a different approach.
+      </p>
+      <p>
+        <strong>We believe your data should never leave your machine.</strong>
+      </p>
+      <p>
+        Every single tool on DevToolKit runs entirely within your browser's local sandbox. Whether you're formatting a massive JSON payload, encoding a secure token, or extracting pages from a confidential PDF, all processing happens locally using modern Web APIs and WebAssembly.
+      </p>
+    </div>
+
+    <div class="glass-panel" style="padding: 4rem; margin-bottom: 4rem;">
+      <h2>The Tech Stack</h2>
+      <p>DevToolKit is built on modern web technologies to ensure lightning-fast performance:</p>
+      <ul>
+        <li><strong>Astro</strong> - For static site generation and zero-JS baseline</li>
+        <li><strong>Vanilla JavaScript</strong> - For maximum performance and minimal overhead</li>
+        <li><strong>PDF-lib</strong> - For complex local PDF manipulation</li>
+        <li><strong>Web Workers</strong> - To ensure the UI never blocks during heavy calculations</li>
+      </ul>
+    </div>
+
+    <div class="glass-panel" style="padding: 4rem;">
+      <h2>Open Source & Privacy First</h2>
+      <p>
+        DevToolKit has no tracking cookies, no analytics that follow you around, and absolutely no server-side data collection. The code that manipulates your data is running right in front of you.
+      </p>
+      <p style="margin-top: 2.4rem;">
+        <a href="/" class="btn btn-primary">Back to Tools</a>
+      </p>
+    </div>
+  </main>
 </BaseLayout>

@@ -1,0 +1,96 @@
+---
+import { groupedGames, getGameCategoryColor } from '../data/games';
+
+const currentPath = Astro.url.pathname;
+
+// Sort categories
+const categories = Object.keys(groupedGames).sort();
+---
+
+<aside class="app-sidebar" id="app-sidebar">
+  <div class="sidebar-brand">
+    <a href="/games" aria-label="DevToolKit Games">
+      <svg viewBox="0 0 24 24" width="24" height="24" style="flex-shrink: 0; fill: url(#logo-grad-sidebar);">
+        <defs>
+          <linearGradient id="logo-grad-sidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fb7185" />
+            <stop offset="100%" stop-color="#818cf8" />
+          </linearGradient>
+        </defs>
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v4H7v2h4v4h2v-4h4v-2h-4V7z"></path>
+      </svg>
+      Brain Games
+    </a>
+  </div>
+
+  <nav class="sidebar-nav">
+    {categories.map(category => {
+      const isCategoryActive = groupedGames[category].some(g => currentPath === g.url || currentPath === g.url + '/');
+      
+      const getCategoryIcon = (cat) => {
+        switch(cat) {
+          case 'Logic': return 'ph-brain';
+          case 'Memory': return 'ph-cards';
+          case 'Speed': return 'ph-lightning';
+          case 'Words': return 'ph-text-t';
+          case 'Strategy': return 'ph-strategy';
+          default: return 'ph-game-controller';
+        }
+      };
+
+      return (
+      <details class="sidebar-group" open={isCategoryActive} style="margin-bottom: 0.4rem;">
+        <summary class="sidebar-group-title" style={`cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; user-select: none; --cat-color: ${getGameCategoryColor(category)}`}>
+          <div style="display: flex; align-items: center; gap: 1rem; color: var(--cat-color);">
+            <div class="cat-icon-box">
+              <i class={`ph ${getCategoryIcon(category)} cat-icon`}></i>
+            </div>
+            <span class="cat-title-text" style="font-weight: 700; letter-spacing: 0.05em; background: linear-gradient(45deg, var(--cat-color), var(--text-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{category}</span>
+          </div>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition: transform 0.2s; opacity: 0.5;">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </summary>
+        <div class="sidebar-group-content" style="padding-top: 0.6rem; display: flex; flex-direction: column; gap: 0.2rem;">
+          {groupedGames[category].map(game => (
+            <a 
+              href={game.url} 
+              class={`sidebar-link ${currentPath === game.url || currentPath === game.url + '/' ? 'active' : ''}`}
+              title={game.description}
+              style={`--cat-color: ${getGameCategoryColor(category)}`}
+            >
+              <span class="sidebar-icon"><i class={`ph ${game.icon}`}></i></span>
+              <span class="sidebar-text">{game.name}</span>
+            </a>
+          ))}
+        </div>
+      </details>
+    )})}
+    <style>
+      details > summary::-webkit-details-marker {
+        display: none;
+      }
+      details[open] > summary .chevron {
+        transform: rotate(180deg);
+      }
+      .cat-icon {
+        font-size: 1.8rem;
+        filter: drop-shadow(0 0 8px var(--cat-color));
+        animation: floatIcon 3s ease-in-out infinite;
+      }
+      @keyframes floatIcon {
+        0% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 12px var(--cat-color)); }
+        100% { transform: translateY(0px) scale(1); }
+      }
+    </style>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">Navigation</div>
+      <a href="/" class="sidebar-link">
+        <span class="sidebar-icon"><i class="ph ph-arrow-left"></i></span>
+        <span class="sidebar-text">Back to Utilities</span>
+      </a>
+    </div>
+  </nav>
+</aside>

@@ -1,91 +1,69 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
 import ToolCard from '../components/ToolCard.astro';
-import { tools } from '../data/tools';
+import { tools, groupedTools } from '../data/tools';
 
 const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'Generators', 'Text'];
 ---
 
 <BaseLayout title="DevToolKit — Premium Online Developer Tools" description="Lightning-fast, privacy-first developer tools running entirely client-side. JSON Formatter, Base64 Encoder, Color Converter, Word Counter & more.">
-  <Header />
-
   <!-- Hero with Animated Background -->
   <section class="hero">
     <div class="hero-mesh"></div>
     <div class="hero-particles"></div>
     <div class="container hero-content">
+      <!-- Hero Statistics Badge -->
       <div class="badge-glow">
-        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="color: var(--accent-purple);"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-        DevToolKit 2.0
-      </div>
-      <h1>Private & Instant<br/><span class="gradient-text">Developer Utilities</span></h1>
-      <p class="hero-subtitle">Premium, client-side tools that run entirely in your browser. No cookies, no data collection. Just pure utility at your fingertips.</p>
-      
-      <!-- Universal Search Component -->
-      <div class="search-wrapper">
-        <input type="text" class="search-input" id="hero-search" placeholder="Search tools (Press '/' to focus)..." autocomplete="off" aria-label="Search tools">
-        <svg class="search-icon-svg" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <span class="search-shortcut-hint">/</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        100% Client-Side Processing
       </div>
 
-      <!-- Hero Statistics -->
-      <div class="hero-stats">
-        <div class="hero-stat-card">
-          <div class="hero-stat-val">100%</div>
-          <div class="hero-stat-lbl">Client Side</div>
-        </div>
-        <div class="hero-stat-card">
-          <div class="hero-stat-val">{tools.length}</div>
-          <div class="hero-stat-lbl">Active Tools</div>
-        </div>
-        <div class="hero-stat-card">
-          <div class="hero-stat-val">&lt;100ms</div>
-          <div class="hero-stat-lbl">Response Time</div>
-        </div>
+      <h1>
+        The Ultimate <span class="gradient-text">Developer Suite</span>
+      </h1>
+      <p class="hero-subtitle">
+        A premium collection of high-performance tools designed for speed and privacy. No server uploads. No tracking. Just instant results right in your browser.
+      </p>
+      
+      <!-- Universal Search Component -->
+      <div class="search-wrapper" style="margin-bottom: 2rem;">
+        <input type="text" class="search-input" id="hero-search" placeholder="Search tools (e.g. JSON, PDF, Encode)..." autocomplete="off" aria-label="Search tools">
+        <svg class="search-icon-svg" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <span class="search-shortcut-hint">/</span>
       </div>
     </div>
   </section>
 
   <!-- Pinned / Favorite Tools Section -->
   <section class="container recent-pinned-section" id="favorites-section">
-    <h2 style="font-size: 2.2rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.8rem;">
-      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="color: var(--accent-rose);"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-      Pinned Tools
-    </h2>
+    <h3 style="font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--text-primary);">Quick Access</h3>
     <div class="recent-pinned-grid" id="favorites-grid"></div>
-  </section>
-
-  <!-- Recent Tools Section -->
-  <section class="container recent-pinned-section" id="recents-section">
-    <h2 style="font-size: 2.2rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.8rem;">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: var(--accent-purple);"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-      Recently Used
-    </h2>
-    <div class="recent-pinned-grid" id="recents-grid"></div>
   </section>
 
   <!-- Main Tools Grid & Category Filters -->
   <section class="container tools-grid-section" id="tools-section">
-    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 1.6rem; flex-wrap: wrap; gap: 1.6rem;">
-      <h2 style="font-size: 2.8rem;">All Utilities</h2>
-      
-      <!-- Category Filter Tabs -->
-      <div class="categories-filter" style="margin: 0;">
-        {categories.map((cat, i) => (
-          <button class={`filter-pill ${i === 0 ? 'active' : ''}`} data-category={cat}>{cat}</button>
-        ))}
-      </div>
+    <!-- Category Filter Pills -->
+    <div class="categories-filter" id="categories-filter">
+      {categories.map((cat, i) => (
+        <button class={`filter-pill ${i === 0 ? 'active' : ''}`} data-category={cat}>{cat}</button>
+      ))}
     </div>
 
     <!-- Grid List -->
-    <div class="tools-grid" style="margin-top: 3.2rem;">
+    <div class="tools-grid" id="tools-grid">
       {tools.map((tool) => (
         <div class="tool-card-container" data-title={tool.name} data-desc={tool.description} data-category={tool.category}>
           <ToolCard {...tool} />
         </div>
       ))}
+    </div>
+    
+    <!-- Empty State for Search -->
+    <div id="no-results" class="editor-empty-state" style="display: none;">
+      <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      <p style="font-size: 1.6rem; color: var(--text-primary);">No tools found matching your search.</p>
+      <p>Try a different keyword or check the categories above.</p>
+      <button class="btn btn-secondary" style="margin-top: 1.6rem;" onclick="document.getElementById('hero-search').value=''; document.getElementById('hero-search').dispatchEvent(new Event('input'));">Clear Search</button>
     </div>
   </section>
 
@@ -94,34 +72,32 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
     <h2 style="font-size: 3.2rem; text-align: center; margin-bottom: 1.6rem;">Designed For Developers</h2>
     <p style="text-align: center; color: var(--text-secondary); max-width: 600px; margin: 0 auto 5.6rem;">All calculations occur 100% locally inside your browser process space. Your information remains completely safe.</p>
     
-    <div class="tools-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-      <div class="tool-grid-card" style="cursor: default;">
-        <div class="tool-icon-wrapper" style="color: var(--accent-purple);">
-          <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+    <div style="display: flex; flex-wrap: wrap; gap: 2.4rem; justify-content: center;">
+      <div class="glass-card" style="padding: 3.2rem; flex: 1 1 280px; max-width: 400px; text-align: center;">
+        <div class="tool-icon-wrapper" style="margin: 0 auto 2rem; color: var(--accent-purple); background: var(--accent-purple-glow); border-color: rgba(139, 92, 246, 0.2);">
+          <svg viewBox="0 0 24 24" style="width: 2.4rem; height: 2.4rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
         </div>
-        <h3 style="font-size: 1.8rem; margin-bottom: 0.6rem;">Privacy Guarantee</h3>
-        <p style="font-size: 1.35rem; line-height: 1.6;">No data ever transfers to external hosts. Secure client execution prevents data logging.</p>
+        <h3 style="font-size: 2rem; margin-bottom: 1rem;">Privacy Guarantee</h3>
+        <p style="font-size: 1.45rem; line-height: 1.6;">No data ever transfers to external hosts. Secure client execution prevents data logging.</p>
       </div>
 
-      <div class="tool-grid-card" style="cursor: default;">
-        <div class="tool-icon-wrapper" style="color: var(--accent-emerald);">
-          <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      <div class="glass-card" style="padding: 3.2rem; flex: 1 1 280px; max-width: 400px; text-align: center;">
+        <div class="tool-icon-wrapper" style="margin: 0 auto 2rem; color: var(--accent-emerald); background: var(--accent-emerald-glow); border-color: rgba(16, 185, 129, 0.2);">
+          <svg viewBox="0 0 24 24" style="width: 2.4rem; height: 2.4rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
         </div>
-        <h3 style="font-size: 1.8rem; margin-bottom: 0.6rem;">Zero Delays</h3>
-        <p style="font-size: 1.35rem; line-height: 1.6;">Build structures compiled to run on lightweight modern browser sandboxes instantly.</p>
+        <h3 style="font-size: 2rem; margin-bottom: 1rem;">Zero Delays</h3>
+        <p style="font-size: 1.45rem; line-height: 1.6;">Build structures compiled to run on lightweight modern browser sandboxes instantly.</p>
       </div>
 
-      <div class="tool-grid-card" style="cursor: default;">
-        <div class="tool-icon-wrapper" style="color: var(--accent-cyan);">
-          <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+      <div class="glass-card" style="padding: 3.2rem; flex: 1 1 280px; max-width: 400px; text-align: center;">
+        <div class="tool-icon-wrapper" style="margin: 0 auto 2rem; color: var(--accent-cyan); background: var(--accent-cyan-glow); border-color: rgba(6, 182, 212, 0.2);">
+          <svg viewBox="0 0 24 24" style="width: 2.4rem; height: 2.4rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
         </div>
-        <h3 style="font-size: 1.8rem; margin-bottom: 0.6rem;">Command Palette</h3>
-        <p style="font-size: 1.35rem; line-height: 1.6;">Press "/" or "Ctrl+K" at any point to search or navigate to specific utilities instantly.</p>
+        <h3 style="font-size: 2rem; margin-bottom: 1rem;">Command Palette</h3>
+        <p style="font-size: 1.45rem; line-height: 1.6;">Press "/" or "Ctrl+K" at any point to search or navigate to specific utilities instantly.</p>
       </div>
     </div>
   </section>
-
-  <Footer />
 
   <div id="valid-tools-data" data-urls={JSON.stringify(tools.map(t => t.url))} style="display:none;" aria-hidden="true"></div>
 
@@ -131,11 +107,14 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
       const searchInput = document.getElementById('hero-search');
       const filterPills = document.querySelectorAll('.filter-pill');
       const cardContainers = document.querySelectorAll('.tool-card-container');
+      const noResults = document.getElementById('no-results');
+      const toolsGrid = document.getElementById('tools-grid');
       
       let activeCategory = 'All';
       let searchQuery = '';
 
       function filterCards() {
+        let hasVisible = false;
         cardContainers.forEach(container => {
           const title = container.getAttribute('data-title').toLowerCase();
           const desc = container.getAttribute('data-desc').toLowerCase();
@@ -146,10 +125,19 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
 
           if (matchesSearch && matchesCategory) {
             container.style.display = 'block';
+            hasVisible = true;
           } else {
             container.style.display = 'none';
           }
         });
+        
+        if (hasVisible) {
+          toolsGrid.style.display = 'grid';
+          noResults.style.display = 'none';
+        } else {
+          toolsGrid.style.display = 'none';
+          noResults.style.display = 'flex';
+        }
       }
 
       // Input listening
@@ -235,52 +223,7 @@ const categories = ['All', 'Productivity', 'Developer', 'Encoding', 'Design', 'G
         }
       }
 
-      // Local storage Recents loader
-      function loadRecents() {
-        const recSec = document.getElementById('recents-section');
-        const recGrid = document.getElementById('recents-grid');
-        if (!recSec || !recGrid) return;
-
-        try {
-          const rawRecents = JSON.parse(localStorage.getItem('recentTools') || '[]');
-          const validUrls = getValidTools();
-          
-          // Filter out invalid tools
-          const recents = rawRecents.filter(tool => validUrls.includes(tool.url));
-          
-          // Update local storage if we removed any invalid tools
-          if (recents.length !== rawRecents.length) {
-            localStorage.setItem('recentTools', JSON.stringify(recents));
-          }
-
-          if (recents.length === 0) {
-            recSec.classList.remove('has-items');
-            return;
-          }
-
-          recSec.classList.add('has-items');
-          recGrid.innerHTML = '';
-          recents.forEach(tool => {
-            const a = document.createElement('a');
-            a.className = 'recent-tool-card';
-            a.href = tool.url;
-            a.innerHTML = `
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              <div class="recent-tool-info">
-                <h4>${tool.name}</h4>
-                <p>${tool.category}</p>
-              </div>
-              <span class="tool-hotkey">➔</span>
-            `;
-            recGrid.appendChild(a);
-          });
-        } catch (e) {
-          console.error(e);
-        }
-      }
-
       loadFavorites();
-      loadRecents();
     });
   </script>
 </BaseLayout>

@@ -1,0 +1,571 @@
+---
+import GameLayout from '../../layouts/GameLayout.astro';
+---
+
+<GameLayout title="Memory Match — Premium Edition" description="Test your memory with this premium developer-themed matching game." gameName="Memory Match" category="Memory">
+  
+  <div class="game-container">
+    <div class="game-header">
+      <div class="stat-box">
+        <span class="stat-label">Moves</span>
+        <span class="stat-value" id="moves-count">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Time</span>
+        <span class="stat-value" id="timer-display">00:00</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Best Time</span>
+        <span class="stat-value" id="best-time">--:--</span>
+      </div>
+      <button class="btn btn-primary btn-icon" id="btn-restart" style="padding: 1.2rem; align-self: stretch;" title="Restart Game">
+        <i class="ph ph-arrow-counter-clockwise" style="font-size: 2rem;"></i>
+      </button>
+    </div>
+
+    <div class="game-layout-frame glass-panel">
+      <div class="grid-wrapper">
+        <div class="memory-grid" id="memory-grid">
+          <!-- Cards injected via JS -->
+        </div>
+        
+        <!-- Victory Overlay -->
+        <div class="victory-screen glass-panel" id="victory-screen" style="display: none;">
+          <i class="ph-fill ph-check-circle" style="font-size: 6rem; color: var(--cat-developer); margin-bottom: 1rem;"></i>
+          <h2>🎉 Subnet Cleared!</h2>
+          <div style="display: flex; gap: 2rem; margin: 2rem 0;">
+          <div>
+            <div class="stat-label" style="font-size: 1.4rem;">Time</div>
+            <div id="final-time" style="font-size: 2.8rem; font-weight: 700; color: var(--accent-cyan);"></div>
+          </div>
+          <div>
+            <div class="stat-label" style="font-size: 1.4rem;">Moves</div>
+            <div id="final-moves" style="font-size: 2.8rem; font-weight: 700; color: var(--accent-purple);"></div>
+          </div>
+        </div>
+        <p id="new-record-msg" style="color: var(--cat-developer); display: none; font-weight: 600; margin-bottom: 2rem;">New Personal Best!</p>
+        <button class="btn btn-primary" id="btn-play-again" style="font-size: 1.6rem; padding: 1.2rem 2.4rem;">Play Again</button>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- How to Play Section -->
+  <div class="glass-panel" style="max-width: 800px; width: 100%; margin: 2rem auto; padding: 2rem;">
+    <h3 style="margin-bottom: 1rem; color: var(--accent-purple);">How to Play</h3>
+    <ul style="list-style-type: disc; margin-left: 2rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.5rem; font-size: 1.4rem;">
+      <li>Click on any node to reveal the developer icon hidden underneath.</li>
+      <li>Click on a second node to try and find its matching pair.</li>
+      <li>If the icons match, they establish a connection and stay revealed.</li>
+      <li>Clear the entire grid in the fastest time with the fewest moves to set a new high score!</li>
+    </ul>
+  </div>
+
+  <style is:global>
+    .game-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2.4rem;
+    }
+    
+    .game-header {
+      display: flex;
+      gap: 1.6rem;
+      width: 100%;
+      align-items: center;
+    }
+    
+    .stat-box {
+      background: var(--bg-card);
+      padding: 1.2rem 2rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.05), var(--shadow-sm);
+    }
+    
+    .stat-label {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+    
+    .stat-value {
+      font-size: 2.4rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .game-layout-frame {
+      padding: 3rem;
+      border-radius: var(--radius-xl);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+      width: 100%;
+    }
+
+    .grid-wrapper {
+      position: relative;
+    }
+    
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.6rem;
+      perspective: 1000px; /* Essential for 3D flip */
+    }
+    
+    /* Card Styles */
+    .card {
+      aspect-ratio: 3 / 4;
+      position: relative;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy flip */
+    }
+    
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card.matched {
+      transform: rotateY(180deg) scale(0.95);
+    }
+
+    .card.found {
+      transform: rotateY(0deg) scale(0.95);
+      pointer-events: none;
+    }
+    
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 1px solid var(--border-color);
+    }
+    
+    /* Premium Back Gradient */
+    .card-back {
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-hover) 100%);
+      transition: box-shadow 0.2s, border-color 0.2s;
+      font-size: 3rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+    
+    .card-back::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 2px dashed var(--border-color);
+      border-radius: calc(var(--radius-lg) - 4px);
+      opacity: 0.5;
+    }
+
+    .card:hover .card-back {
+      border-color: var(--accent-purple);
+      color: var(--accent-purple);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+    }
+    
+    .card-front {
+      background: var(--bg-card-hover);
+      transform: rotateY(180deg);
+      font-size: 4rem;
+      color: var(--accent-cyan);
+      box-shadow: inset 0 0 20px rgba(34, 211, 238, 0.05);
+      border-color: var(--accent-cyan);
+    }
+    
+    /* Match Animation Glow */
+    .card.matched .card-front {
+      background-color: rgba(61, 220, 151, 0.15) !important;
+      border-color: var(--cat-developer) !important;
+      color: var(--cat-developer) !important;
+      box-shadow: 0 0 30px rgba(61, 220, 151, 0.6), inset 0 0 20px rgba(61, 220, 151, 0.3) !important;
+      animation: pulse-match 1.5s ease-out;
+    }
+    
+    /* Premium SVG Animated Tick Mark */
+    .animated-check {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6rem;
+      height: 6rem;
+      display: none;
+      z-index: 10;
+    }
+    .animated-check .check-circle {
+      stroke: #3ddc97;
+      stroke-width: 3;
+      stroke-dasharray: 160;
+      stroke-dashoffset: 160;
+      fill: transparent;
+      filter: drop-shadow(0 0 8px rgba(61, 220, 151, 0.5));
+    }
+    .animated-check .check-path {
+      stroke: #3ddc97;
+      stroke-width: 4;
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      filter: drop-shadow(0 0 8px rgba(61, 220, 151, 0.8));
+    }
+    
+    .card.found .animated-check {
+      display: block;
+    }
+    .card.found .animated-check .check-circle {
+      animation: draw-circle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+    .card.found .animated-check .check-path {
+      animation: draw-check 0.4s 0.4s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+    
+    @keyframes draw-circle {
+      100% { stroke-dashoffset: 0; fill: rgba(61, 220, 151, 0.1); }
+    }
+    @keyframes draw-check {
+      100% { stroke-dashoffset: 0; }
+    }
+    
+    .card.found .ph-brain {
+      opacity: 0.1;
+      transition: opacity 0.3s;
+    }
+    
+    /* Celebration particles */
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--cat-developer);
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+    }
+    
+    @keyframes pop-in-center {
+      0% { transform: translate(-50%, -50%) scale(0); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+    
+    /* Mega Confetti Particle */
+    .mega-particle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    @keyframes pulse-match {
+      0% { box-shadow: 0 0 40px rgba(61, 220, 151, 0.8), inset 0 0 30px rgba(61, 220, 151, 0.5); }
+      100% { box-shadow: 0 0 30px rgba(61, 220, 151, 0.6), inset 0 0 20px rgba(61, 220, 151, 0.3); }
+    }
+    
+    .victory-screen {
+      position: absolute;
+      inset: -1rem;
+      z-index: 10;
+      background: rgba(10, 12, 16, 0.85);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 1px solid var(--cat-developer);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 0 100px rgba(61, 220, 151, 0.3), inset 0 0 50px rgba(61, 220, 151, 0.2);
+      animation: victory-glow 2s infinite alternate;
+    }
+    
+    @keyframes victory-glow {
+      0% { box-shadow: 0 0 80px rgba(61, 220, 151, 0.2), inset 0 0 30px rgba(61, 220, 151, 0.1); }
+      100% { box-shadow: 0 0 120px rgba(61, 220, 151, 0.5), inset 0 0 60px rgba(61, 220, 151, 0.3); }
+    }
+    
+    .victory-screen h2 {
+      font-size: 4rem;
+      background: var(--gradient-hero);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 600px) {
+      .memory-grid { gap: 1rem; }
+      .game-header { flex-wrap: wrap; }
+      .stat-box { padding: 0.8rem 1rem; }
+      .stat-value { font-size: 2rem; }
+      .card-front { font-size: 3rem; }
+    }
+  </style>
+
+  <script is:inline>
+    // Premium Memory Match Logic
+    const grid = document.getElementById('memory-grid');
+    const movesEl = document.getElementById('moves-count');
+    const timeEl = document.getElementById('timer-display');
+    const bestTimeEl = document.getElementById('best-time');
+    const victoryScreen = document.getElementById('victory-screen');
+    const finalMoves = document.getElementById('final-moves');
+    const finalTime = document.getElementById('final-time');
+    const newRecordMsg = document.getElementById('new-record-msg');
+    
+    // Developer themed Phosphor Icons
+    const ICONS = [
+      'ph-code', 'ph-terminal', 'ph-database', 'ph-bug', 
+      'ph-brackets-curly', 'ph-cpu', 'ph-git-branch', 'ph-cloud'
+    ];
+    
+    let cards = [];
+    let hasFlippedCard = false;
+    let lockBoard = false;
+    let firstCard, secondCard;
+    let moves = 0;
+    let matchedPairs = 0;
+    
+    // Timer state
+    let timerInterval = null;
+    let secondsElapsed = 0;
+    let bestSeconds = localStorage.getItem('memory-best-time') ? parseInt(localStorage.getItem('memory-best-time')) : null;
+    
+    function formatTime(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+      const s = (totalSeconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+    
+    if (bestSeconds) bestTimeEl.textContent = formatTime(bestSeconds);
+    
+    function initGame() {
+      grid.innerHTML = '';
+      moves = 0;
+      matchedPairs = 0;
+      movesEl.textContent = moves;
+      hasFlippedCard = false;
+      lockBoard = false;
+      firstCard = null;
+      secondCard = null;
+      victoryScreen.style.display = 'none';
+      newRecordMsg.style.display = 'none';
+      
+      clearInterval(timerInterval);
+      timerInterval = null;
+      secondsElapsed = 0;
+      timeEl.textContent = "00:00";
+      
+      // Duplicate icons and shuffle
+      const deck = [...ICONS, ...ICONS];
+      deck.sort(() => Math.random() - 0.5);
+      
+      deck.forEach((iconClass) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.icon = iconClass;
+        
+        card.innerHTML = `
+          <div class="card-face card-back">
+            <i class="ph ph-brain back-icon"></i>
+            <svg class="animated-check" viewBox="0 0 52 52">
+              <circle class="check-circle" cx="26" cy="26" r="24"/>
+              <path class="check-path" d="M15 27l7 7 15-15"/>
+            </svg>
+          </div>
+          <div class="card-face card-front">
+            <i class="ph ${iconClass}"></i>
+          </div>
+        `;
+        
+        card.addEventListener('click', flipCard);
+        grid.appendChild(card);
+      });
+    }
+    
+    function startTimer() {
+      if (!timerInterval) {
+        timerInterval = setInterval(() => {
+          secondsElapsed++;
+          timeEl.textContent = formatTime(secondsElapsed);
+        }, 1000);
+      }
+    }
+    
+    function flipCard() {
+      if (lockBoard) return;
+      if (this === firstCard) return; // Prevent double clicking same card
+      
+      startTimer();
+      
+      this.classList.add('flipped');
+      
+      if (!hasFlippedCard) {
+        hasFlippedCard = true;
+        firstCard = this;
+        return;
+      }
+      
+      secondCard = this;
+      moves++;
+      movesEl.textContent = moves;
+      
+      checkForMatch();
+    }
+    
+    function checkForMatch() {
+      let isMatch = firstCard.dataset.icon === secondCard.dataset.icon;
+      isMatch ? disableCards() : unflipCards();
+    }
+    
+    function createParticles(x, y) {
+      for (let i = 0; i < 24; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        document.body.appendChild(p);
+        
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 40 + Math.random() * 100;
+        const destX = x + Math.cos(angle) * distance;
+        const destY = y + Math.sin(angle) * distance;
+        
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        
+        p.animate([
+          { transform: 'translate(-50%, -50%) scale(1.5)', opacity: 1 },
+          { transform: `translate(calc(-50% + ${destX - x}px), calc(-50% + ${destY - y}px)) scale(0)`, opacity: 0 }
+        ], {
+          duration: 2000,
+          easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+        });
+        
+        setTimeout(() => p.remove(), 2000);
+      }
+    }
+    
+    function megaCelebration() {
+      const colors = ['#3ddc97', '#22d3ee', '#a855f7', '#fb7185', '#E8A33D'];
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      
+      for (let i = 0; i < 150; i++) {
+        const p = document.createElement('div');
+        p.className = 'mega-particle';
+        p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        document.body.appendChild(p);
+        
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 200 + Math.random() * 400;
+        const destX = cx + Math.cos(angle) * velocity;
+        const destY = cy + Math.sin(angle) * velocity + 200; // Gravity effect
+        
+        p.style.left = cx + 'px';
+        p.style.top = cy + 'px';
+        p.style.transform = `rotate(${Math.random() * 360}deg)`;
+        
+        p.animate([
+          { transform: `translate(-50%, -50%) rotate(0deg) scale(1)`, opacity: 1 },
+          { transform: `translate(calc(-50% + ${destX - cx}px), calc(-50% + ${destY - cy}px)) rotate(${360 + Math.random()*720}deg) scale(0)`, opacity: 0 }
+        ], {
+          duration: 2000 + Math.random() * 2000,
+          easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        });
+        
+        setTimeout(() => p.remove(), 4000);
+      }
+    }
+    
+    function disableCards() {
+      firstCard.removeEventListener('click', flipCard);
+      secondCard.removeEventListener('click', flipCard);
+      
+      firstCard.classList.add('matched');
+      secondCard.classList.add('matched');
+      
+      // Celebration particles
+      const rect1 = firstCard.getBoundingClientRect();
+      const rect2 = secondCard.getBoundingClientRect();
+      createParticles(rect1.left + rect1.width / 2, rect1.top + rect1.height / 2);
+      createParticles(rect2.left + rect2.width / 2, rect2.top + rect2.height / 2);
+      
+      matchedPairs++;
+      
+      if (matchedPairs === ICONS.length) {
+        clearInterval(timerInterval);
+        setTimeout(() => {
+          megaCelebration();
+          showVictory();
+        }, 600);
+      }
+      
+      let fCard = firstCard;
+      let sCard = secondCard;
+      
+      setTimeout(() => {
+        fCard.classList.remove('flipped');
+        sCard.classList.remove('flipped');
+        fCard.classList.add('found');
+        sCard.classList.add('found');
+      }, 1000);
+      
+      resetBoard();
+    }
+    
+    function unflipCards() {
+      lockBoard = true;
+      setTimeout(() => {
+        firstCard.classList.remove('flipped');
+        secondCard.classList.remove('flipped');
+        resetBoard();
+      }, 1000); // 1 second to memorize
+    }
+    
+    function resetBoard() {
+      [hasFlippedCard, lockBoard] = [false, false];
+      [firstCard, secondCard] = [null, null];
+    }
+    
+    function showVictory() {
+      finalMoves.textContent = moves;
+      finalTime.textContent = formatTime(secondsElapsed);
+      
+      if (!bestSeconds || secondsElapsed < bestSeconds) {
+        bestSeconds = secondsElapsed;
+        localStorage.setItem('memory-best-time', bestSeconds);
+        bestTimeEl.textContent = formatTime(bestSeconds);
+        newRecordMsg.style.display = 'block';
+      }
+      
+      victoryScreen.style.display = 'flex';
+    }
+    
+    document.getElementById('btn-restart').addEventListener('click', initGame);
+    document.getElementById('btn-play-again').addEventListener('click', initGame);
+    
+    initGame();
+  </script>
+
+</GameLayout>

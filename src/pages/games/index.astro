@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { games } from '../../data/games';
+import { getGameCategoryColor } from '../../data/games';
+
+const categories = ['All', 'Logic', 'Memory', 'Speed'];
+---
+
+<BaseLayout title="Brain Games — DevToolKit" description="A suite of premium client-side brain games." sidebarType="games">
+  <Header />
+
+  <!-- Hero -->
+  <section class="hero" style="padding: 4rem 0 2rem;">
+    <div class="hero-mesh"></div>
+    <div class="container hero-content">
+      <div class="badge-glow" style="border-color: #fb7185; color: #fb7185; background: rgba(251,113,133,0.15);">
+        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+        Premium Games
+      </div>
+      
+      <h1>Brain <span class="gradient-text" style="background: linear-gradient(to right, #fb7185, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Games</span></h1>
+      <p class="hero-subtitle">Exercise your logic, memory, and reaction time completely client-side.</p>
+    </div>
+  </section>
+
+  <!-- Games Grid -->
+  <section class="container tools-grid-section" id="games-section">
+    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 1.6rem; flex-wrap: wrap; gap: 1.6rem;">
+      <h2 style="font-size: 2.8rem;">All Games</h2>
+      
+      <!-- Category Filter Tabs -->
+      <div class="categories-filter" style="margin: 0;">
+        {categories.map((cat, i) => (
+          <button class={`filter-pill ${i === 0 ? 'active' : ''}`} data-category={cat} style="border-color: rgba(251,113,133,0.2);">{cat}</button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Grid List -->
+    <div class="tools-grid" style="margin-top: 3.2rem;">
+      {games.map((game) => (
+        <div class="tool-card-container" data-title={game.name} data-desc={game.description} data-category={game.category}>
+          <a href={game.url} class="tool-grid-card" style="text-decoration: none;">
+            <div class="tool-icon-wrapper" style={`color: ${getGameCategoryColor(game.category)}; border-color: ${getGameCategoryColor(game.category)}40; background: ${getGameCategoryColor(game.category)}10;`}>
+              <i class={`ph ${game.icon}`} style="font-size: 2.6rem;"></i>
+            </div>
+            <h3>{game.name}</h3>
+            <p>{game.description}</p>
+            <div class="tool-meta-wrapper">
+              <span class="tool-badge" style={`color: ${getGameCategoryColor(game.category)}; border: 1px solid ${getGameCategoryColor(game.category)}40;`}>{game.category}</span>
+              <span style="color: var(--text-muted); font-size: 1.4rem;">Play →</span>
+            </div>
+          </a>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <Footer />
+
+  <script is:inline>
+    // Universal filter and search logic for Games
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterPills = document.querySelectorAll('.filter-pill');
+      const cardContainers = document.querySelectorAll('.tool-card-container');
+      
+      let activeCategory = 'All';
+
+      function filterCards() {
+        cardContainers.forEach(container => {
+          const category = container.getAttribute('data-category');
+          const matchesCategory = activeCategory === 'All' || category === activeCategory;
+
+          if (matchesCategory) {
+            container.style.display = 'block';
+          } else {
+            container.style.display = 'none';
+          }
+        });
+      }
+
+      // Categories Pill clicking
+      filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          filterPills.forEach(p => {
+            p.classList.remove('active');
+            p.style.background = 'var(--bg-card)';
+            p.style.color = 'var(--text-secondary)';
+          });
+          pill.classList.add('active');
+          pill.style.background = 'linear-gradient(to right, #fb7185, #818cf8)';
+          pill.style.color = '#fff';
+          pill.style.borderColor = 'transparent';
+          
+          activeCategory = pill.getAttribute('data-category');
+          filterCards();
+        });
+      });
+    });
+  </script>
+</BaseLayout>

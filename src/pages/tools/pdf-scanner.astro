@@ -191,9 +191,9 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
   .btn-sm { padding: 0.6rem 1.2rem; font-size: 1.3rem; }
 </style>
 
-<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-
 <script>
+  import { jsPDF } from 'jspdf';
+
   const pages = [];
   const dropZone = document.getElementById('drop-zone');
   const fileInput = document.getElementById('file-input');
@@ -359,8 +359,6 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
     btnGenerate.textContent = '⏳ Generating...';
 
     try {
-      const { jsPDF } = window.jspdf;
-
       const pageSize = document.getElementById('page-size').value;
       const filter = document.getElementById('filter-select').value;
       const quality = parseFloat(document.getElementById('quality-select').value);
